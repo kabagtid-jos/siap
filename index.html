@@ -52,6 +52,16 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #A88C61; }
+
+        /* SweetAlert2 Mobile Tweaks (Memperkecil Pop-up di Mobile) */
+        @media (max-width: 640px) {
+            .swal2-popup { font-size: 0.85rem !important; padding: 1rem !important; width: 85% !important; border-radius: 1rem !important; }
+            .swal2-title { font-size: 1.2rem !important; }
+            .swal2-icon { transform: scale(0.7); margin: 0.5rem auto !important; }
+            .swal2-html-container { margin: 0.5em 1em 0.3em !important; font-size: 0.85rem !important; }
+            .swal2-actions { margin-top: 0.5rem !important; }
+            .swal2-styled { padding: 0.4em 1em !important; font-size: 0.9rem !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
@@ -101,31 +111,31 @@
             <!-- Unified Card (Login + Public Log) -->
             <div class="glass rounded-2xl max-w-4xl mx-auto flex flex-col md:flex-row overflow-hidden shadow-xl">
                 <!-- Left: Login Side -->
-                <div class="p-8 text-center md:w-1/2 flex flex-col justify-center bg-white/40 dark:bg-gray-800/40">
-                    <div class="bg-[#FDF8E7] dark:bg-gray-900 text-[#D4AF37] w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                        <i class="fa-solid fa-mosque text-4xl"></i>
+                <div class="p-6 md:p-8 text-center md:w-1/2 flex flex-col justify-center bg-white/40 dark:bg-gray-800/40">
+                    <div class="bg-[#FDF8E7] dark:bg-gray-900 text-[#D4AF37] w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-inner">
+                        <i class="fa-solid fa-mosque text-3xl md:text-4xl"></i>
                     </div>
-                    <h2 class="text-2xl font-bold mb-2 text-gray-800 dark:text-white">SIAP P2S Abu Zairi</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Sistem Absensi Pimpinan</p>
+                    <h2 class="text-xl md:text-2xl font-bold mb-1 md:mb-2 text-gray-800 dark:text-white">SIAP P2S Abu Zairi</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs md:text-sm mb-5 md:mb-6">Sistem Absensi Pimpinan</p>
                     
-                    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3 md:space-y-4">
                         <div class="relative">
-                            <i class="fa-solid fa-id-card absolute left-4 top-3.5 text-gray-400"></i>
-                            <input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
+                            <i class="fa-solid fa-id-card absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
+                            <input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div class="relative">
-                            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400"></i>
-                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
+                            <i class="fa-solid fa-lock absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
+                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
                         </div>
-                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-3 rounded-xl transition shadow-md">
+                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">
                             Masuk Sistem
                         </button>
                     </form>
                 </div>
 
                 <!-- Right: Public Log Side -->
-                <div class="p-6 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
-                    <h3 class="font-bold text-lg mb-4 border-b border-gray-200/80 dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100 flex items-center">
+                <div class="p-5 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
+                    <h3 class="font-bold text-base md:text-lg mb-3 md:mb-4 border-b border-gray-200/80 dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100 flex items-center">
                         <i class="fa-solid fa-list-check mr-2 text-[#D4AF37]"></i> Kehadiran Hari Ini
                     </h3>
                     <div class="overflow-y-auto flex-1 max-h-[300px] md:max-h-[400px] pr-2 custom-scrollbar">
@@ -336,20 +346,20 @@
 
     <!-- Modal Tambah User (Admin) -->
     <div id="modalAddUser" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700">
-            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
-                <h3 class="font-bold text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-[95%] md:w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center mb-3 md:mb-4 border-b dark:border-gray-700 pb-2">
+                <h3 class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleAddUser(event)" class="space-y-4">
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">NIY</label><input type="text" id="addNiy" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih Lembaga --</option></select></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><input type="text" id="addJabatan" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Kode Kartu RFID <span class="text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="text" id="addRfid" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#FDF8E7] dark:file:bg-gray-600 file:text-[#A88C61] dark:file:text-yellow-400 hover:file:bg-[#D4AF37] hover:file:text-white transition"></div>
-                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-3 rounded-xl mt-4 shadow-md transition">Simpan Data</button>
+            <form onsubmit="handleAddUser(event)" class="space-y-3 md:space-y-4">
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">NIY</label><input type="text" id="addNiy" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih Lembaga --</option></select></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><input type="text" id="addJabatan" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Kode Kartu RFID <span class="text-[10px] md:text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="text" id="addRfid" class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-[10px] md:text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 md:py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white text-xs md:text-sm file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] md:file:text-xs file:font-bold file:bg-[#FDF8E7] dark:file:bg-gray-600 file:text-[#A88C61] dark:file:text-yellow-400 hover:file:bg-[#D4AF37] hover:file:text-white transition"></div>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2.5 md:py-3 rounded-xl mt-3 md:mt-4 shadow-md transition text-sm md:text-base">Simpan Data</button>
             </form>
         </div>
     </div>
