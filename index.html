@@ -167,13 +167,12 @@
                     <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
                         <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area P2S Abu Zairi yang ditentukan.</li>
                         <li class="flex items-start"><i class="fa-solid fa-clock text-[#D4AF37] mr-3 mt-0.5"></i> Absen masuk hanya bisa dilakukan sesuai jadwal yang telah ditentukan oleh lembaga Anda.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-money-bill-wave text-[#D4AF37] mr-3 mt-0.5"></i> Bisyaroh dihitung berdasarkan total jam aktual (Pulang dikurangi Masuk). Jika lupa absen pulang, bisyaroh dihitung 50% dari jadwal standar.</li>
                         <li class="flex items-start"><i class="fa-solid fa-envelope-open-text text-[#D4AF37] mr-3 mt-0.5"></i> Pengajuan Izin (Sakit/Dinas Luar/Cuti) <b>tidak dihitung sebagai kehadiran</b> (tidak menambah hari hadir dan tidak mendapat Bisyaroh).</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- PENGAJUAN IZIN FORM (BARU) -->
+            <!-- PENGAJUAN IZIN FORM (BARU DENGAN RENTANG TANGGAL) -->
             <div class="mt-6 glass rounded-2xl p-6 fade-in shadow-md">
                 <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100">
                     <i class="fa-solid fa-envelope-open-text mr-2 text-[#D4AF37]"></i> Form Pengajuan Izin / Dinas Luar
@@ -190,8 +189,12 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">Tanggal Izin</label>
-                        <input type="date" id="izinTanggal" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none bg-white dark:bg-gray-700 dark:text-white text-sm focus:border-[#D4AF37]">
+                        <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">Dari Tanggal</label>
+                        <input type="date" id="izinTanggalMulai" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none bg-white dark:bg-gray-700 dark:text-white text-sm focus:border-[#D4AF37]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">Sampai Tanggal</label>
+                        <input type="date" id="izinTanggalSelesai" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none bg-white dark:bg-gray-700 dark:text-white text-sm focus:border-[#D4AF37]">
                     </div>
                     <div class="sm:col-span-3">
                         <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">Alasan / Keterangan</label>
@@ -394,7 +397,7 @@
                             <input type="hidden" id="setJadwalLembaga" required>
                         </div>
 
-                        <!-- List UI Jabatan & Honor (BARU: Dengan Jam Efektif) -->
+                        <!-- List UI Jabatan & Honor -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
                             <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan & Tarif Bisyaroh per Jam</label>
                             <div class="overflow-x-auto mb-3">
@@ -560,8 +563,11 @@
             let date = new Date();
             let mm = String(date.getMonth() + 1).padStart(2, '0');
             document.getElementById('filterBulanRekap').value = `${date.getFullYear()}-${mm}`;
-            // Set tanggal default untuk form izin
-            document.getElementById('izinTanggal').value = `${date.getFullYear()}-${mm}-${String(date.getDate()).padStart(2, '0')}`;
+            
+            // Set tanggal default untuk form izin (Mulai dan Selesai hari ini)
+            let today = `${date.getFullYear()}-${mm}-${String(date.getDate()).padStart(2, '0')}`;
+            document.getElementById('izinTanggalMulai').value = today;
+            document.getElementById('izinTanggalSelesai').value = today;
         });
 
         async function callAPI(params) {
@@ -696,15 +702,21 @@
             }
         }
 
-        // PENGAJUAN IZIN LOGIC (BARU)
+        // PENGAJUAN IZIN LOGIC (RENTANG HARI)
         async function handleIzin(e) {
             e.preventDefault();
             const tipe = document.getElementById('izinTipe').value;
-            const tanggal = document.getElementById('izinTanggal').value;
+            const tglMulai = document.getElementById('izinTanggalMulai').value;
+            const tglSelesai = document.getElementById('izinTanggalSelesai').value;
             const alasan = document.getElementById('izinAlasan').value;
 
-            if(!tipe || !tanggal || !alasan.trim()) {
+            if(!tipe || !tglMulai || !tglSelesai || !alasan.trim()) {
                 Swal.fire({icon: 'warning', title: 'Form Tidak Lengkap'});
+                return;
+            }
+
+            if(new Date(tglMulai) > new Date(tglSelesai)) {
+                Swal.fire({icon: 'warning', title: 'Tanggal Tidak Valid', text: 'Tanggal Selesai tidak boleh mendahului Tanggal Mulai.'});
                 return;
             }
 
@@ -714,7 +726,8 @@
                 niy: currentUser.niy,
                 nama: currentUser.nama,
                 tipe: tipe,
-                tanggal: tanggal,
+                tanggalMulai: tglMulai,
+                tanggalSelesai: tglSelesai,
                 alasan: alasan
             });
             hideLoading();
@@ -723,7 +736,9 @@
                 Swal.fire({icon: 'success', title: 'Berhasil', text: res.message});
                 document.getElementById('formIzin').reset();
                 let date = new Date();
-                document.getElementById('izinTanggal').value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                let today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                document.getElementById('izinTanggalMulai').value = today;
+                document.getElementById('izinTanggalSelesai').value = today;
                 loadPersonalLog();
             } else {
                 Swal.fire({icon: 'error', title: 'Gagal', text: res.message});
@@ -822,7 +837,7 @@
                 });
                 container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN BISYAROH:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
             } else {
-                container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran/izin pada bulan tersebut.</td></tr>';
+                container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran (Di Dalam Area) pada bulan tersebut.</td></tr>';
             }
         }
 
