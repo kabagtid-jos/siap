@@ -186,7 +186,7 @@
                     <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
                         <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area P2S Abu Zairi yang ditentukan.</li>
                         <li class="flex items-start"><i class="fa-solid fa-clock text-[#D4AF37] mr-3 mt-0.5"></i> Absen masuk hanya bisa dilakukan sesuai jadwal yang telah ditentukan oleh lembaga Anda.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-money-bill-wave text-[#D4AF37] mr-3 mt-0.5"></i> Honor dihitung berdasarkan total jam aktual (Pulang dikurangi Masuk). Jika lupa absen pulang, honor dihitung 50% dari jadwal standar.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-money-bill-wave text-[#D4AF37] mr-3 mt-0.5"></i> Bisyaroh dihitung berdasarkan total jam aktual (Pulang dikurangi Masuk). Jika lupa absen pulang, bisyaroh dihitung 50% dari jadwal standar.</li>
                     </ul>
                 </div>
             </div>
@@ -217,7 +217,7 @@
                     <i class="fa-solid fa-chart-line text-lg md:mr-2 mb-1 md:mb-0"></i> Dashboard
                 </button>
                 <button onclick="switchAdminTab('rekap')" id="btnTabRekap" class="admin-tab flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap">
-                    <i class="fa-solid fa-file-invoice-dollar text-lg md:mr-2 mb-1 md:mb-0"></i> Rekap Gaji
+                    <i class="fa-solid fa-file-invoice-dollar text-lg md:mr-2 mb-1 md:mb-0"></i> Rekap Bisyaroh
                 </button>
                 <button onclick="switchAdminTab('pimpinan')" id="btnTabPimpinan" class="admin-tab flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap">
                     <i class="fa-solid fa-address-book text-lg md:mr-2 mb-1 md:mb-0"></i> Data Pimpinan
@@ -276,7 +276,7 @@
             <div id="adminTabRekap" class="admin-content hidden">
                 <div class="glass rounded-xl p-6 shadow-md">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b dark:border-gray-700 pb-4 gap-4">
-                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-file-invoice-dollar mr-2 text-[#D4AF37]"></i>Rekap Kehadiran & Gaji Pimpinan</h3>
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-file-invoice-dollar mr-2 text-[#D4AF37]"></i>Rekap Kehadiran & Bisyaroh Pimpinan</h3>
                         <div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
                             <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Pilih Bulan:</label>
                             <input type="month" id="filterBulanRekap" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm outline-none bg-white dark:bg-gray-700 dark:text-white" onchange="loadRekapData()">
@@ -290,7 +290,7 @@
                                     <th class="px-4 py-3">Lembaga & Jabatan</th>
                                     <th class="px-4 py-3 text-center">Total Hari</th>
                                     <th class="px-4 py-3 text-center">Jam Diakui (Max)</th>
-                                    <th class="px-4 py-3 text-right rounded-r-lg">Estimasi Honor</th>
+                                    <th class="px-4 py-3 text-right rounded-r-lg">Estimasi Bisyaroh</th>
                                 </tr>
                             </thead>
                             <tbody id="rekapContainer">
@@ -380,7 +380,7 @@
 
                         <!-- List UI Jabatan & Honor (BARU: Dengan Jam Efektif) -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
-                            <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan & Tarif Honor per Jam</label>
+                            <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan & Tarif Bisyaroh per Jam</label>
                             <div class="overflow-x-auto mb-3">
                                 <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                                     <thead class="bg-gray-100 dark:bg-gray-700/80">
@@ -753,7 +753,7 @@
                         </tr>
                     `;
                 });
-                container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN HONOR:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
+                container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN BISYAROH:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
             } else {
                 container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran (Di Dalam Area) pada bulan tersebut.</td></tr>';
             }
