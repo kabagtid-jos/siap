@@ -2,7 +2,7 @@
 <html lang="id" class="transition-colors duration-300">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIAP P2S Abu Zairi</title>
     
     <!-- Favicon -->
@@ -74,7 +74,8 @@
         .clock-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
+<!-- h-[100dvh] ditambahkan agar ukuran tinggi pas pada browser mobile (mengabaikan address bar) -->
+<body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen h-[100dvh] overflow-hidden flex flex-col relative transition-colors duration-300">
 
     <!-- HEADER -->
     <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md z-50 rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
@@ -103,7 +104,8 @@
         </div>
     </header>
 
-    <div class="flex-1 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto custom-scrollbar">
+    <!-- CLASS 'min-h-0' DITAMBAHKAN DI SINI UNTUK MENCEGAH HEADER TERDORONG / TERPOTONG KE ATAS -->
+    <div class="flex-1 min-h-0 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto custom-scrollbar">
         
         <!-- LOGIN SECTION -->
         <div id="loginSection" class="fade-in w-full mx-auto flex flex-col items-center justify-center min-h-[80vh] md:min-h-[calc(100vh-8rem)]">
@@ -706,7 +708,6 @@
         async function handleLogin(e) {
             e.preventDefault(); 
             
-            // Animasi Tombol Login
             const btn = document.getElementById('btnLogin');
             const btnText = document.getElementById('btnLoginText');
             const spinner = document.getElementById('btnLoginSpinner');
@@ -717,7 +718,6 @@
 
             const res = await callAPI({ action: 'login', niy: document.getElementById('niy').value, password: document.getElementById('password').value });
             
-            // Reset Tombol
             btn.disabled = false;
             btnText.innerText = 'Login';
             spinner.classList.add('hidden');
@@ -768,7 +768,7 @@
             document.getElementById('videoElement').classList.remove('hidden'); 
             document.getElementById('locationStatus').classList.remove('hidden'); 
             document.getElementById('actionButtons').classList.remove('hidden');
-            document.getElementById('btnOpenCamera').classList.remove('animate-pulse'); // Matikan pulse jika sudah diklik
+            document.getElementById('btnOpenCamera').classList.remove('animate-pulse');
             startCamera(); 
             getLocation(); 
         }
@@ -839,7 +839,6 @@
             }
         }
 
-        // Popup Aturan Pimpinan
         function showRulesAlert() {
             Swal.fire({
                 title: 'Aturan & Panduan Absensi',
@@ -899,7 +898,7 @@
             }
         }
 
-        // ================= LOGGING (PUBLIK & PERSONAL) =================
+        // ================= LOGGING =================
         async function loadPersonalLog() {
             const res = await callAPI({ action: 'getPersonalLog', niy: currentUser.niy });
             const c = document.getElementById('personalLogContainer');
@@ -954,7 +953,6 @@
             if (tabName === 'rekap') { loadRekapData(); }
         }
 
-        // Pop-up Detail Kehadiran Hari Ini
         function showTodayList(type) {
             let title = '';
             let list = [];
@@ -1009,14 +1007,13 @@
             let input = document.getElementById('searchRekap').value.toLowerCase();
             let rows = document.getElementById('rekapContainer').getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
-                // Ignore the summary total row at the very bottom
                 if(rows[i].classList.contains('bg-gray-100')) continue;
                 let text = rows[i].innerText.toLowerCase();
                 rows[i].style.display = text.includes(input) ? '' : 'none';
             }
         }
 
-        // ================= GET ADMIN DATA (DASHBOARD) =================
+        // ================= GET ADMIN DATA =================
         async function loadAdminData() {
             const filterEl = document.getElementById('filterTahunDashboard');
             const tahunDipilih = filterEl.value || '';
@@ -1048,7 +1045,6 @@
                 todayDataLists.izin.list = res.data.todayStats.izin.list;
                 todayDataLists.sakit.list = res.data.todayStats.sakit.list;
 
-                // Load Aktivitas Terkini (Menggantikan Log Seluruh Sistem)
                 const log = document.getElementById('recentLogs'); 
                 log.innerHTML = '';
                 const historyData = res.data.history || [];
@@ -1078,10 +1074,9 @@
                 } else { uc.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">Belum ada data pimpinan.</td></tr>'; }
                 
                 renderChart(res.data.charts);
-                filterPimpinan(); // Apply filter jika ada ketikan
+                filterPimpinan(); 
             }
         }
-
 
         // ================= REKAP KEHADIRAN & BISYAROH =================
         async function loadRekapData() {
@@ -1125,7 +1120,7 @@
                 } else {
                     container.innerHTML = '<tr><td colspan="5" class="text-center py-12 text-gray-400"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50"></i><br>Tidak ada data kehadiran/izin pada bulan ini.</td></tr>';
                 }
-                filterRekap(); // Apply filter jika ada ketikan
+                filterRekap();
             } else {
                 currentRekapData = [];
                 container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400">Terjadi kesalahan saat memuat data.</td></tr>';
