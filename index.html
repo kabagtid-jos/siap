@@ -168,29 +168,32 @@
                 <div class="glass rounded-2xl p-6">
                     <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-camera mr-2 text-[#A88C61]"></i> Verifikasi Wajah & Lokasi</h3>
                     
-                    <div class="relative w-full h-64 bg-gray-900 rounded-xl overflow-hidden mb-4 shadow-inner">
-                        <video id="videoElement" autoplay class="w-full h-full object-cover"></video>
+                    <div class="relative w-full h-64 bg-gray-900 rounded-xl overflow-hidden mb-4 shadow-inner flex items-center justify-center">
+                        <!-- Placeholder Sebelum Kamera Aktif -->
+                        <div id="cameraPlaceholder" class="text-center text-gray-400 z-20">
+                            <i class="fa-solid fa-video-slash text-4xl mb-3"></i>
+                            <p class="text-sm mb-4">Kamera belum diaktifkan</p>
+                            <button onclick="initAttendance()" class="bg-[#D4AF37] hover:bg-[#A88C61] text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition transform hover:-translate-y-0.5">
+                                <i class="fa-solid fa-power-off mr-2"></i> Buka Kamera
+                            </button>
+                        </div>
+                        
+                        <video id="videoElement" autoplay class="w-full h-full object-cover hidden"></video>
                         <canvas id="canvasElement" class="hidden"></canvas>
                         <!-- Geofence Status -->
-                        <div id="locationStatus" class="absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs p-2 rounded-lg backdrop-blur">
+                        <div id="locationStatus" class="hidden absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs p-2 rounded-lg backdrop-blur z-20">
                             <i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37]"></i> Mendapatkan lokasi...
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mt-6">
-                        <button onclick="siapkanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-blue-400 dark:border-blue-500">
-                            <i class="fa-solid fa-right-to-bracket mb-1 block text-2xl"></i> Absen Masuk
+                    <!-- Action Buttons (Muncul setelah kamera aktif) -->
+                    <div id="actionButtons" class="grid grid-cols-2 gap-4 mt-6 hidden fade-in">
+                        <button onclick="jalankanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-blue-400 dark:border-blue-500 flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-right-to-bracket mb-1 text-2xl"></i> Absen Masuk
                         </button>
-                        <button onclick="siapkanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-orange-400 dark:border-orange-500">
-                            <i class="fa-solid fa-right-from-bracket mb-1 block text-2xl"></i> Absen Pulang
+                        <button onclick="jalankanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-orange-400 dark:border-orange-500 flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-right-from-bracket mb-1 text-2xl"></i> Absen Pulang
                         </button>
-                    </div>
-
-                    <!-- Area Input RFID -->
-                    <div id="rfidArea" class="hidden mt-6 bg-[#FDF8E7] dark:bg-gray-800/80 border-2 border-dashed border-[#D4AF37] rounded-xl p-4 text-center fade-in">
-                        <p class="text-sm font-bold text-[#A88C61] dark:text-[#D4AF37] mb-2">Tap Kartu RFID Anda untuk Absen <span id="lblTipeAbsen" class="text-blue-600 dark:text-blue-400 font-extrabold"></span></p>
-                        <input type="text" id="pimpinanRfidInput" placeholder="Fokus disini & Tap Kartu" class="w-full text-center py-2 border border-[#D4AF37] dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white dark:bg-gray-700 dark:text-white transition" oninput="prosesAbsenRFID()">
-                        <button onclick="batalAbsen()" class="text-xs text-red-500 dark:text-red-400 mt-2 hover:text-red-700 font-semibold transition">Batal</button>
                     </div>
                 </div>
 
@@ -322,8 +325,7 @@
                                     <th class="px-4 py-3 rounded-l-lg">NIY</th>
                                     <th class="px-4 py-3">Nama Lengkap</th>
                                     <th class="px-4 py-3">Lembaga</th>
-                                    <th class="px-4 py-3">Jabatan</th>
-                                    <th class="px-4 py-3 rounded-r-lg">RFID</th>
+                                    <th class="px-4 py-3 rounded-r-lg">Jabatan</th>
                                 </tr>
                             </thead>
                             <tbody id="adminUserList">
@@ -407,7 +409,6 @@
                 <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih Lembaga --</option></select></div>
                 <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><input type="text" id="addJabatan" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                 <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Kode Kartu RFID <span class="text-[10px] md:text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="text" id="addRfid" class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                 <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-[10px] md:text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 md:py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white text-xs md:text-sm file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] md:file:text-xs file:font-bold file:bg-[#FDF8E7] dark:file:bg-gray-600 file:text-[#A88C61] dark:file:text-yellow-400 hover:file:bg-[#D4AF37] hover:file:text-white transition"></div>
                 <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2.5 md:py-3 rounded-xl mt-3 md:mt-4 shadow-md transition text-sm md:text-base">Simpan Data</button>
             </form>
@@ -426,7 +427,6 @@
         let weeklyChart = null;
         let yearlyChart = null;
         let lembagaChart = null;
-        let tipeAbsenAktif = null;
         
         // Leaflet Map Variables
         let mapInstance = null;
@@ -539,8 +539,13 @@
                 loadSettings(); 
             } else {
                 document.getElementById('pimpinanSection').classList.remove('hidden');
-                startCamera();
-                getLocation();
+                
+                // Reset state kamera setiap kali pimpinan login
+                document.getElementById('cameraPlaceholder').classList.remove('hidden');
+                document.getElementById('videoElement').classList.add('hidden');
+                document.getElementById('locationStatus').classList.add('hidden');
+                document.getElementById('actionButtons').classList.add('hidden');
+                
                 loadPersonalLog(); 
             }
         }
@@ -552,7 +557,6 @@
             document.getElementById('pimpinanSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginForm').reset();
-            batalAbsen();
             stopCamera();
             loadPublicLogs(); 
         }
@@ -579,7 +583,18 @@
             }
         }
 
-        // ================= PIMPINAN: CAMERA, LOKASI & RFID =================
+        // ================= PIMPINAN: CAMERA, LOKASI =================
+        function initAttendance() {
+            // Sembunyikan placeholder, tampilkan kamera dan tombol
+            document.getElementById('cameraPlaceholder').classList.add('hidden');
+            document.getElementById('videoElement').classList.remove('hidden');
+            document.getElementById('locationStatus').classList.remove('hidden');
+            document.getElementById('actionButtons').classList.remove('hidden');
+            
+            startCamera();
+            getLocation();
+        }
+
         function startCamera() {
             const video = document.getElementById('videoElement');
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -617,35 +632,7 @@
             } else { statusLabel.innerHTML = "Browser tidak mendukung GPS."; }
         }
 
-        function siapkanAbsen(tipe) {
-            tipeAbsenAktif = tipe;
-            document.getElementById('lblTipeAbsen').innerText = tipe;
-            document.getElementById('rfidArea').classList.remove('hidden');
-            const rfidInput = document.getElementById('pimpinanRfidInput');
-            rfidInput.value = ''; rfidInput.focus();
-        }
-
-        function batalAbsen() {
-            tipeAbsenAktif = null;
-            const rfidArea = document.getElementById('rfidArea');
-            if(rfidArea) rfidArea.classList.add('hidden');
-        }
-
-        let pimpinanRfidTimer;
-        function prosesAbsenRFID() {
-            const input = document.getElementById('pimpinanRfidInput');
-            clearTimeout(pimpinanRfidTimer);
-            pimpinanRfidTimer = setTimeout(() => {
-                if(input.value.length >= 8) {
-                    let scannedRfid = input.value;
-                    input.value = '';
-                    document.getElementById('rfidArea').classList.add('hidden');
-                    jalankanAbsen(tipeAbsenAktif, scannedRfid);
-                }
-            }, 500);
-        }
-
-        async function jalankanAbsen(tipe, rfid) {
+        async function jalankanAbsen(tipe) {
             if (!currentLocation.lat || !currentLocation.lng) {
                 Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Harap tunggu hingga sistem mendapatkan lokasi GPS Anda.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
                 return;
@@ -654,7 +641,7 @@
             showLoading();
             const res = await callAPI({
                 action: 'attend', niy: currentUser.niy, nama: currentUser.nama, tipe: tipe,
-                lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64, rfid: rfid
+                lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64
             });
             hideLoading();
             if (res.success) {
@@ -760,7 +747,6 @@
                                 <td class="px-4 py-3 text-gray-800 dark:text-gray-200">${u.nama}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">${u.lembaga || '-'}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">${u.jabatan}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-500">${u.rfid ? u.rfid : '<span class="text-red-400 dark:text-red-500 italic">Belum Diatur</span>'}</td>
                             </tr>
                         `;
                     });
@@ -1072,7 +1058,7 @@
             const payload = {
                 action: 'addUser', niy: document.getElementById('addNiy').value, nama: document.getElementById('addNama').value,
                 lembaga: document.getElementById('addLembaga').value,
-                jabatan: document.getElementById('addJabatan').value, password: document.getElementById('addPassword').value, rfid: document.getElementById('addRfid').value,
+                jabatan: document.getElementById('addJabatan').value, password: document.getElementById('addPassword').value,
                 foto: fotoBase64
             };
             
