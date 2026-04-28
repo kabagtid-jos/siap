@@ -644,14 +644,27 @@
                 lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64
             });
             hideLoading();
+            
             if (res.success) {
-                let badge = res.geofence.status === 'Di Dalam Area' ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';
+                // Popup Berhasil
+                let badge = 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300';
                 Swal.fire({
                     icon: 'success', title: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
-                    html: `Jarak: <b>${res.geofence.jarak}m</b> dari Pusat Yayasan<br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
+                    html: `Jarak: <b>${res.geofence.jarak}</b> dari Pusat Yayasan<br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
                 });
                 loadPersonalLog();
-            } else { Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
+            } else {
+                // Popup Gagal (Bisa karena geofence atau error lain)
+                if(res.geofence) {
+                    let badge = 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';
+                    Swal.fire({
+                        icon: 'error', title: 'Gagal Absen', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
+                        html: `<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: <b>${res.geofence.jarak}</b><br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
+                    });
+                } else {
+                    Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); 
+                }
+            }
         }
 
         async function loadPersonalLog() {
