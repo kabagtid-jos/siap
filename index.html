@@ -706,15 +706,14 @@
             const activeBtn = document.getElementById(activeBtnId);
             activeBtn.classList.remove('md:border-transparent', 'text-gray-500', 'dark:text-gray-400');
             activeBtn.classList.add('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
-
-            // Penting: Render ulang ukuran peta jika tab pengaturan dibuka dan perbaiki center posisinya
+            
+            // Render ulang ukuran peta jika tab pengaturan dibuka
             if (tabName === 'settings' && mapInstance) {
+                // Memastikan peta mendapatkan ukuran penuh sesaat setelah class hidden dihilangkan
                 setTimeout(() => {
                     mapInstance.invalidateSize();
-                    if(mapMarker) {
-                       mapInstance.setView(mapMarker.getLatLng(), mapInstance.getZoom());
-                    }
-                }, 300); // 300ms cukup untuk membiarkan animasi tab selesai terlebih dahulu
+                    if(mapMarker) mapInstance.panTo(mapMarker.getLatLng());
+                }, 100); 
             }
         }
 
@@ -872,6 +871,15 @@
             document.getElementById('setLat').addEventListener('input', syncMapFromInputs);
             document.getElementById('setLng').addEventListener('input', syncMapFromInputs);
             document.getElementById('setRadius').addEventListener('input', syncMapFromInputs);
+
+            // Observer untuk merender ulang peta saat tab dimunculkan (mengatasi bug peta abu-abu)
+            const mapContainer = document.getElementById('mapGeofence');
+            const observer = new ResizeObserver(() => {
+                if (mapInstance) {
+                    mapInstance.invalidateSize();
+                }
+            });
+            observer.observe(mapContainer);
         }
 
         function updateMapInputsAndCircle(lat, lng) {
