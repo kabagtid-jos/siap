@@ -78,16 +78,16 @@
 
     <!-- HEADER -->
     <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md z-50 rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+        <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 flex-1 min-w-0">
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-[#A88C61] to-[#D4AF37] flex items-center justify-center text-white text-base md:text-lg font-bold shadow-sm flex-shrink-0 border-2 border-white dark:border-gray-600 overflow-hidden relative">
                     <span id="headerInitials">AZ</span>
                 </div>
-                <div class="flex flex-col text-white justify-center">
-                    <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate max-w-[150px] sm:max-w-xs md:max-w-md">Nama Lengkap</h2>
+                <div class="flex flex-col text-white justify-center flex-1 min-w-0">
+                    <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate w-full">Nama Lengkap</h2>
                     <div class="flex flex-wrap gap-1.5 md:gap-2 mt-1">
-                        <span class="bg-black/20 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-semibold flex items-center tracking-wide">NIY: <span id="headerNiy" class="ml-1">000</span></span>
-                        <span id="headerJabatan" class="bg-white/30 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-bold tracking-wide">Admin</span>
+                        <span class="bg-black/20 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-semibold flex items-center tracking-wide truncate max-w-[100px] sm:max-w-none">NIY: <span id="headerNiy" class="ml-1">000</span></span>
+                        <span id="headerJabatan" class="bg-white/30 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-bold tracking-wide truncate max-w-[100px] sm:max-w-none">Admin</span>
                     </div>
                 </div>
             </div>
@@ -1051,10 +1051,11 @@
                 // Load Aktivitas Terkini (Menggantikan Log Seluruh Sistem)
                 const log = document.getElementById('recentLogs'); 
                 log.innerHTML = '';
-                if(res.data.history.length === 0) {
+                const historyData = res.data.history || [];
+                if(historyData.length === 0) {
                     log.innerHTML = '<div class="text-center mt-6 text-gray-400"><i class="fa-solid fa-inbox text-3xl mb-2 opacity-50"></i><br>Belum ada aktivitas.</div>';
                 } else { 
-                    res.data.history.forEach(r => { 
+                    historyData.forEach(r => { 
                         let i = '';
                         if(r[4] === 'Masuk') i = '<i class="fa-solid fa-arrow-right-to-bracket text-blue-500"></i>';
                         else if(r[4] === 'Pulang') i = '<i class="fa-solid fa-arrow-right-from-bracket text-orange-500"></i>';
