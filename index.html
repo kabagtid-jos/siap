@@ -768,7 +768,7 @@
                     userContainer.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-400 dark:text-gray-500">Belum ada data pimpinan terdaftar.</td></tr>';
                 }
 
-                renderChart();
+                renderChart(res.data.charts); // Mengirim data grafik dari database ke fungsi perender
             }
         }
 
@@ -928,10 +928,12 @@
         }
 
         // ================= CHART RENDERER =================
-        function renderChart() {
+        function renderChart(chartData) {
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#9ca3af' : '#4b5563';
             
+            if (!chartData) return; // Mencegah error jika data grafik kosong
+
             // Palet Warna Vibran & Menarik (Berwarna-warni)
             const vibrantBgColors = [
                 'rgba(59, 130, 246, 0.8)',  // Blue
@@ -941,7 +943,9 @@
                 'rgba(139, 92, 246, 0.8)',  // Violet
                 'rgba(6, 182, 212, 0.8)'    // Cyan
             ];
-            const vibrantBorderColors = vibrantBgColors.map(color => color.replace('0.8)', '1)'));
+            
+            // Fungsi generator warna jika datanya banyak
+            const getColors = (len, opacity) => Array.from({length: len}, (_, i) => vibrantBgColors[i % vibrantBgColors.length].replace('0.8)', opacity + ')'));
 
             // 1. Grafik Mingguan (Bar)
             const ctxWeekly = document.getElementById('attendanceChart').getContext('2d');
@@ -949,12 +953,12 @@
             weeklyChart = new Chart(ctxWeekly, {
                 type: 'bar',
                 data: {
-                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                    labels: chartData.weekly.labels,
                     datasets: [{
                         label: 'Kehadiran', 
-                        data: [12, 19, 15, 17, 14, 10], // Data simulasi
-                        backgroundColor: vibrantBgColors,
-                        borderColor: vibrantBorderColors,
+                        data: chartData.weekly.data, 
+                        backgroundColor: getColors(chartData.weekly.data.length, 0.8),
+                        borderColor: getColors(chartData.weekly.data.length, 1),
                         borderWidth: 1, 
                         borderRadius: 6
                     }]
@@ -963,7 +967,7 @@
                     responsive: true, maintainAspectRatio: false, 
                     scales: { 
                         x: { ticks: { color: textColor } },
-                        y: { beginAtZero: true, suggestedMax: 20, ticks: { color: textColor } } 
+                        y: { beginAtZero: true, suggestedMax: 20, ticks: { color: textColor, stepSize: 1 } } 
                     }, 
                     plugins: { legend: { display: false } } 
                 }
@@ -978,7 +982,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
                     datasets: [{
                         label: 'Total Kehadiran', 
-                        data: [120, 150, 180, 170, 160, 190, 185, 200, 210, 195, 220, 240], // Data simulasi
+                        data: chartData.yearly.data, 
                         backgroundColor: 'rgba(59, 130, 246, 0.15)', // Light Blue Fill
                         borderColor: '#3B82F6', // Blue Line
                         borderWidth: 2,
@@ -991,7 +995,7 @@
                     responsive: true, maintainAspectRatio: false, 
                     scales: { 
                         x: { ticks: { color: textColor } },
-                        y: { beginAtZero: true, ticks: { color: textColor } } 
+                        y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 } } 
                     }, 
                     plugins: { legend: { display: false } } 
                 }
@@ -1000,18 +1004,18 @@
             // 3. Grafik Per Lembaga (Doughnut)
             const ctxLembaga = document.getElementById('lembagaChart').getContext('2d');
             if(lembagaChart) lembagaChart.destroy();
+            
+            let lbgLabels = chartData.lembaga.labels.length > 0 ? chartData.lembaga.labels : ['Belum ada data'];
+            let lbgData = chartData.lembaga.data.length > 0 ? chartData.lembaga.data : [1];
+            let lbgColors = chartData.lembaga.data.length > 0 ? getColors(chartData.lembaga.data.length, 0.8) : ['rgba(156, 163, 175, 0.3)'];
+
             lembagaChart = new Chart(ctxLembaga, {
                 type: 'doughnut',
                 data: {
-                    labels: ['PAUD', 'SD', 'SMP', 'SMA'], // Data simulasi
+                    labels: lbgLabels,
                     datasets: [{
-                        data: [15, 30, 25, 20], // Data simulasi
-                        backgroundColor: [
-                            'rgba(139, 92, 246, 0.8)', // Violet
-                            'rgba(16, 185, 129, 0.8)', // Emerald
-                            'rgba(245, 158, 11, 0.8)', // Amber
-                            'rgba(239, 68, 68, 0.8)'   // Red
-                        ],
+                        data: lbgData,
+                        backgroundColor: lbgColors,
                         borderColor: isDark ? '#1f2937' : '#ffffff',
                         borderWidth: 2
                     }]
