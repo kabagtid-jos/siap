@@ -157,7 +157,6 @@
                     <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-camera mr-2 text-[#A88C61]"></i> Verifikasi Wajah & Lokasi</h3>
                     
                     <div class="relative w-full h-64 bg-gray-900 rounded-xl overflow-hidden mb-4 shadow-inner flex items-center justify-center">
-                        <!-- Placeholder Sebelum Kamera Aktif -->
                         <div id="cameraPlaceholder" class="text-center text-gray-400 z-20">
                             <i class="fa-solid fa-video-slash text-4xl mb-3"></i>
                             <p class="text-sm mb-4">Kamera belum diaktifkan</p>
@@ -168,7 +167,6 @@
                         
                         <video id="videoElement" autoplay class="w-full h-full object-cover hidden"></video>
                         <canvas id="canvasElement" class="hidden"></canvas>
-                        <!-- Geofence Status -->
                         <div id="locationStatus" class="hidden absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs p-2 rounded-lg backdrop-blur z-20">
                             <i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37]"></i> Mendapatkan lokasi...
                         </div>
@@ -337,15 +335,33 @@
                             <input type="number" id="setRadius" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-bold text-[#A88C61]">
                         </div>
                         
-                        <!-- List UI Lembaga -->
+                        <!-- List UI Lembaga + Jadwal Jam Masuk/Pulang -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-building mr-2 text-[#A88C61]"></i>Daftar Lembaga</label>
-                            <div id="lembagaTags" class="flex flex-wrap gap-2 mb-3"></div>
-                            <div class="flex space-x-2">
-                                <input type="text" id="newLembagaInput" placeholder="Tambah lembaga baru..." class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
-                                <button type="button" onclick="tambahLembaga()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2.5 px-4 rounded-lg transition shadow-sm whitespace-nowrap"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-building mr-2 text-[#A88C61]"></i>Daftar Lembaga & Jam Kerja</label>
+                            
+                            <div class="overflow-x-auto mb-3">
+                                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300">
+                                        <tr>
+                                            <th class="p-3">Nama Lembaga</th>
+                                            <th class="p-3">Jam Masuk</th>
+                                            <th class="p-3">Jam Pulang</th>
+                                            <th class="p-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lembagaTableBody">
+                                        <!-- Rendered via JS -->
+                                    </tbody>
+                                </table>
                             </div>
-                            <input type="hidden" id="setLembaga" required>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                                <input type="text" id="newLembagaNama" placeholder="Nama Lembaga..." class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
+                                <input type="time" id="newLembagaMasuk" title="Jam Masuk" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
+                                <input type="time" id="newLembagaPulang" title="Jam Pulang" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
+                                <button type="button" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-lg transition shadow-sm text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            </div>
+                            <input type="hidden" id="setJadwalLembaga" required>
                         </div>
 
                         <!-- List UI Jabatan -->
@@ -377,7 +393,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
             <div class="flex justify-between items-center mb-3 md:mb-4 border-b dark:border-gray-700 pb-2">
                 <h3 id="modalTitle" class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal()" type="button" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <form id="formAddUser" onsubmit="handleAddUser(event)" class="space-y-3">
@@ -431,9 +447,10 @@
         let mapCircle = null;
 
         // User Management Variables
-        let userMap = {}; // Untuk simpan data pimpinan lengkap by NIY
+        let userMap = {}; 
         let isEditMode = false;
         let currentEditNiy = '';
+        let jadwalLembagaData = {};
 
         // ================= UTILITIES & DARK MODE =================
         function toggleDarkMode() {
@@ -600,7 +617,8 @@
             
             const fotoBase64 = takeSnapshot();
             showLoading();
-            const res = await callAPI({ action: 'attend', niy: currentUser.niy, nama: currentUser.nama, tipe: tipe, lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64 });
+            // Menambahkan currentUser.lembaga ke request agar backend bisa memvalidasi jamnya
+            const res = await callAPI({ action: 'attend', niy: currentUser.niy, nama: currentUser.nama, lembaga: currentUser.lembaga, tipe: tipe, lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64 });
             hideLoading();
             
             stopCamera();
@@ -686,13 +704,13 @@
                     });
                 }
 
-                // Render User List & Simpan ke Memory (Untuk fitur Edit/Hapus)
+                // Render User List & Simpan ke Memory
                 const userContainer = document.getElementById('adminUserList');
                 userContainer.innerHTML = '';
-                userMap = {}; // Reset state
+                userMap = {}; 
                 if(res.data.userList && res.data.userList.length > 0) {
                     res.data.userList.forEach(u => {
-                        userMap[u.niy] = u; // Save state
+                        userMap[u.niy] = u; 
                         userContainer.innerHTML += `
                             <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                                 <td class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">${u.niy}</td>
@@ -714,7 +732,53 @@
             }
         }
 
-        // ================= FITUR DINAMIS LEMBAGA & JABATAN =================
+        // ================= FITUR DINAMIS JADWAL LEMBAGA & JABATAN =================
+        function renderJadwalLembaga() {
+            const container = document.getElementById('lembagaTableBody');
+            container.innerHTML = '';
+            const selectEl = document.getElementById('addLembaga');
+            selectEl.innerHTML = '<option value="">-- Pilih --</option>';
+
+            for(let namaLembaga in jadwalLembagaData) {
+                let jdw = jadwalLembagaData[namaLembaga];
+                container.innerHTML += `
+                    <tr class="border-b dark:border-gray-700">
+                        <td class="p-2 font-medium text-gray-800 dark:text-gray-200">${namaLembaga}</td>
+                        <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.masuk}</td>
+                        <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.pulang}</td>
+                        <td class="p-2 text-center">
+                            <button type="button" onclick="hapusJadwalLembaga('${namaLembaga}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+                selectEl.innerHTML += `<option value="${namaLembaga}">${namaLembaga}</option>`;
+            }
+            document.getElementById('setJadwalLembaga').value = JSON.stringify(jadwalLembagaData);
+        }
+
+        function tambahJadwalLembaga() {
+            const nama = document.getElementById('newLembagaNama').value.trim();
+            const masuk = document.getElementById('newLembagaMasuk').value;
+            const pulang = document.getElementById('newLembagaPulang').value;
+
+            if(!nama || !masuk || !pulang) {
+                Swal.fire({icon:'warning', title:'Form Tidak Lengkap', text:'Harap isi nama lembaga, jam masuk, dan jam pulang.', timer:2000, showConfirmButton:false});
+                return;
+            }
+
+            jadwalLembagaData[nama] = { masuk: masuk, pulang: pulang };
+            renderJadwalLembaga();
+            
+            document.getElementById('newLembagaNama').value = '';
+            document.getElementById('newLembagaMasuk').value = '';
+            document.getElementById('newLembagaPulang').value = '';
+        }
+
+        function hapusJadwalLembaga(nama) {
+            delete jadwalLembagaData[nama];
+            renderJadwalLembaga();
+        }
+
         function renderTags(inputId, containerId, selectId) {
             const str = document.getElementById(inputId).value;
             const items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
@@ -728,10 +792,11 @@
                     </span>`;
             });
             
-            // Perbarui Dropdown di Form
-            const selectEl = document.getElementById(selectId);
-            selectEl.innerHTML = '<option value="">-- Pilih --</option>';
-            items.forEach(val => { selectEl.innerHTML += `<option value="${val}">${val}</option>`; });
+            if(selectId){
+                const selectEl = document.getElementById(selectId);
+                selectEl.innerHTML = '<option value="">-- Pilih --</option>';
+                items.forEach(val => { selectEl.innerHTML += `<option value="${val}">${val}</option>`; });
+            }
         }
 
         function tambahTag(newInputId, hiddenInputId, containerId, selectId) {
@@ -757,8 +822,6 @@
             renderTags(hiddenInputId, containerId, selectId);
         }
 
-        // Pembungkus untuk tombol HTML
-        function tambahLembaga() { tambahTag('newLembagaInput', 'setLembaga', 'lembagaTags', 'addLembaga'); }
         function tambahJabatan() { tambahTag('newJabatanInput', 'setJabatan', 'jabatanTags', 'addJabatan'); }
 
 
@@ -801,11 +864,20 @@
                 document.getElementById('setLng').value = lng;
                 document.getElementById('setRadius').value = radius;
                 
-                document.getElementById('setLembaga').value = res.data['Daftar_Lembaga'] || 'PAUD, SD, SMP, SMA';
-                renderTags('setLembaga', 'lembagaTags', 'addLembaga');
-                
+                // Load Jabatan
                 document.getElementById('setJabatan').value = res.data['Daftar_Jabatan'] || 'Kepala Sekolah, Wakil Kepala, Guru';
                 renderTags('setJabatan', 'jabatanTags', 'addJabatan');
+
+                // Load Jadwal Lembaga JSON
+                let jadwalStr = res.data['Jadwal_Lembaga'];
+                if(jadwalStr) {
+                    try { jadwalLembagaData = JSON.parse(jadwalStr); } catch(e) { jadwalLembagaData = {}; }
+                } else if(res.data['Daftar_Lembaga']) {
+                    // Migrasi/Fallback jika masih format lama (string koma)
+                    let oldLem = res.data['Daftar_Lembaga'].split(',').map(s=>s.trim());
+                    oldLem.forEach(l => { if(l) jadwalLembagaData[l] = {masuk: "07:00", pulang: "13:00"}; });
+                }
+                renderJadwalLembaga();
 
                 initGeofenceMap(lat, lng, radius); syncMapFromInputs(); 
             }
@@ -815,7 +887,7 @@
             e.preventDefault();
             const payload = {
                 action: 'saveSettings', lat: document.getElementById('setLat').value, lng: document.getElementById('setLng').value,
-                radius: document.getElementById('setRadius').value, lembaga: document.getElementById('setLembaga').value, jabatanList: document.getElementById('setJabatan').value
+                radius: document.getElementById('setRadius').value, jadwalLembaga: document.getElementById('setJadwalLembaga').value, jabatanList: document.getElementById('setJabatan').value
             };
             showLoading(); const res = await callAPI(payload); hideLoading();
             if(res.success) Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
@@ -858,7 +930,6 @@
             document.getElementById('modalTitle').innerText = 'Tambah Pimpinan';
             document.getElementById('formAddUser').reset();
             
-            // NIY bisa diketik, Password Wajib
             document.getElementById('addNiy').readOnly = false;
             document.getElementById('addNiy').classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             document.getElementById('addPassword').required = true;
@@ -874,9 +945,8 @@
             isEditMode = true; currentEditNiy = niy;
             document.getElementById('modalTitle').innerText = 'Edit Data Pimpinan';
             
-            // Isi Form dengan data user
             document.getElementById('addNiy').value = user.niy;
-            document.getElementById('addNiy').readOnly = true; // NIY tidak boleh diganti saat edit
+            document.getElementById('addNiy').readOnly = true; 
             document.getElementById('addNiy').classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             
             document.getElementById('addNama').value = user.nama;
@@ -885,7 +955,6 @@
             document.getElementById('addLembaga').value = user.lembaga;
             document.getElementById('addJabatan').value = user.jabatan;
             
-            // Kosongkan password. Jadikan Opsional
             document.getElementById('addPassword').value = '';
             document.getElementById('addPassword').required = false;
             document.getElementById('addPassword').placeholder = '(Kosongkan jika tidak diubah)';
