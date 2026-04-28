@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIAP P2S Abu Zairi</title>
+    
+    <!-- PWA Setup & Meta Tags -->
+    <meta name="theme-color" content="#D4AF37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SIAP P2S Abu Zairi">
+    <link rel="apple-touch-icon" href="https://i.ibb.co.com/7tyfRwdB/Desain-tanpa-judul.png">
+    
+    <!-- Manifest PWA (Inlined untuk single-file app) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22SIAP%20P2S%20Abu%20Zairi%22%2C%22short_name%22%3A%22SIAP%20P2S%22%2C%22description%22%3A%22Sistem%20Absensi%20Pimpinan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23111827%22%2C%22theme_color%22%3A%22%23D4AF37%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co.com%2F7tyfRwdB%2FDesain-tanpa-judul.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{darkBg:'#111827',darkCard:'#1f2937'}}}}</script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -141,6 +155,16 @@
         function confirmDelete(niy){Swal.fire({title:'Hapus?',text:"Data tidak bisa dikembalikan.",icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus!',confirmButtonColor:'#d33'}).then(async(r)=>{if(r.isConfirmed){showLoading();const res=await callAPI({action:'deleteUser',niy:niy});hideLoading();if(res.success){Swal.fire('Terhapus!','','success');loadAdminData()}}})}
         function compressAvatar(f){return new Promise((r)=>{const reader=new FileReader();reader.readAsDataURL(f);reader.onload=(e)=>{const img=new Image();img.src=e.target.result;img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>200){h*=200/w;w=200}}else{if(h>200){w*=200/h;h=200}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',0.6))}}})}
         async function handleAddUser(e){e.preventDefault();let f='';if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);showLoading();const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,password:document.getElementById('addPassword').value,foto:f});hideLoading();if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData()}else{Swal.fire('Error',res.message,'error')}}
+
+        // Setup PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const sw = "self.addEventListener('fetch', (e) => {});";
+                const blob = new Blob([sw], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(()=>{});
+            });
+        }
     </script>
 </body>
 </html>
