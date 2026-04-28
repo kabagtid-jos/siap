@@ -67,8 +67,9 @@
             .swal2-styled { padding: 0.4em 1em !important; font-size: 0.9rem !important; }
         }
 
-        /* Penyesuaian Z-Index Peta agar tidak menimpa header/modal */
+        /* Penyesuaian Z-Index Peta agar tidak menimpa header/modal dan perbaikan Icon */
         .leaflet-container { z-index: 10 !important; font-family: 'Poppins', sans-serif;}
+        .custom-pin { background: transparent; border: none; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
@@ -347,7 +348,7 @@
                             <span class="text-xs text-green-600 dark:text-green-400 font-semibold bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-md">Live Map Ready</span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Geser pin (marker) atau klik area pada peta untuk mengatur koordinat pusat secara otomatis.</p>
-                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner overflow-hidden"></div>
+                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner overflow-hidden relative z-10"></div>
                     </div>
 
                     <form onsubmit="handleSaveSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
@@ -706,11 +707,14 @@
             activeBtn.classList.remove('md:border-transparent', 'text-gray-500', 'dark:text-gray-400');
             activeBtn.classList.add('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
 
-            // Penting: Render ulang ukuran peta jika tab pengaturan dibuka
+            // Penting: Render ulang ukuran peta jika tab pengaturan dibuka dan perbaiki center posisinya
             if (tabName === 'settings' && mapInstance) {
                 setTimeout(() => {
                     mapInstance.invalidateSize();
-                }, 100);
+                    if(mapMarker) {
+                       mapInstance.setView(mapMarker.getLatLng(), mapInstance.getZoom());
+                    }
+                }, 300); // 300ms cukup untuk membiarkan animasi tab selesai terlebih dahulu
             }
         }
 
@@ -833,8 +837,16 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(mapInstance);
 
+            // FIX: Gunakan Custom Icon dari FontAwesome agar pin tidak hilang (Leaflet image path bug)
+            const pinIcon = L.divIcon({
+                className: 'custom-pin',
+                html: '<i class="fa-solid fa-location-dot text-4xl text-red-500 drop-shadow-md" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></i>',
+                iconSize: [30, 42],
+                iconAnchor: [15, 42] // Posisi ujung bawah pin
+            });
+
             // Marker (Bisa Digeser)
-            mapMarker = L.marker([centerLat, centerLng], {draggable: true}).addTo(mapInstance);
+            mapMarker = L.marker([centerLat, centerLng], {draggable: true, icon: pinIcon}).addTo(mapInstance);
 
             // Lingkaran Radius (Warna Emas menyesuaikan tema)
             mapCircle = L.circle([centerLat, centerLng], {
