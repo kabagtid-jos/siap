@@ -359,7 +359,7 @@
                                 <input type="text" id="newLembagaNama" placeholder="Nama Lembaga..." class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
                                 <input type="time" id="newLembagaMasuk" title="Jam Masuk" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
                                 <input type="time" id="newLembagaPulang" title="Jam Pulang" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
-                                <button type="button" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-lg transition shadow-sm text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+                                <button type="button" id="btnTambahLembaga" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-lg transition shadow-sm text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
                             </div>
                             <input type="hidden" id="setJadwalLembaga" required>
                         </div>
@@ -451,6 +451,7 @@
         let isEditMode = false;
         let currentEditNiy = '';
         let jadwalLembagaData = {};
+        let editingLembagaOldName = null;
 
         // ================= UTILITIES & DARK MODE =================
         function toggleDarkMode() {
@@ -747,13 +748,27 @@
                         <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.masuk}</td>
                         <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.pulang}</td>
                         <td class="p-2 text-center">
-                            <button type="button" onclick="hapusJadwalLembaga('${namaLembaga}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
+                            <button type="button" onclick="editJadwalLembaga('${namaLembaga}')" class="text-blue-500 hover:text-blue-700 mr-2" title="Edit Jadwal"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button type="button" onclick="hapusJadwalLembaga('${namaLembaga}')" class="text-red-500 hover:text-red-700" title="Hapus Lembaga"><i class="fa-solid fa-trash-can"></i></button>
                         </td>
                     </tr>
                 `;
                 selectEl.innerHTML += `<option value="${namaLembaga}">${namaLembaga}</option>`;
             }
             document.getElementById('setJadwalLembaga').value = JSON.stringify(jadwalLembagaData);
+        }
+
+        function editJadwalLembaga(nama) {
+            editingLembagaOldName = nama;
+            document.getElementById('newLembagaNama').value = nama;
+            document.getElementById('newLembagaMasuk').value = jadwalLembagaData[nama].masuk;
+            document.getElementById('newLembagaPulang').value = jadwalLembagaData[nama].pulang;
+            
+            // Ubah tombol "Tambah" menjadi "Update" berwarna Biru
+            const btn = document.getElementById('btnTambahLembaga');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Update';
+            btn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'dark:bg-gray-600', 'dark:hover:bg-gray-500', 'text-gray-800', 'dark:text-white');
+            btn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white');
         }
 
         function tambahJadwalLembaga() {
@@ -766,7 +781,20 @@
                 return;
             }
 
+            // Jika sedang mode update dan mengubah nama lembaga, hapus riwayat nama lamanya
+            if(editingLembagaOldName && editingLembagaOldName !== nama) {
+                delete jadwalLembagaData[editingLembagaOldName];
+            }
+
             jadwalLembagaData[nama] = { masuk: masuk, pulang: pulang };
+            
+            // Reset status kembali ke mode Tambah Data
+            editingLembagaOldName = null;
+            const btn = document.getElementById('btnTambahLembaga');
+            btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah';
+            btn.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'text-white');
+            btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'dark:bg-gray-600', 'dark:hover:bg-gray-500', 'text-gray-800', 'dark:text-white');
+
             renderJadwalLembaga();
             
             document.getElementById('newLembagaNama').value = '';
