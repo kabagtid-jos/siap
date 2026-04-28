@@ -4,57 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAP P2S Abu Zairi</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#111827',
-                        darkCard: '#1f2937',
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { darkBg: '#111827', darkCard: '#1f2937' } } } }
     </script>
-    <!-- Leaflet CSS & JS untuk Peta -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-        }
-        .dark .glass {
-            background: rgba(31, 41, 55, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); }
+        .dark .glass { background: rgba(31, 41, 55, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #videoElement { transform: scaleX(-1); }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #A88C61; }
-
         @media (max-width: 640px) {
             .swal2-popup { font-size: 0.85rem !important; padding: 1rem !important; width: 85% !important; border-radius: 1rem !important; }
             .swal2-title { font-size: 1.2rem !important; }
@@ -63,14 +33,13 @@
             .swal2-actions { margin-top: 0.5rem !important; }
             .swal2-styled { padding: 0.4em 1em !important; font-size: 0.9rem !important; }
         }
-
         .leaflet-container { z-index: 10 !important; font-family: 'Poppins', sans-serif;}
         .custom-pin { background: transparent; border: none; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
 
-    <!-- ================= GLOBAL PROFILE HEADER ================= -->
+    <!-- HEADER -->
     <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md z-50 rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -86,221 +55,123 @@
                     </div>
                 </div>
             </div>
-            
             <div class="flex items-center space-x-2 flex-shrink-0">
-                <button onclick="toggleDarkMode()" title="Ganti Tema" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
-                    <i id="iconMoon" class="fa-solid fa-moon text-xs md:text-sm"></i>
-                    <i id="iconSun" class="fa-solid fa-sun hidden text-xs md:text-sm"></i>
-                </button>
-                <button onclick="logout()" title="Keluar" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
-                    <i class="fa-solid fa-right-from-bracket text-xs md:text-sm"></i>
-                </button>
+                <button onclick="toggleDarkMode()" title="Ganti Tema" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm"><i id="iconMoon" class="fa-solid fa-moon text-xs md:text-sm"></i><i id="iconSun" class="fa-solid fa-sun hidden text-xs md:text-sm"></i></button>
+                <button onclick="logout()" title="Keluar" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm"><i class="fa-solid fa-right-from-bracket text-xs md:text-sm"></i></button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="flex-1 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto custom-scrollbar">
         
-        <!-- ================= LOGIN SECTION ================= -->
+        <!-- LOGIN SECTION -->
         <div id="loginSection" class="fade-in w-full mx-auto mt-4 md:mt-10">
             <div class="glass rounded-2xl max-w-4xl mx-auto flex flex-col md:flex-row overflow-hidden shadow-xl">
                 <div class="p-6 md:p-8 text-center md:w-1/2 flex flex-col justify-center bg-white/40 dark:bg-gray-800/40">
-                    <div class="bg-[#FDF8E7] dark:bg-gray-900 text-[#D4AF37] w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-inner">
-                        <i class="fa-solid fa-mosque text-3xl md:text-4xl"></i>
-                    </div>
+                    <div class="bg-[#FDF8E7] dark:bg-gray-900 text-[#D4AF37] w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-inner"><i class="fa-solid fa-mosque text-3xl md:text-4xl"></i></div>
                     <h2 class="text-xl md:text-2xl font-bold mb-1 md:mb-2 text-gray-800 dark:text-white">SIAP P2S Abu Zairi</h2>
                     <p class="text-gray-500 dark:text-gray-400 text-xs md:text-sm mb-5 md:mb-6">Sistem Absensi Pimpinan</p>
-                    
                     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3 md:space-y-4">
-                        <div class="relative">
-                            <i class="fa-solid fa-id-card absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
-                        </div>
-                        <div class="relative">
-                            <i class="fa-solid fa-lock absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
-                        </div>
-                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">
-                            Masuk Sistem
-                        </button>
+                        <div class="relative"><i class="fa-solid fa-id-card absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i><input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white"></div>
+                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i><input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white"></div>
+                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">Masuk Sistem</button>
                     </form>
                 </div>
-
                 <div class="p-5 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
-                    <h3 class="font-bold text-base md:text-lg mb-3 md:mb-4 border-b border-gray-200/80 dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100 flex items-center">
-                        <i class="fa-solid fa-list-check mr-2 text-[#D4AF37]"></i> Kehadiran Hari Ini
-                    </h3>
+                    <h3 class="font-bold text-base md:text-lg mb-3 md:mb-4 border-b border-gray-200/80 dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100 flex items-center"><i class="fa-solid fa-list-check mr-2 text-[#D4AF37]"></i> Kehadiran Hari Ini</h3>
                     <div class="overflow-y-auto flex-1 max-h-[300px] md:max-h-[400px] pr-2 custom-scrollbar">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-100/80 dark:bg-gray-700/80 sticky top-0 z-10 shadow-sm backdrop-blur">
-                                <tr>
-                                    <th class="px-4 py-3 rounded-l-lg">Pimpinan</th>
-                                    <th class="px-4 py-3">Waktu</th>
-                                    <th class="px-4 py-3 rounded-r-lg">Ket</th>
-                                </tr>
-                            </thead>
-                            <tbody id="publicLogContainer">
-                                <tr><td colspan="3" class="text-center py-10 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i>Memuat data...</td></tr>
-                            </tbody>
-                        </table>
+                        <table class="w-full text-sm text-left"><thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-100/80 dark:bg-gray-700/80 sticky top-0 z-10 shadow-sm backdrop-blur"><tr><th class="px-4 py-3 rounded-l-lg">Pimpinan</th><th class="px-4 py-3">Waktu</th><th class="px-4 py-3 rounded-r-lg">Ket</th></tr></thead><tbody id="publicLogContainer"><tr><td colspan="3" class="text-center py-10 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i>Memuat data...</td></tr></tbody></table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ================= PIMPINAN (ABSENSI) SECTION ================= -->
+        <!-- PIMPINAN (ABSENSI) SECTION -->
         <div id="pimpinanSection" class="hidden fade-in max-w-5xl mx-auto pb-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Camera & Location -->
                 <div class="glass rounded-2xl p-6">
                     <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-camera mr-2 text-[#A88C61]"></i> Verifikasi Wajah & Lokasi</h3>
-                    
                     <div class="relative w-full h-64 bg-gray-900 rounded-xl overflow-hidden mb-4 shadow-inner flex items-center justify-center">
                         <div id="cameraPlaceholder" class="text-center text-gray-400 z-20">
-                            <i class="fa-solid fa-video-slash text-4xl mb-3"></i>
-                            <p class="text-sm mb-4">Kamera belum diaktifkan</p>
-                            <button onclick="initAttendance()" class="bg-[#D4AF37] hover:bg-[#A88C61] text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition transform hover:-translate-y-0.5">
-                                <i class="fa-solid fa-power-off mr-2"></i> Buka Kamera
-                            </button>
+                            <i class="fa-solid fa-video-slash text-4xl mb-3"></i><p class="text-sm mb-4">Kamera belum diaktifkan</p>
+                            <button onclick="initAttendance()" class="bg-[#D4AF37] hover:bg-[#A88C61] text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition transform hover:-translate-y-0.5"><i class="fa-solid fa-power-off mr-2"></i> Buka Kamera</button>
                         </div>
-                        
                         <video id="videoElement" autoplay class="w-full h-full object-cover hidden"></video>
                         <canvas id="canvasElement" class="hidden"></canvas>
-                        <div id="locationStatus" class="hidden absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs p-2 rounded-lg backdrop-blur z-20">
-                            <i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37]"></i> Mendapatkan lokasi...
-                        </div>
+                        <div id="locationStatus" class="hidden absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs p-2 rounded-lg backdrop-blur z-20"><i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37]"></i> Mendapatkan lokasi...</div>
                     </div>
-
-                    <!-- Action Buttons -->
                     <div id="actionButtons" class="grid grid-cols-2 gap-4 mt-6 hidden fade-in">
-                        <button onclick="jalankanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-blue-400 flex flex-col items-center justify-center">
-                            <i class="fa-solid fa-right-to-bracket mb-1 text-2xl"></i> Absen Masuk
-                        </button>
-                        <button onclick="jalankanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-orange-400 flex flex-col items-center justify-center">
-                            <i class="fa-solid fa-right-from-bracket mb-1 text-2xl"></i> Absen Pulang
-                        </button>
+                        <button onclick="jalankanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-blue-400 flex flex-col items-center justify-center"><i class="fa-solid fa-right-to-bracket mb-1 text-2xl"></i> Absen Masuk</button>
+                        <button onclick="jalankanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-orange-400 flex flex-col items-center justify-center"><i class="fa-solid fa-right-from-bracket mb-1 text-2xl"></i> Absen Pulang</button>
                     </div>
                 </div>
-
-                <!-- Info Box (Rules) -->
                 <div class="glass rounded-2xl p-6 h-max shadow-md">
-                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-shield-halved mr-2 text-[#D4AF37]"></i>Aturan Geofencing</h3>
+                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-shield-halved mr-2 text-[#D4AF37]"></i>Aturan Geofencing & Jam Kerja</h3>
                     <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
-                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area P2S Abu Zairi yang telah ditentukan.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan penerangan cukup dan wajah terlihat jelas di kamera untuk verifikasi visual.</li>
-                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Sistem secara otomatis mencatat koordinat dan jarak secara real-time sebagai validasi.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area P2S Abu Zairi yang ditentukan.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-clock text-[#D4AF37] mr-3 mt-0.5"></i> Absen masuk hanya bisa dilakukan sesuai jadwal yang telah ditentukan oleh lembaga Anda.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-money-bill-wave text-[#D4AF37] mr-3 mt-0.5"></i> Honor dihitung berdasarkan total jam aktual (Pulang dikurangi Masuk). Jika lupa absen pulang, honor dihitung 50% dari jadwal standar.</li>
                     </ul>
                 </div>
             </div>
-
-            <!-- Log Absen Personal -->
             <div class="mt-6 glass rounded-2xl p-6 fade-in shadow-md mb-8">
                 <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-clock-rotate-left mr-2 text-[#D4AF37]"></i> Log Absensi Anda</h3>
                 <div class="overflow-x-auto custom-scrollbar max-h-64">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 sticky top-0 z-10 shadow-sm backdrop-blur">
-                            <tr>
-                                <th class="px-4 py-3 rounded-l-lg">Tanggal & Waktu</th>
-                                <th class="px-4 py-3">Tipe</th>
-                                <th class="px-4 py-3 rounded-r-lg">Status Lokasi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="personalLogContainer">
-                            <tr><td colspan="3" class="text-center py-4 text-gray-400">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
+                    <table class="w-full text-sm text-left"><thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 sticky top-0 z-10 shadow-sm backdrop-blur"><tr><th class="px-4 py-3 rounded-l-lg">Tanggal & Waktu</th><th class="px-4 py-3">Tipe</th><th class="px-4 py-3 rounded-r-lg">Status Lokasi</th></tr></thead><tbody id="personalLogContainer"><tr><td colspan="3" class="text-center py-4 text-gray-400">Memuat data...</td></tr></tbody></table>
                 </div>
             </div>
         </div>
 
         <!-- ================= ADMIN DASHBOARD SECTION ================= -->
         <div id="adminSection" class="hidden fade-in max-w-6xl mx-auto pb-32 md:pb-10">
-            
             <!-- ADMIN NAVIGATION TABS -->
-            <div class="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:bg-transparent md:shadow-none flex justify-around md:justify-start md:space-x-4 px-2 py-3 md:px-0 md:py-0 md:mb-6 md:border-b border-gray-200 dark:border-gray-700 md:pb-2 overflow-x-auto custom-scrollbar rounded-t-2xl md:rounded-none transition-all">
-                <button onclick="switchAdminTab('dashboard')" id="btnTabDashboard" class="admin-tab active flex flex-col md:flex-row items-center justify-center w-full md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-[#D4AF37] text-[#A88C61] whitespace-nowrap">
-                    <i class="fa-solid fa-chart-line text-lg md:mr-2 mb-1 md:mb-0"></i> Dashboard
-                </button>
-                <button onclick="switchAdminTab('pimpinan')" id="btnTabPimpinan" class="admin-tab flex flex-col md:flex-row items-center justify-center w-full md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap">
-                    <i class="fa-solid fa-address-book text-lg md:mr-2 mb-1 md:mb-0"></i> Data Pimpinan
-                </button>
-                <button onclick="switchAdminTab('settings')" id="btnTabSettings" class="admin-tab flex flex-col md:flex-row items-center justify-center w-full md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap">
-                    <i class="fa-solid fa-sliders text-lg md:mr-2 mb-1 md:mb-0"></i> Pengaturan
-                </button>
+            <div class="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:bg-transparent md:shadow-none flex justify-start md:space-x-4 px-2 py-3 md:px-0 md:py-0 md:mb-6 md:border-b border-gray-200 dark:border-gray-700 md:pb-2 overflow-x-auto custom-scrollbar rounded-t-2xl md:rounded-none transition-all">
+                <button onclick="switchAdminTab('dashboard')" id="btnTabDashboard" class="admin-tab active flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-[#D4AF37] text-[#A88C61] whitespace-nowrap"><i class="fa-solid fa-chart-line text-lg md:mr-2 mb-1 md:mb-0"></i> Dashboard</button>
+                <button onclick="switchAdminTab('rekap')" id="btnTabRekap" class="admin-tab flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap"><i class="fa-solid fa-file-invoice-dollar text-lg md:mr-2 mb-1 md:mb-0"></i> Rekap Gaji</button>
+                <button onclick="switchAdminTab('pimpinan')" id="btnTabPimpinan" class="admin-tab flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap"><i class="fa-solid fa-address-book text-lg md:mr-2 mb-1 md:mb-0"></i> Data Pimpinan</button>
+                <button onclick="switchAdminTab('settings')" id="btnTabSettings" class="admin-tab flex flex-col md:flex-row items-center justify-center min-w-[80px] md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-transparent text-gray-500 dark:text-gray-400 hover:text-[#A88C61] dark:hover:text-[#D4AF37] whitespace-nowrap"><i class="fa-solid fa-sliders text-lg md:mr-2 mb-1 md:mb-0"></i> Pengaturan</button>
             </div>
 
-            <!-- 1. TAB DASHBOARD -->
+            <!-- TAB 1: DASHBOARD -->
             <div id="adminTabDashboard" class="admin-content">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="glass rounded-xl p-6 border-l-4 border-blue-500">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Pimpinan</p>
-                                <h3 id="statTotal" class="text-3xl font-bold text-gray-800 dark:text-white">0</h3>
-                            </div>
-                            <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full text-blue-500 dark:text-blue-400"><i class="fa-solid fa-users text-xl"></i></div>
-                        </div>
-                    </div>
-                    <div class="glass rounded-xl p-6 border-l-4 border-[#D4AF37]">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Hadir Hari Ini</p>
-                                <h3 id="statHadir" class="text-3xl font-bold text-gray-800 dark:text-white">0</h3>
-                            </div>
-                            <div class="bg-[#FDF8E7] dark:bg-yellow-900/30 p-3 rounded-full text-[#D4AF37]"><i class="fa-solid fa-clipboard-check text-xl"></i></div>
-                        </div>
-                    </div>
+                    <div class="glass rounded-xl p-6 border-l-4 border-blue-500"><div class="flex justify-between items-center"><div><p class="text-sm text-gray-500 font-medium">Total Pimpinan</p><h3 id="statTotal" class="text-3xl font-bold">0</h3></div><div class="bg-blue-100 p-3 rounded-full text-blue-500"><i class="fa-solid fa-users text-xl"></i></div></div></div>
+                    <div class="glass rounded-xl p-6 border-l-4 border-[#D4AF37]"><div class="flex justify-between items-center"><div><p class="text-sm text-gray-500 font-medium">Hadir Hari Ini</p><h3 id="statHadir" class="text-3xl font-bold">0</h3></div><div class="bg-[#FDF8E7] p-3 rounded-full text-[#D4AF37]"><i class="fa-solid fa-clipboard-check text-xl"></i></div></div></div>
                 </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="glass rounded-xl p-6 lg:col-span-2 shadow-md">
-                        <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Grafik Kehadiran Mingguan</h3>
-                        <div class="relative w-full h-64 sm:h-72"><canvas id="attendanceChart"></canvas></div>
-                    </div>
-                    <div class="glass rounded-xl p-6 shadow-md flex flex-col">
-                        <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Log Seluruh Sistem</h3>
-                        <div class="overflow-y-auto flex-1 h-64 pr-2 custom-scrollbar" id="recentLogs">
-                            <div class="text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>
-                        </div>
-                    </div>
+                    <div class="glass rounded-xl p-6 lg:col-span-2 shadow-md"><h3 class="font-bold border-b pb-2 mb-4">Grafik Kehadiran Mingguan</h3><div class="relative w-full h-64"><canvas id="attendanceChart"></canvas></div></div>
+                    <div class="glass rounded-xl p-6 shadow-md flex flex-col"><h3 class="font-bold border-b pb-2 mb-4">Log Seluruh Sistem</h3><div class="overflow-y-auto flex-1 h-64 pr-2 custom-scrollbar" id="recentLogs"></div></div>
                 </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass rounded-xl p-6 shadow-md">
-                        <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Grafik Kehadiran Tahunan</h3>
-                        <div class="relative w-full h-64"><canvas id="yearlyChart"></canvas></div>
-                    </div>
-                    <div class="glass rounded-xl p-6 shadow-md">
-                        <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Kehadiran Per Lembaga</h3>
-                        <div class="relative w-full h-64 flex justify-center"><canvas id="lembagaChart"></canvas></div>
-                    </div>
+                    <div class="glass rounded-xl p-6 shadow-md"><h3 class="font-bold border-b pb-2 mb-4">Grafik Tahunan</h3><div class="relative w-full h-64"><canvas id="yearlyChart"></canvas></div></div>
+                    <div class="glass rounded-xl p-6 shadow-md"><h3 class="font-bold border-b pb-2 mb-4">Per Lembaga</h3><div class="relative w-full h-64 flex justify-center"><canvas id="lembagaChart"></canvas></div></div>
                 </div>
                 <div class="h-24 md:hidden w-full"></div>
             </div>
 
-            <!-- 2. TAB DAFTAR PIMPINAN -->
-            <div id="adminTabPimpinan" class="admin-content hidden">
+            <!-- TAB 2: REKAP GAJI / HONOR (BARU) -->
+            <div id="adminTabRekap" class="admin-content hidden">
                 <div class="glass rounded-xl p-6 shadow-md">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b dark:border-gray-700 pb-4 gap-4">
-                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-address-book mr-2 text-[#D4AF37]"></i>Daftar Pimpinan</h3>
-                        <button onclick="showAddUserModal()" class="bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center">
-                            <i class="fa-solid fa-user-plus mr-2"></i> Tambah Pimpinan
-                        </button>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b dark:border-gray-700 pb-4 gap-4">
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-file-invoice-dollar mr-2 text-[#D4AF37]"></i>Rekap Kehadiran & Gaji Pimpinan</h3>
+                        <div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Pilih Bulan:</label>
+                            <input type="month" id="filterBulanRekap" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm outline-none bg-white dark:bg-gray-700 dark:text-white" onchange="loadRekapData()">
+                        </div>
                     </div>
-                    <div class="overflow-x-auto custom-scrollbar max-h-96">
+                    <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 sticky top-0 z-10 shadow-sm backdrop-blur">
+                            <thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 shadow-sm">
                                 <tr>
-                                    <th class="px-4 py-3 rounded-l-lg">NIY</th>
-                                    <th class="px-4 py-3">Nama Lengkap</th>
-                                    <th class="px-4 py-3">Lembaga</th>
-                                    <th class="px-4 py-3">Jabatan</th>
-                                    <th class="px-4 py-3 rounded-r-lg text-center">Aksi</th>
+                                    <th class="px-4 py-3 rounded-l-lg">Pimpinan</th>
+                                    <th class="px-4 py-3">Lembaga & Jabatan</th>
+                                    <th class="px-4 py-3 text-center">Total Hari</th>
+                                    <th class="px-4 py-3 text-center">Total Jam</th>
+                                    <th class="px-4 py-3 text-right rounded-r-lg">Estimasi Gaji/Honor</th>
                                 </tr>
                             </thead>
-                            <tbody id="adminUserList">
-                                <tr><td colspan="5" class="text-center py-6 text-gray-400">Memuat data pimpinan...</td></tr>
+                            <tbody id="rekapContainer">
+                                <tr><td colspan="5" class="text-center py-10 text-gray-400">Silakan pilih bulan untuk memuat data rekapitulasi.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -308,84 +179,76 @@
                 <div class="h-24 md:hidden w-full"></div>
             </div>
 
-            <!-- 3. TAB PENGATURAN -->
+            <!-- TAB 3: DAFTAR PIMPINAN -->
+            <div id="adminTabPimpinan" class="admin-content hidden">
+                <div class="glass rounded-xl p-6 shadow-md">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b dark:border-gray-700 pb-4 gap-4">
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-address-book mr-2 text-[#D4AF37]"></i>Daftar Pimpinan</h3>
+                        <button onclick="showAddUserModal()" class="bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center"><i class="fa-solid fa-user-plus mr-2"></i> Tambah</button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar max-h-96">
+                        <table class="w-full text-sm text-left"><thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 sticky top-0"><tr><th class="px-4 py-3 rounded-l-lg">NIY</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Lembaga</th><th class="px-4 py-3">Jabatan</th><th class="px-4 py-3 text-center">Aksi</th></tr></thead>
+                        <tbody id="adminUserList"></tbody></table>
+                    </div>
+                </div>
+                <div class="h-24 md:hidden w-full"></div>
+            </div>
+
+            <!-- TAB 4: PENGATURAN -->
             <div id="adminTabSettings" class="admin-content hidden">
                 <div class="glass rounded-xl p-6 shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-white"><i class="fa-solid fa-sliders mr-2 text-[#D4AF37]"></i> Pengaturan Sistem (Geofencing, Lembaga & Jabatan)</h3>
+                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-sliders mr-2 text-[#D4AF37]"></i> Pengaturan Sistem Terpadu</h3>
                     
                     <div class="mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200"><i class="fa-solid fa-map-location-dot mr-2 text-[#A88C61]"></i>Peta Lokasi Geofence</label>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Masukkan koordinat Latitude dan Longitude pada kolom di bawah untuk memperbarui titik lokasi pada peta.</p>
-                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner overflow-hidden relative z-10"></div>
+                        <div class="flex justify-between items-center mb-2"><label class="block text-sm font-bold text-gray-700 dark:text-gray-200"><i class="fa-solid fa-map-location-dot mr-2 text-[#A88C61]"></i>Peta Lokasi Geofence</label></div>
+                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner relative z-10"></div>
                     </div>
 
                     <form onsubmit="handleSaveSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Latitude Pusat</label>
-                            <input type="text" id="setLat" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Longitude Pusat</label>
-                            <input type="text" id="setLng" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Radius Toleransi Absen (Meter)</label>
-                            <input type="number" id="setRadius" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-bold text-[#A88C61]">
-                        </div>
+                        <div><label class="block text-xs font-medium mb-1">Latitude</label><input type="text" id="setLat" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:bg-gray-700 dark:text-white"></div>
+                        <div><label class="block text-xs font-medium mb-1">Longitude</label><input type="text" id="setLng" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:bg-gray-700 dark:text-white"></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-medium mb-1">Radius Absen (Meter)</label><input type="number" id="setRadius" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:bg-gray-700 dark:text-white font-bold text-[#A88C61]"></div>
                         
-                        <!-- List UI Lembaga + Jadwal Jam Masuk/Pulang -->
+                        <!-- List UI Lembaga & Jam Kerja -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-building mr-2 text-[#A88C61]"></i>Daftar Lembaga & Jam Kerja</label>
-                            
+                            <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-building mr-2 text-[#A88C61]"></i>Daftar Lembaga & Jam Kerja</label>
                             <div class="overflow-x-auto mb-3">
-                                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
-                                    <thead class="bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-300">
-                                        <tr>
-                                            <th class="p-3">Nama Lembaga</th>
-                                            <th class="p-3">Jam Masuk</th>
-                                            <th class="p-3">Jam Pulang</th>
-                                            <th class="p-3 text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="lembagaTableBody">
-                                        <!-- Rendered via JS -->
-                                    </tbody>
-                                </table>
+                                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"><thead class="bg-gray-100 dark:bg-gray-700/80"><tr><th class="p-3">Nama Lembaga</th><th class="p-3">Masuk</th><th class="p-3">Pulang</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody id="lembagaTableBody"></tbody></table>
                             </div>
-
                             <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                                <input type="text" id="newLembagaNama" placeholder="Nama Lembaga..." class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
-                                <input type="time" id="newLembagaMasuk" title="Jam Masuk" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
-                                <input type="time" id="newLembagaPulang" title="Jam Pulang" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm text-sm">
-                                <button type="button" id="btnTambahLembaga" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2 px-4 rounded-lg transition shadow-sm text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+                                <input type="text" id="newLembagaNama" placeholder="Nama..." class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none dark:bg-gray-700 text-sm">
+                                <input type="time" id="newLembagaMasuk" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none dark:bg-gray-700 text-sm">
+                                <input type="time" id="newLembagaPulang" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none dark:bg-gray-700 text-sm">
+                                <button type="button" id="btnTambahLembaga" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-bold py-2 rounded-lg text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
                             </div>
                             <input type="hidden" id="setJadwalLembaga" required>
                         </div>
 
-                        <!-- List UI Jabatan -->
+                        <!-- List UI Jabatan & Honor (BARU) -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan</label>
-                            <div id="jabatanTags" class="flex flex-wrap gap-2 mb-3"></div>
-                            <div class="flex space-x-2">
-                                <input type="text" id="newJabatanInput" placeholder="Tambah jabatan baru..." class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
-                                <button type="button" onclick="tambahJabatan()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2.5 px-4 rounded-lg transition shadow-sm whitespace-nowrap"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan & Tarif Honor per Jam</label>
+                            <div class="overflow-x-auto mb-3">
+                                <table class="w-full text-sm text-left border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"><thead class="bg-gray-100 dark:bg-gray-700/80"><tr><th class="p-3">Nama Jabatan</th><th class="p-3 text-right">Tarif Honor (Rp/Jam)</th><th class="p-3 text-center">Aksi</th></tr></thead><tbody id="jabatanTableBody"></tbody></table>
                             </div>
-                            <input type="hidden" id="setJabatan" required>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <input type="text" id="newJabatanNama" placeholder="Nama Jabatan..." class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none dark:bg-gray-700 text-sm">
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
+                                    <input type="text" id="newJabatanTarif" placeholder="7000" oninput="formatRupiahInput(this)" class="w-full pl-8 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none dark:bg-gray-700 text-sm font-mono">
+                                </div>
+                                <button type="button" id="btnTambahJabatan" onclick="tambahTarifJabatan()" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-bold py-2 rounded-lg text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            </div>
+                            <input type="hidden" id="setTarifJabatan" required>
                         </div>
 
                         <div class="md:col-span-2 flex justify-end mt-4">
-                            <button type="submit" class="bg-gray-800 dark:bg-[#D4AF37] hover:bg-gray-900 dark:hover:bg-[#B8972E] text-white dark:text-gray-900 font-bold py-3 px-8 rounded-xl shadow-md transition flex items-center">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Konfigurasi
-                            </button>
+                            <button type="submit" class="bg-gray-800 dark:bg-[#D4AF37] hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-xl shadow-md transition flex items-center"><i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Konfigurasi</button>
                         </div>
                     </form>
                 </div>
                 <div class="h-24 md:hidden w-full"></div>
             </div>
         </div>
-
     </div>
 
     <!-- Modal Form (Tambah & Edit User) -->
@@ -393,120 +256,88 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
             <div class="flex justify-between items-center mb-3 md:mb-4 border-b dark:border-gray-700 pb-2">
                 <h3 id="modalTitle" class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
-                <button onclick="closeModal()" type="button" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal()" type="button" class="text-gray-400 hover:text-red-500 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
             <form id="formAddUser" onsubmit="handleAddUser(event)" class="space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">NIY (Unik)</label><input type="text" id="addNiy" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                    <div><label class="text-xs font-medium">NIY (Unik)</label><input type="text" id="addNiy" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"></div>
+                    <div><label class="text-xs font-medium">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"></div>
                 </div>
-                
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Tanggal Lahir</label><input type="date" id="addTglLahir" class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jenis Kelamin</label>
-                        <select id="addJk" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white">
-                            <option value="">-- Pilih --</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
+                    <div><label class="text-xs font-medium">Tanggal Lahir</label><input type="date" id="addTglLahir" class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"></div>
+                    <div><label class="text-xs font-medium">Jenis Kelamin</label>
+                        <select id="addJk" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"><option value="">-- Pilih --</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih --</option></select></div>
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><select id="addJabatan" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih --</option></select></div>
+                    <div><label class="text-xs font-medium">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"><option value="">-- Pilih --</option></select></div>
+                    <div><label class="text-xs font-medium">Jabatan</label><select id="addJabatan" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"><option value="">-- Pilih --</option></select></div>
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-[10px] text-gray-400">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 md:py-2 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-gray-200 dark:file:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-lg dark:text-white"></div>
+                    <div><label class="text-xs font-medium">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 border rounded-lg outline-none bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600"></div>
+                    <div><label class="text-xs font-medium">Foto Profil</label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 border rounded-lg dark:text-white dark:border-gray-600"></div>
                 </div>
-                
-                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2.5 md:py-3 rounded-xl mt-4 shadow-md transition text-sm md:text-base">Simpan Data</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] text-white font-bold py-2.5 rounded-xl mt-4 shadow-md transition">Simpan Data</button>
             </form>
         </div>
     </div>
 
 
     <script>
-        // ================= KONFIGURASI LINK GAS ANDA =================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweZs6jjAUyHWeMLzgdG3RNyL4ovaaLOHjLWd8mqs2BEM1BNYL0bbQ-NxHzZXoZGjbYPA/exec';
         
-        // State Management
-        let currentUser = null;
-        let currentLocation = { lat: 0, lng: 0 };
-        let stream = null;
-        let weeklyChart = null;
-        let yearlyChart = null;
-        let lembagaChart = null;
+        let currentUser = null; let currentLocation = { lat: 0, lng: 0 }; let stream = null;
+        let weeklyChart = null; let yearlyChart = null; let lembagaChart = null;
+        let mapInstance = null; let mapMarker = null; let mapCircle = null;
+        let userMap = {}; let isEditMode = false; let currentEditNiy = '';
         
-        // Leaflet Map Variables
-        let mapInstance = null;
-        let mapMarker = null;
-        let mapCircle = null;
-
-        // User Management Variables
-        let userMap = {}; 
-        let isEditMode = false;
-        let currentEditNiy = '';
+        // Data Settings
         let jadwalLembagaData = {};
+        let tarifJabatanData = {};
         let editingLembagaOldName = null;
+        let editingJabatanOldName = null;
 
-        // ================= UTILITIES & DARK MODE =================
+        // Utilities
+        function formatRupiah(number) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number); }
+        function formatRupiahInput(input) { let val = input.value.replace(/[^,\d]/g, ''); input.value = val ? parseInt(val).toLocaleString('id-ID') : ''; }
+        function parseRupiahInput(str) { return parseInt(str.replace(/\./g, '')) || 0; }
+
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            
-            document.getElementById('iconMoon').classList.toggle('hidden', isDark);
-            document.getElementById('iconSun').classList.toggle('hidden', !isDark);
-
-            const textColor = isDark ? '#9ca3af' : '#4b5563';
-            if(weeklyChart) { weeklyChart.options.scales.x.ticks.color = textColor; weeklyChart.options.scales.y.ticks.color = textColor; weeklyChart.update(); }
-            if(yearlyChart) { yearlyChart.options.scales.x.ticks.color = textColor; yearlyChart.options.scales.y.ticks.color = textColor; yearlyChart.update(); }
-            if(lembagaChart) { lembagaChart.options.plugins.legend.labels.color = textColor; lembagaChart.data.datasets[0].borderColor = isDark ? '#1f2937' : '#ffffff'; lembagaChart.update(); }
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            document.getElementById('iconMoon').classList.toggle('hidden', document.documentElement.classList.contains('dark'));
+            document.getElementById('iconSun').classList.toggle('hidden', !document.documentElement.classList.contains('dark'));
         }
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) { toggleDarkMode(); toggleDarkMode(); }
 
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            document.getElementById('iconMoon').classList.add('hidden');
-            document.getElementById('iconSun').classList.remove('hidden');
-        }
-
-        function showLoading() {
-            Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454', didOpen: () => { Swal.showLoading() } });
-        }
+        function showLoading() { Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454', didOpen: () => { Swal.showLoading() } }); }
         function hideLoading() { Swal.close(); }
 
-        window.addEventListener('DOMContentLoaded', () => { loadPublicLogs(); });
+        window.addEventListener('DOMContentLoaded', () => { 
+            loadPublicLogs();
+            let date = new Date();
+            let mm = String(date.getMonth() + 1).padStart(2, '0');
+            document.getElementById('filterBulanRekap').value = `${date.getFullYear()}-${mm}`;
+        });
 
         async function callAPI(params) {
             const urlParams = new URLSearchParams(params).toString();
-            try {
-                const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: urlParams });
-                return await response.json();
-            } catch (error) { return { success: false, message: 'Gagal terhubung ke server.' }; }
+            try { const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: urlParams }); return await response.json(); } 
+            catch (error) { return { success: false, message: 'Gagal terhubung ke server.' }; }
         }
 
-        // ================= LOGIN LOGIC =================
+        // Login Logic
         async function handleLogin(e) {
-            e.preventDefault();
-            const niy = document.getElementById('niy').value;
-            const password = document.getElementById('password').value;
-            
-            showLoading();
-            const res = await callAPI({ action: 'login', niy, password });
+            e.preventDefault(); showLoading();
+            const res = await callAPI({ action: 'login', niy: document.getElementById('niy').value, password: document.getElementById('password').value });
             hideLoading();
-
-            if (res.success) { loginSuccess(res.user); } 
-            else { Swal.fire({icon: 'error', title: 'Login Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
+            if (res.success) { loginSuccess(res.user); } else { Swal.fire({icon: 'error', title: 'Login Gagal', text: res.message}); }
         }
 
         function loginSuccess(user) {
             currentUser = user;
             document.getElementById('loginSection').classList.add('hidden');
-            
             document.getElementById('profileHeader').classList.remove('hidden');
             document.getElementById('headerNama').innerText = user.nama;
             document.getElementById('headerNiy').innerText = user.niy;
@@ -514,20 +345,12 @@
             
             let inisial = user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             const headerAvatarBox = document.getElementById('headerInitials').parentElement;
-            
-            if (user.foto && user.foto.startsWith('data:image')) {
-                headerAvatarBox.innerHTML = `<img src="${user.foto}" id="headerInitials" alt="Foto Profil" class="w-full h-full rounded-full object-cover">`;
-                headerAvatarBox.classList.remove('bg-gradient-to-tr', 'from-[#A88C61]', 'to-[#D4AF37]');
-            } else {
-                headerAvatarBox.innerHTML = `<span id="headerInitials">${inisial}</span>`;
-                headerAvatarBox.classList.add('bg-gradient-to-tr', 'from-[#A88C61]', 'to-[#D4AF37]');
-            }
+            if (user.foto && user.foto.startsWith('data:image')) { headerAvatarBox.innerHTML = `<img src="${user.foto}" class="w-full h-full rounded-full object-cover">`; headerAvatarBox.classList.remove('bg-gradient-to-tr'); } 
+            else { headerAvatarBox.innerHTML = `<span id="headerInitials">${inisial}</span>`; headerAvatarBox.classList.add('bg-gradient-to-tr'); }
 
             if (user.role === 'admin') {
                 document.getElementById('adminSection').classList.remove('hidden');
-                switchAdminTab('dashboard'); 
-                loadAdminData();
-                loadSettings(); 
+                switchAdminTab('dashboard'); loadAdminData(); loadSettings(); 
             } else {
                 document.getElementById('pimpinanSection').classList.remove('hidden');
                 document.getElementById('cameraPlaceholder').classList.remove('hidden');
@@ -538,519 +361,211 @@
             }
         }
 
-        function logout() {
-            currentUser = null;
-            document.getElementById('profileHeader').classList.add('hidden');
-            document.getElementById('adminSection').classList.add('hidden');
-            document.getElementById('pimpinanSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('loginForm').reset();
-            stopCamera();
-            loadPublicLogs(); 
-        }
+        function logout() { location.reload(); }
 
-        // ================= PUBLIC LOG =================
-        async function loadPublicLogs() {
-            const res = await callAPI({ action: 'getPublicLogs' });
-            const container = document.getElementById('publicLogContainer');
-            if (res.success && res.data && res.data.length > 0) {
-                container.innerHTML = '';
-                res.data.forEach(row => {
-                    let badgeTipe = row.tipe === 'Masuk' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300';
-                    container.innerHTML += `
-                        <tr class="border-b border-gray-100/80 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <td class="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">${row.nama}</td>
-                            <td class="px-4 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">${new Date(row.timestamp).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}</td>
-                            <td class="px-4 py-3"><span class="px-2 py-1 text-[10px] sm:text-xs rounded-full font-bold ${badgeTipe}">${row.tipe}</span></td>
-                        </tr>
-                    `;
-                });
-            } else { container.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500 dark:text-gray-400">Belum ada Pimpinan yang absen hari ini.</td></tr>'; }
-        }
-
-        // ================= PIMPINAN: CAMERA, LOKASI =================
-        function initAttendance() {
-            document.getElementById('cameraPlaceholder').classList.add('hidden');
-            document.getElementById('videoElement').classList.remove('hidden');
-            document.getElementById('locationStatus').classList.remove('hidden');
-            document.getElementById('actionButtons').classList.remove('hidden');
-            startCamera(); getLocation();
-        }
-
-        function startCamera() {
-            const video = document.getElementById('videoElement');
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                    .then(s => { stream = s; video.srcObject = stream; })
-                    .catch(err => { Swal.fire('Kamera Error', 'Mohon izinkan akses kamera.', 'warning'); });
-            }
-        }
-
-        function stopCamera() {
-            if (stream) { stream.getTracks().forEach(t => t.stop()); document.getElementById('videoElement').srcObject = null; }
-        }
-
-        function takeSnapshot() {
-            const video = document.getElementById('videoElement');
-            const canvas = document.getElementById('canvasElement');
-            canvas.width = 320; canvas.height = 240;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/jpeg', 0.5); 
-        }
-
-        function getLocation() {
-            const statusLabel = document.getElementById('locationStatus');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (p) => { currentLocation.lat = p.coords.latitude; currentLocation.lng = p.coords.longitude; statusLabel.innerHTML = `<i class="fa-solid fa-map-pin text-[#D4AF37]"></i> Akurasi: ${Math.round(p.coords.accuracy)}m`; },
-                    (e) => { statusLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Gagal ambil lokasi GPS.`; },
-                    { enableHighAccuracy: true }
-                );
-            }
-        }
+        // Camera & Absen
+        function initAttendance() { document.getElementById('cameraPlaceholder').classList.add('hidden'); document.getElementById('videoElement').classList.remove('hidden'); document.getElementById('locationStatus').classList.remove('hidden'); document.getElementById('actionButtons').classList.remove('hidden'); startCamera(); getLocation(); }
+        function startCamera() { navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => { stream = s; document.getElementById('videoElement').srcObject = stream; }).catch(err => { Swal.fire('Error', 'Izinkan akses kamera.', 'warning'); }); }
+        function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); document.getElementById('videoElement').srcObject = null; } }
+        function takeSnapshot() { const cvs = document.getElementById('canvasElement'); cvs.width = 320; cvs.height = 240; cvs.getContext('2d').drawImage(document.getElementById('videoElement'), 0, 0, cvs.width, cvs.height); return cvs.toDataURL('image/jpeg', 0.5); }
+        function getLocation() { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition( p => { currentLocation.lat = p.coords.latitude; currentLocation.lng = p.coords.longitude; document.getElementById('locationStatus').innerHTML = `<i class="fa-solid fa-map-pin text-[#D4AF37]"></i> Akurasi: ${Math.round(p.coords.accuracy)}m`; }, e => { document.getElementById('locationStatus').innerHTML = `Gagal ambil GPS.`; }, { enableHighAccuracy: true }); } }
 
         async function jalankanAbsen(tipe) {
-            if (!currentLocation.lat || !currentLocation.lng) {
-                Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Tunggu hingga sistem mendapat lokasi GPS.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-                return;
-            }
-            
-            const fotoBase64 = takeSnapshot();
+            if (!currentLocation.lat || !currentLocation.lng) { Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Tunggu hingga mendapat GPS.'}); return; }
             showLoading();
-            // Menambahkan currentUser.lembaga ke request agar backend bisa memvalidasi jamnya
-            const res = await callAPI({ action: 'attend', niy: currentUser.niy, nama: currentUser.nama, lembaga: currentUser.lembaga, tipe: tipe, lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64 });
+            const res = await callAPI({ action: 'attend', niy: currentUser.niy, nama: currentUser.nama, lembaga: currentUser.lembaga, tipe: tipe, lat: currentLocation.lat, lng: currentLocation.lng, foto: takeSnapshot() });
             hideLoading();
+            stopCamera(); document.getElementById('cameraPlaceholder').classList.remove('hidden'); document.getElementById('videoElement').classList.add('hidden'); document.getElementById('locationStatus').classList.add('hidden'); document.getElementById('actionButtons').classList.add('hidden');
             
-            stopCamera();
-            document.getElementById('cameraPlaceholder').classList.remove('hidden');
-            document.getElementById('videoElement').classList.add('hidden');
-            document.getElementById('locationStatus').classList.add('hidden');
-            document.getElementById('actionButtons').classList.add('hidden');
-            
-            if (res.success) {
-                let badge = 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300';
-                Swal.fire({
-                    icon: 'success', title: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
-                    html: `Jarak: <b>${res.geofence.jarak}</b> dari Pusat P2S Abu Zairi<br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
-                });
-                loadPersonalLog();
-            } else {
-                if(res.geofence) {
-                    let badge = 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';
-                    Swal.fire({
-                        icon: 'error', title: 'Gagal Absen', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
-                        html: `<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: <b>${res.geofence.jarak}</b><br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
-                    });
-                } else { Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
-            }
+            if (res.success) { Swal.fire({icon: 'success', title: res.message, html: `Jarak: <b>${res.geofence.jarak}</b><br>Status: ${res.geofence.status}`}); loadPersonalLog(); } 
+            else { if(res.geofence) Swal.fire({icon: 'error', title: 'Ditolak', html: `<span class="text-red-500">${res.message}</span><br>Jarak: ${res.geofence.jarak}<br>Status: ${res.geofence.status}`}); else Swal.fire({icon: 'error', title: 'Gagal', text: res.message}); }
         }
 
         async function loadPersonalLog() {
             const res = await callAPI({ action: 'getPersonalLog', niy: currentUser.niy });
-            const container = document.getElementById('personalLogContainer');
-            if (res.success && res.data && res.data.length > 0) {
+            const c = document.getElementById('personalLogContainer');
+            if (res.success && res.data.length > 0) {
+                c.innerHTML = '';
+                res.data.forEach(r => { c.innerHTML += `<tr class="border-b"><td class="px-4 py-3">${new Date(r.timestamp).toLocaleString('id-ID')}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full font-bold ${r.tipe==='Masuk'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700'}">${r.tipe}</span></td><td class="px-4 py-3">${r.status}</td></tr>`; });
+            } else { c.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-gray-400">Belum ada riwayat.</td></tr>'; }
+        }
+
+        async function loadPublicLogs() {
+            const res = await callAPI({ action: 'getPublicLogs' });
+            const c = document.getElementById('publicLogContainer');
+            if (res.success && res.data.length > 0) {
+                c.innerHTML = '';
+                res.data.forEach(r => { c.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-semibold">${r.nama}</td><td class="px-4 py-3">${new Date(r.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</td><td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded-full font-bold ${r.tipe==='Masuk'?'bg-blue-100 text-blue-700':'bg-orange-100 text-orange-700'}">${r.tipe}</span></td></tr>`; });
+            } else { c.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">Belum ada kehadiran hari ini.</td></tr>'; }
+        }
+
+        // Tab Nav Admin
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('md:border-[#D4AF37]', 'text-[#A88C61]'); el.classList.add('md:border-transparent', 'text-gray-500'); });
+            
+            let contentId = 'adminTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            let btnId = 'btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+            document.getElementById(contentId).classList.remove('hidden');
+            document.getElementById(btnId).classList.add('md:border-[#D4AF37]', 'text-[#A88C61]');
+            
+            if (tabName === 'settings' && mapInstance) { setTimeout(() => { mapInstance.invalidateSize(); }, 100); }
+            if (tabName === 'rekap') { loadRekapData(); }
+        }
+
+        // REKAP KEHADIRAN (HONOR/GAJI)
+        async function loadRekapData() {
+            const val = document.getElementById('filterBulanRekap').value; // Format: YYYY-MM
+            if(!val) return;
+            showLoading();
+            const res = await callAPI({ action: 'getRekapKehadiran', bulan: val });
+            hideLoading();
+            
+            const container = document.getElementById('rekapContainer');
+            if(res.success && res.data && res.data.length > 0) {
                 container.innerHTML = '';
-                res.data.forEach(row => {
-                    let badgeTipe = row.tipe === 'Masuk' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300';
-                    let badgeStatus = row.status === 'Di Dalam Area' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300';
+                let totalSistem = 0;
+                res.data.forEach(r => {
+                    totalSistem += r.totalHonor;
                     container.innerHTML += `
-                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                            <td class="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">${new Date(row.timestamp).toLocaleString('id-ID')}</td>
-                            <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-full font-bold ${badgeTipe}">${row.tipe}</span></td>
-                            <td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded font-bold ${badgeStatus}">${row.status}</span></td>
+                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="px-4 py-3"><p class="font-bold text-gray-800 dark:text-gray-200">${r.nama}</p><p class="text-[10px] text-gray-500">${r.niy}</p></td>
+                            <td class="px-4 py-3"><p class="font-medium text-gray-600 dark:text-gray-400">${r.jabatan}</p><p class="text-xs text-gray-500">${r.lembaga || '-'}</p></td>
+                            <td class="px-4 py-3 text-center font-bold text-blue-600">${r.totalHari}</td>
+                            <td class="px-4 py-3 text-center font-bold text-orange-600">${r.totalJam.toFixed(2)}</td>
+                            <td class="px-4 py-3 text-right font-mono font-bold text-green-600">${formatRupiah(r.totalHonor)}</td>
                         </tr>
                     `;
                 });
-            } else { container.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-gray-400 dark:text-gray-500">Belum ada riwayat absensi.</td></tr>'; }
+                container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN HONOR:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
+            } else {
+                container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran (Di Dalam Area) pada bulan tersebut.</td></tr>';
+            }
         }
 
-        // ================= ADMIN: TAB NAVIGATION =================
-        function switchAdminTab(tabName) {
-            document.querySelectorAll('.admin-content').forEach(el => { el.classList.add('hidden'); el.classList.remove('fade-in'); });
-            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]'); el.classList.add('md:border-transparent', 'text-gray-500', 'dark:text-gray-400'); });
-            
-            const contentId = 'adminTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
-            document.getElementById(contentId).classList.remove('hidden'); document.getElementById(contentId).classList.add('fade-in');
-            
-            const activeBtn = document.getElementById('btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
-            activeBtn.classList.remove('md:border-transparent', 'text-gray-500', 'dark:text-gray-400'); activeBtn.classList.add('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
-            
-            if (tabName === 'settings' && mapInstance) { setTimeout(() => { mapInstance.invalidateSize(); if(mapMarker) mapInstance.panTo(mapMarker.getLatLng()); }, 100); }
-        }
-
-        // ================= ADMIN: DASHBOARD & PENGATURAN =================
         async function loadAdminData() {
             const res = await callAPI({ action: 'getAdminData' });
             if (res.success) {
-                document.getElementById('statTotal').innerText = res.data.totalPimpinan;
-                document.getElementById('statHadir').innerText = res.data.hadirHariIni;
-                
-                const logContainer = document.getElementById('recentLogs');
-                logContainer.innerHTML = '';
-                if(res.data.history.length === 0) logContainer.innerHTML = '<div class="text-center text-gray-400 mt-4">Belum ada data absensi.</div>';
-                else {
-                    res.data.history.forEach(row => {
-                        let isMasuk = row[4] === 'Masuk';
-                        let icon = isMasuk ? '<i class="fa-solid fa-arrow-right-to-bracket text-blue-500 dark:text-blue-400"></i>' : '<i class="fa-solid fa-arrow-right-from-bracket text-orange-500 dark:text-orange-400"></i>';
-                        let badgeStatus = row[8] === 'Di Dalam Area' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300';
-                        logContainer.innerHTML += `
-                            <div class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition text-sm">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-600 shadow-sm flex items-center justify-center">${icon}</div>
-                                    <div><p class="font-semibold text-gray-800 dark:text-gray-200">${row[3]} <span class="text-[10px] text-gray-400 ml-1">(${row[2]})</span></p>
-                                    <p class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i>${new Date(row[0]).toLocaleString('id-ID')}</p></div>
-                                </div><span class="text-[10px] font-bold px-2 py-1 rounded ${badgeStatus}">${row[8]}</span>
-                            </div>`;
-                    });
-                }
+                document.getElementById('statTotal').innerText = res.data.totalPimpinan; document.getElementById('statHadir').innerText = res.data.hadirHariIni;
+                const log = document.getElementById('recentLogs'); log.innerHTML = '';
+                if(res.data.history.length === 0) log.innerHTML = '<div class="text-center mt-4">Belum ada data.</div>';
+                else { res.data.history.forEach(r => { let i = r[4] === 'Masuk' ? '<i class="fa-solid fa-arrow-right-to-bracket text-blue-500"></i>' : '<i class="fa-solid fa-arrow-right-from-bracket text-orange-500"></i>'; log.innerHTML += `<div class="flex items-center justify-between p-3 border-b text-sm"><div class="flex items-center space-x-3"><div class="w-8 h-8 rounded-full bg-white border flex items-center justify-center">${i}</div><div><p class="font-semibold">${r[3]}</p><p class="text-xs text-gray-500">${new Date(r[0]).toLocaleString('id-ID')}</p></div></div><span class="text-[10px] font-bold px-2 py-1 rounded ${r[8]=='Di Dalam Area'?'bg-green-100':'bg-red-100'}">${r[8]}</span></div>`; }); }
 
-                // Render User List & Simpan ke Memory
-                const userContainer = document.getElementById('adminUserList');
-                userContainer.innerHTML = '';
-                userMap = {}; 
+                const uc = document.getElementById('adminUserList'); uc.innerHTML = ''; userMap = {}; 
                 if(res.data.userList && res.data.userList.length > 0) {
-                    res.data.userList.forEach(u => {
-                        userMap[u.niy] = u; 
-                        userContainer.innerHTML += `
-                            <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                <td class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">${u.niy}</td>
-                                <td class="px-4 py-3 text-gray-800 dark:text-gray-200">${u.nama}</td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">${u.lembaga || '-'}</td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">${u.jabatan}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <button onclick="openEditModal('${u.niy}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg transition"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button onclick="confirmDelete('${u.niy}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else { userContainer.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">Belum ada data pimpinan terdaftar.</td></tr>'; }
-
+                    res.data.userList.forEach(u => { userMap[u.niy] = u; uc.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-semibold">${u.niy}</td><td class="px-4 py-3">${u.nama}</td><td class="px-4 py-3">${u.lembaga||'-'}</td><td class="px-4 py-3">${u.jabatan}</td><td class="px-4 py-3 text-center"><button onclick="openEditModal('${u.niy}')" class="text-blue-500 mx-1"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelete('${u.niy}')" class="text-red-500 mx-1"><i class="fa-solid fa-trash-can"></i></button></td></tr>`; });
+                } else { uc.innerHTML = '<tr><td colspan="5" class="text-center py-6">Belum ada data.</td></tr>'; }
                 renderChart(res.data.charts);
             }
         }
 
-        // ================= FITUR DINAMIS JADWAL LEMBAGA & JABATAN =================
+        // PENGATURAN LEMBAGA & JABATAN
         function renderJadwalLembaga() {
-            const container = document.getElementById('lembagaTableBody');
-            container.innerHTML = '';
-            const selectEl = document.getElementById('addLembaga');
-            selectEl.innerHTML = '<option value="">-- Pilih --</option>';
-
-            for(let namaLembaga in jadwalLembagaData) {
-                let jdw = jadwalLembagaData[namaLembaga];
-                container.innerHTML += `
-                    <tr class="border-b dark:border-gray-700">
-                        <td class="p-2 font-medium text-gray-800 dark:text-gray-200">${namaLembaga}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.masuk}</td>
-                        <td class="p-2 text-gray-600 dark:text-gray-400">${jdw.pulang}</td>
-                        <td class="p-2 text-center">
-                            <button type="button" onclick="editJadwalLembaga('${namaLembaga}')" class="text-blue-500 hover:text-blue-700 mr-2" title="Edit Jadwal"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button type="button" onclick="hapusJadwalLembaga('${namaLembaga}')" class="text-red-500 hover:text-red-700" title="Hapus Lembaga"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
-                `;
-                selectEl.innerHTML += `<option value="${namaLembaga}">${namaLembaga}</option>`;
+            const container = document.getElementById('lembagaTableBody'); container.innerHTML = '';
+            const selectEl = document.getElementById('addLembaga'); selectEl.innerHTML = '<option value="">-- Pilih --</option>';
+            for(let nama in jadwalLembagaData) {
+                let jdw = jadwalLembagaData[nama];
+                container.innerHTML += `<tr class="border-b"><td class="p-2 font-medium">${nama}</td><td class="p-2">${jdw.masuk}</td><td class="p-2">${jdw.pulang}</td><td class="p-2 text-center"><button type="button" onclick="editJadwalLembaga('${nama}')" class="text-blue-500 mx-1"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" onclick="hapusJadwalLembaga('${nama}')" class="text-red-500 mx-1"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+                selectEl.innerHTML += `<option value="${nama}">${nama}</option>`;
             }
             document.getElementById('setJadwalLembaga').value = JSON.stringify(jadwalLembagaData);
         }
 
         function editJadwalLembaga(nama) {
             editingLembagaOldName = nama;
-            document.getElementById('newLembagaNama').value = nama;
-            document.getElementById('newLembagaMasuk').value = jadwalLembagaData[nama].masuk;
-            document.getElementById('newLembagaPulang').value = jadwalLembagaData[nama].pulang;
-            
-            // Ubah tombol "Tambah" menjadi "Update" berwarna Biru
-            const btn = document.getElementById('btnTambahLembaga');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Update';
-            btn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'dark:bg-gray-600', 'dark:hover:bg-gray-500', 'text-gray-800', 'dark:text-white');
-            btn.classList.add('bg-blue-500', 'hover:bg-blue-600', 'text-white');
+            document.getElementById('newLembagaNama').value = nama; document.getElementById('newLembagaMasuk').value = jadwalLembagaData[nama].masuk; document.getElementById('newLembagaPulang').value = jadwalLembagaData[nama].pulang;
+            let btn = document.getElementById('btnTambahLembaga'); btn.innerHTML = '<i class="fa-solid fa-check"></i> Update'; btn.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm';
         }
 
         function tambahJadwalLembaga() {
-            const nama = document.getElementById('newLembagaNama').value.trim();
-            const masuk = document.getElementById('newLembagaMasuk').value;
-            const pulang = document.getElementById('newLembagaPulang').value;
-
-            if(!nama || !masuk || !pulang) {
-                Swal.fire({icon:'warning', title:'Form Tidak Lengkap', text:'Harap isi nama lembaga, jam masuk, dan jam pulang.', timer:2000, showConfirmButton:false});
-                return;
-            }
-
-            // Jika sedang mode update dan mengubah nama lembaga, hapus riwayat nama lamanya
-            if(editingLembagaOldName && editingLembagaOldName !== nama) {
-                delete jadwalLembagaData[editingLembagaOldName];
-            }
-
+            const nama = document.getElementById('newLembagaNama').value.trim(); const masuk = document.getElementById('newLembagaMasuk').value; const pulang = document.getElementById('newLembagaPulang').value;
+            if(!nama || !masuk || !pulang) { Swal.fire({icon:'warning', title:'Form Tidak Lengkap', timer:2000, showConfirmButton:false}); return; }
+            if(editingLembagaOldName && editingLembagaOldName !== nama) delete jadwalLembagaData[editingLembagaOldName];
             jadwalLembagaData[nama] = { masuk: masuk, pulang: pulang };
-            
-            // Reset status kembali ke mode Tambah Data
             editingLembagaOldName = null;
-            const btn = document.getElementById('btnTambahLembaga');
-            btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah';
-            btn.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'text-white');
-            btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'dark:bg-gray-600', 'dark:hover:bg-gray-500', 'text-gray-800', 'dark:text-white');
-
-            renderJadwalLembaga();
-            
-            document.getElementById('newLembagaNama').value = '';
-            document.getElementById('newLembagaMasuk').value = '';
-            document.getElementById('newLembagaPulang').value = '';
+            let btn = document.getElementById('btnTambahLembaga'); btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah'; btn.className = 'w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-bold py-2 rounded-lg text-sm';
+            renderJadwalLembaga(); document.getElementById('newLembagaNama').value = ''; document.getElementById('newLembagaMasuk').value = ''; document.getElementById('newLembagaPulang').value = '';
         }
+        function hapusJadwalLembaga(nama) { delete jadwalLembagaData[nama]; renderJadwalLembaga(); }
 
-        function hapusJadwalLembaga(nama) {
-            delete jadwalLembagaData[nama];
-            renderJadwalLembaga();
-        }
-
-        function renderTags(inputId, containerId, selectId) {
-            const str = document.getElementById(inputId).value;
-            const items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            items.forEach((val, index) => {
-                container.innerHTML += `
-                    <span class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm flex items-center font-medium shadow-sm">
-                        ${val} <button type="button" onclick="hapusTag('${inputId}', '${containerId}', '${selectId}', ${index})" class="ml-2 w-5 h-5 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition"><i class="fa-solid fa-xmark text-xs"></i></button>
-                    </span>`;
-            });
-            
-            if(selectId){
-                const selectEl = document.getElementById(selectId);
-                selectEl.innerHTML = '<option value="">-- Pilih --</option>';
-                items.forEach(val => { selectEl.innerHTML += `<option value="${val}">${val}</option>`; });
+        function renderTarifJabatan() {
+            const container = document.getElementById('jabatanTableBody'); container.innerHTML = '';
+            const selectEl = document.getElementById('addJabatan'); selectEl.innerHTML = '<option value="">-- Pilih --</option>';
+            for(let nama in tarifJabatanData) {
+                let trf = tarifJabatanData[nama];
+                container.innerHTML += `<tr class="border-b"><td class="p-2 font-medium">${nama}</td><td class="p-2 text-right font-mono text-green-600 font-bold">${formatRupiah(trf)}</td><td class="p-2 text-center"><button type="button" onclick="editTarifJabatan('${nama}')" class="text-blue-500 mx-1"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" onclick="hapusTarifJabatan('${nama}')" class="text-red-500 mx-1"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
+                selectEl.innerHTML += `<option value="${nama}">${nama}</option>`;
             }
+            document.getElementById('setTarifJabatan').value = JSON.stringify(tarifJabatanData);
         }
 
-        function tambahTag(newInputId, hiddenInputId, containerId, selectId) {
-            const input = document.getElementById(newInputId);
-            const val = input.value.trim();
-            if(val) {
-                let str = document.getElementById(hiddenInputId).value;
-                let items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-                if(!items.includes(val)) {
-                    items.push(val);
-                    document.getElementById(hiddenInputId).value = items.join(', ');
-                    renderTags(hiddenInputId, containerId, selectId);
-                    input.value = '';
-                } else { Swal.fire({icon:'info', title:'Sudah Ada', timer:2000, showConfirmButton:false}); }
-            }
+        function editTarifJabatan(nama) {
+            editingJabatanOldName = nama;
+            document.getElementById('newJabatanNama').value = nama; 
+            document.getElementById('newJabatanTarif').value = tarifJabatanData[nama].toLocaleString('id-ID');
+            let btn = document.getElementById('btnTambahJabatan'); btn.innerHTML = '<i class="fa-solid fa-check"></i> Update'; btn.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm';
         }
 
-        function hapusTag(hiddenInputId, containerId, selectId, index) {
-            let str = document.getElementById(hiddenInputId).value;
-            let items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-            items.splice(index, 1);
-            document.getElementById(hiddenInputId).value = items.join(', ');
-            renderTags(hiddenInputId, containerId, selectId);
+        function tambahTarifJabatan() {
+            const nama = document.getElementById('newJabatanNama').value.trim(); 
+            const tarifRp = parseRupiahInput(document.getElementById('newJabatanTarif').value);
+            if(!nama || tarifRp <= 0) { Swal.fire({icon:'warning', title:'Form Tidak Lengkap', timer:2000, showConfirmButton:false}); return; }
+            if(editingJabatanOldName && editingJabatanOldName !== nama) delete tarifJabatanData[editingJabatanOldName];
+            tarifJabatanData[nama] = tarifRp;
+            editingJabatanOldName = null;
+            let btn = document.getElementById('btnTambahJabatan'); btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah'; btn.className = 'w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-bold py-2 rounded-lg text-sm';
+            renderTarifJabatan(); document.getElementById('newJabatanNama').value = ''; document.getElementById('newJabatanTarif').value = '';
         }
+        function hapusTarifJabatan(nama) { delete tarifJabatanData[nama]; renderTarifJabatan(); }
 
-        function tambahJabatan() { tambahTag('newJabatanInput', 'setJabatan', 'jabatanTags', 'addJabatan'); }
-
-
-        // Fitur Peta Leaflet
+        // Peta Geofence
         function initGeofenceMap(lat, lng, radius) {
             if (mapInstance) return; 
-            const centerLat = parseFloat(lat) || -8.172533; const centerLng = parseFloat(lng) || 113.702331; const rad = parseFloat(radius) || 100;
-            mapInstance = L.map('mapGeofence').setView([centerLat, centerLng], 17);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
-
-            const pinIcon = L.divIcon({ className: 'custom-pin', html: '<i class="fa-solid fa-location-dot text-4xl text-red-500 drop-shadow-md"></i>', iconSize: [30, 42], iconAnchor: [15, 42] });
-            mapMarker = L.marker([centerLat, centerLng], {icon: pinIcon}).addTo(mapInstance);
-            mapCircle = L.circle([centerLat, centerLng], { color: '#D4AF37', fillColor: '#D4AF37', fillOpacity: 0.25, radius: rad }).addTo(mapInstance);
-
-            document.getElementById('setLat').addEventListener('input', syncMapFromInputs);
-            document.getElementById('setLng').addEventListener('input', syncMapFromInputs);
-            document.getElementById('setRadius').addEventListener('input', syncMapFromInputs);
-
-            const mapContainer = document.getElementById('mapGeofence');
-            new ResizeObserver(() => { if (mapInstance) mapInstance.invalidateSize(); }).observe(mapContainer);
+            mapInstance = L.map('mapGeofence').setView([lat, lng], 17); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+            const pin = L.divIcon({ className: 'custom-pin', html: '<i class="fa-solid fa-location-dot text-4xl text-red-500 drop-shadow-md"></i>', iconSize:[30,42], iconAnchor:[15,42] });
+            mapMarker = L.marker([lat, lng], {icon: pin}).addTo(mapInstance); mapCircle = L.circle([lat, lng], { color:'#D4AF37', fillColor:'#D4AF37', fillOpacity:0.25, radius:radius }).addTo(mapInstance);
+            ['setLat','setLng','setRadius'].forEach(id => document.getElementById(id).addEventListener('input', syncMapFromInputs));
+            new ResizeObserver(() => { if(mapInstance) mapInstance.invalidateSize(); }).observe(document.getElementById('mapGeofence'));
         }
-
-        function syncMapFromInputs() {
-            if (!mapInstance) return;
-            const lat = parseFloat(document.getElementById('setLat').value) || 0;
-            const lng = parseFloat(document.getElementById('setLng').value) || 0;
-            const rad = parseFloat(document.getElementById('setRadius').value) || 100;
-            if (lat !== 0 && lng !== 0) { mapMarker.setLatLng([lat, lng]); mapCircle.setLatLng([lat, lng]); mapInstance.panTo([lat, lng]); }
-            mapCircle.setRadius(rad);
-        }
+        function syncMapFromInputs() { if(!mapInstance) return; let lat = parseFloat(document.getElementById('setLat').value)||0, lng = parseFloat(document.getElementById('setLng').value)||0, rad = parseFloat(document.getElementById('setRadius').value)||100; if(lat&&lng) { mapMarker.setLatLng([lat,lng]); mapCircle.setLatLng([lat,lng]); mapInstance.panTo([lat,lng]); } mapCircle.setRadius(rad); }
 
         async function loadSettings() {
             const res = await callAPI({ action: 'getSettings' });
             if (res.success) {
-                const lat = res.data['Lattitude_Kantor'] || '-8.172533';
-                const lng = res.data['Longitude_Kantor'] || '113.702331';
-                const radius = res.data['Radius_Max_Meter'] || '100';
-
-                document.getElementById('setLat').value = lat;
-                document.getElementById('setLng').value = lng;
-                document.getElementById('setRadius').value = radius;
+                document.getElementById('setLat').value = res.data['Lattitude_Kantor'] || '-8.172533'; document.getElementById('setLng').value = res.data['Longitude_Kantor'] || '113.702331'; document.getElementById('setRadius').value = res.data['Radius_Max_Meter'] || '100';
                 
-                // Load Jabatan
-                document.getElementById('setJabatan').value = res.data['Daftar_Jabatan'] || 'Kepala Sekolah, Wakil Kepala, Guru';
-                renderTags('setJabatan', 'jabatanTags', 'addJabatan');
-
-                // Load Jadwal Lembaga JSON
-                let jadwalStr = res.data['Jadwal_Lembaga'];
-                if(jadwalStr) {
-                    try { jadwalLembagaData = JSON.parse(jadwalStr); } catch(e) { jadwalLembagaData = {}; }
-                } else if(res.data['Daftar_Lembaga']) {
-                    // Migrasi/Fallback jika masih format lama (string koma)
-                    let oldLem = res.data['Daftar_Lembaga'].split(',').map(s=>s.trim());
-                    oldLem.forEach(l => { if(l) jadwalLembagaData[l] = {masuk: "07:00", pulang: "13:00"}; });
-                }
+                try { tarifJabatanData = JSON.parse(res.data['Tarif_Jabatan'] || '{}'); } catch(e) { tarifJabatanData = {}; }
+                renderTarifJabatan();
+                
+                try { jadwalLembagaData = JSON.parse(res.data['Jadwal_Lembaga'] || '{}'); } catch(e) { jadwalLembagaData = {}; }
                 renderJadwalLembaga();
 
-                initGeofenceMap(lat, lng, radius); syncMapFromInputs(); 
+                initGeofenceMap(parseFloat(document.getElementById('setLat').value), parseFloat(document.getElementById('setLng').value), parseFloat(document.getElementById('setRadius').value)); syncMapFromInputs(); 
             }
         }
 
         async function handleSaveSettings(e) {
-            e.preventDefault();
-            const payload = {
-                action: 'saveSettings', lat: document.getElementById('setLat').value, lng: document.getElementById('setLng').value,
-                radius: document.getElementById('setRadius').value, jadwalLembaga: document.getElementById('setJadwalLembaga').value, jabatanList: document.getElementById('setJabatan').value
-            };
-            showLoading(); const res = await callAPI(payload); hideLoading();
-            if(res.success) Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-            else Swal.fire({icon:'error', title:'Error', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
+            e.preventDefault(); showLoading();
+            const payload = { action: 'saveSettings', lat: document.getElementById('setLat').value, lng: document.getElementById('setLng').value, radius: document.getElementById('setRadius').value, jadwalLembaga: document.getElementById('setJadwalLembaga').value, tarifJabatan: document.getElementById('setTarifJabatan').value };
+            const res = await callAPI(payload); hideLoading();
+            Swal.fire({icon: res.success ? 'success' : 'error', title: res.success ? 'Berhasil' : 'Error', text: res.message});
         }
 
-        // ================= CHART RENDERER =================
         function renderChart(chartData) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#9ca3af' : '#4b5563';
-            if (!chartData) return;
-
-            const vibrantBgColors = ['rgba(59, 130, 246, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(6, 182, 212, 0.8)'];
-            const getColors = (len, op) => Array.from({length: len}, (_, i) => vibrantBgColors[i % vibrantBgColors.length].replace('0.8)', op + ')'));
-
-            // Weekly
-            const ctxWeekly = document.getElementById('attendanceChart').getContext('2d');
-            if(weeklyChart) weeklyChart.destroy();
-            weeklyChart = new Chart(ctxWeekly, { type: 'bar', data: { labels: chartData.weekly.labels, datasets: [{ label: 'Kehadiran', data: chartData.weekly.data, backgroundColor: getColors(chartData.weekly.data.length, 0.8), borderColor: getColors(chartData.weekly.data.length, 1), borderWidth: 1, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { beginAtZero: true, suggestedMax: 20, ticks: { color: textColor, stepSize: 1 } } }, plugins: { legend: { display: false } } } });
-
-            // Yearly
-            const ctxYearly = document.getElementById('yearlyChart').getContext('2d');
-            if(yearlyChart) yearlyChart.destroy();
-            yearlyChart = new Chart(ctxYearly, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'], datasets: [{ label: 'Total Kehadiran', data: chartData.yearly.data, backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3B82F6', borderWidth: 2, fill: true, tension: 0.4, pointBackgroundColor: '#1D4ED8' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 } } }, plugins: { legend: { display: false } } } });
-
-            // Lembaga
-            const ctxLembaga = document.getElementById('lembagaChart').getContext('2d');
-            if(lembagaChart) lembagaChart.destroy();
-            let lbgLabels = chartData.lembaga.labels.length > 0 ? chartData.lembaga.labels : ['Belum ada data'];
-            let lbgData = chartData.lembaga.data.length > 0 ? chartData.lembaga.data : [1];
-            let lbgColors = chartData.lembaga.data.length > 0 ? getColors(chartData.lembaga.data.length, 0.8) : ['rgba(156, 163, 175, 0.3)'];
-            lembagaChart = new Chart(ctxLembaga, { type: 'doughnut', data: { labels: lbgLabels, datasets: [{ data: lbgData, backgroundColor: lbgColors, borderColor: isDark ? '#1f2937' : '#ffffff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor } } } } });
+            const isDark = document.documentElement.classList.contains('dark'); const textColor = isDark ? '#9ca3af' : '#4b5563'; if (!chartData) return;
+            const getColors = (len, op) => Array.from({length: len}, (_, i) => ['rgba(59,130,246,0.8)','rgba(239,68,68,0.8)','rgba(16,185,129,0.8)','rgba(245,158,11,0.8)','rgba(139,92,246,0.8)'][i % 5].replace('0.8)', op + ')'));
+            if(weeklyChart) weeklyChart.destroy(); weeklyChart = new Chart(document.getElementById('attendanceChart').getContext('2d'), { type: 'bar', data: { labels: chartData.weekly.labels, datasets: [{ data: chartData.weekly.data, backgroundColor: getColors(chartData.weekly.data.length, 0.8) }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            if(yearlyChart) yearlyChart.destroy(); yearlyChart = new Chart(document.getElementById('yearlyChart').getContext('2d'), { type: 'line', data: { labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'], datasets: [{ data: chartData.yearly.data, borderColor: '#3B82F6', fill:true, backgroundColor:'rgba(59,130,246,0.15)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            if(lembagaChart) lembagaChart.destroy(); lembagaChart = new Chart(document.getElementById('lembagaChart').getContext('2d'), { type: 'doughnut', data: { labels: chartData.lembaga.labels.length ? chartData.lembaga.labels : ['Kosong'], datasets: [{ data: chartData.lembaga.data.length ? chartData.lembaga.data : [1], backgroundColor: chartData.lembaga.data.length ? getColors(chartData.lembaga.data.length, 0.8) : ['#ccc'] }] }, options: { responsive: true, maintainAspectRatio: false } });
         }
 
-        // ================= ADMIN: USER MANAGEMENT (ADD, EDIT, DELETE) =================
+        // Add/Edit User
         function closeModal() { document.getElementById('modalAddUser').classList.add('hidden'); }
-        
-        function showAddUserModal() { 
-            isEditMode = false; currentEditNiy = '';
-            document.getElementById('modalTitle').innerText = 'Tambah Pimpinan';
-            document.getElementById('formAddUser').reset();
-            
-            document.getElementById('addNiy').readOnly = false;
-            document.getElementById('addNiy').classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            document.getElementById('addPassword').required = true;
-            document.getElementById('addPassword').placeholder = 'Password Login';
-            
-            document.getElementById('modalAddUser').classList.remove('hidden'); 
-        }
-
-        function openEditModal(niy) {
-            let user = userMap[niy];
-            if(!user) return;
-            
-            isEditMode = true; currentEditNiy = niy;
-            document.getElementById('modalTitle').innerText = 'Edit Data Pimpinan';
-            
-            document.getElementById('addNiy').value = user.niy;
-            document.getElementById('addNiy').readOnly = true; 
-            document.getElementById('addNiy').classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            
-            document.getElementById('addNama').value = user.nama;
-            document.getElementById('addTglLahir').value = user.tglLahir;
-            document.getElementById('addJk').value = user.jk;
-            document.getElementById('addLembaga').value = user.lembaga;
-            document.getElementById('addJabatan').value = user.jabatan;
-            
-            document.getElementById('addPassword').value = '';
-            document.getElementById('addPassword').required = false;
-            document.getElementById('addPassword').placeholder = '(Kosongkan jika tidak diubah)';
-            
-            document.getElementById('modalAddUser').classList.remove('hidden');
-        }
-        
-        function confirmDelete(niy) {
-            let user = userMap[niy];
-            Swal.fire({
-                title: 'Hapus Pimpinan?',
-                html: `Anda yakin ingin menghapus data pimpinan <b>${user.nama}</b>?<br>Data tidak bisa dikembalikan.`,
-                icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#8a8a8a',
-                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
-                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    showLoading();
-                    const res = await callAPI({ action: 'deleteUser', niy: niy });
-                    hideLoading();
-                    if(res.success) { Swal.fire('Terhapus!', res.message, 'success'); loadAdminData(); } 
-                    else { Swal.fire('Gagal', res.message, 'error'); }
-                }
-            });
-        }
-
-        // Kompres Foto
-        function compressAvatar(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image(); img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height; const maxSize = 200;
-                        if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } } else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
-                    };
-                };
-            });
-        }
-
-        async function handleAddUser(e) {
-            e.preventDefault();
-            let fotoBase64 = '';
-            const fileInput = document.getElementById('addFoto');
-            if (fileInput.files.length > 0) fotoBase64 = await compressAvatar(fileInput.files[0]);
-
-            const payload = {
-                action: isEditMode ? 'editUser' : 'addUser', 
-                niy: isEditMode ? currentEditNiy : document.getElementById('addNiy').value, 
-                nama: document.getElementById('addNama').value,
-                lembaga: document.getElementById('addLembaga').value,
-                jabatan: document.getElementById('addJabatan').value, 
-                tglLahir: document.getElementById('addTglLahir').value,
-                jk: document.getElementById('addJk').value,
-                password: document.getElementById('addPassword').value, 
-                foto: fotoBase64
-            };
-            
-            showLoading(); const res = await callAPI(payload); hideLoading();
-            if(res.success) {
-                Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-                closeModal(); loadAdminData(); 
-            } else { Swal.fire({icon:'error', title:'Error', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
-        }
+        function showAddUserModal() { isEditMode = false; document.getElementById('modalTitle').innerText = 'Tambah Pimpinan'; document.getElementById('formAddUser').reset(); document.getElementById('addNiy').readOnly = false; document.getElementById('addNiy').classList.remove('bg-gray-200'); document.getElementById('addPassword').required = true; document.getElementById('modalAddUser').classList.remove('hidden'); }
+        function openEditModal(niy) { let user = userMap[niy]; if(!user) return; isEditMode = true; currentEditNiy = niy; document.getElementById('modalTitle').innerText = 'Edit Data Pimpinan'; document.getElementById('addNiy').value = user.niy; document.getElementById('addNiy').readOnly = true; document.getElementById('addNiy').classList.add('bg-gray-200'); document.getElementById('addNama').value = user.nama; document.getElementById('addTglLahir').value = user.tglLahir; document.getElementById('addJk').value = user.jk; document.getElementById('addLembaga').value = user.lembaga; document.getElementById('addJabatan').value = user.jabatan; document.getElementById('addPassword').value = ''; document.getElementById('addPassword').required = false; document.getElementById('modalAddUser').classList.remove('hidden'); }
+        function confirmDelete(niy) { Swal.fire({ title: 'Hapus?', text: "Data tidak bisa kembali.", icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, Hapus!' }).then(async (r) => { if (r.isConfirmed) { showLoading(); const res = await callAPI({ action: 'deleteUser', niy: niy }); hideLoading(); if(res.success) { Swal.fire('Terhapus!', '', 'success'); loadAdminData(); } } }); }
+        function compressAvatar(file) { return new Promise((r) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = (e) => { const img = new Image(); img.src = e.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height; if (w > h) { if (w > 200) { h *= 200 / w; w = 200; } } else { if (h > 200) { w *= 200 / h; h = 200; } } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); r(canvas.toDataURL('image/jpeg', 0.6)); }; }; }); }
+        async function handleAddUser(e) { e.preventDefault(); let foto = ''; if (document.getElementById('addFoto').files.length > 0) foto = await compressAvatar(document.getElementById('addFoto').files[0]); showLoading(); const res = await callAPI({ action: isEditMode ? 'editUser' : 'addUser', niy: isEditMode ? currentEditNiy : document.getElementById('addNiy').value, nama: document.getElementById('addNama').value, lembaga: document.getElementById('addLembaga').value, jabatan: document.getElementById('addJabatan').value, tglLahir: document.getElementById('addTglLahir').value, jk: document.getElementById('addJk').value, password: document.getElementById('addPassword').value, foto: foto }); hideLoading(); if(res.success) { Swal.fire('Berhasil', res.message, 'success'); closeModal(); loadAdminData(); } else { Swal.fire('Error', res.message, 'error'); } }
     </script>
 </body>
 </html>
