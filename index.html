@@ -28,6 +28,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Library untuk Export Excel & PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -172,7 +177,7 @@
                 </div>
             </div>
 
-            <!-- PENGAJUAN IZIN FORM (BARU DENGAN RENTANG TANGGAL) -->
+            <!-- PENGAJUAN IZIN FORM -->
             <div class="mt-6 glass rounded-2xl p-6 fade-in shadow-md">
                 <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100">
                     <i class="fa-solid fa-envelope-open-text mr-2 text-[#D4AF37]"></i> Form Pengajuan Izin
@@ -198,7 +203,7 @@
                     </div>
                     <div class="sm:col-span-3">
                         <label class="block text-xs font-medium mb-1 text-gray-600 dark:text-gray-300">Alasan / Keterangan</label>
-                        <textarea id="izinAlasan" required rows="2" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none bg-white dark:bg-gray-700 dark:text-white text-sm focus:border-[#D4AF37]" placeholder="Tuliskan alasan atau keterangan dinas selengkapnya..."></textarea>
+                        <textarea id="izinAlasan" required rows="2" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none bg-white dark:bg-gray-700 dark:text-white text-sm focus:border-[#D4AF37]" placeholder="Tuliskan alasan atau keterangan selengkapnya..."></textarea>
                     </div>
                     <div class="sm:col-span-3 flex justify-end">
                         <button type="submit" class="bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2 px-6 rounded-lg transition shadow-md text-sm">
@@ -268,16 +273,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="glass rounded-xl p-6 lg:col-span-2 shadow-md">
+                
+                <!-- Chart Mingguan (Log Terbaru dihapus sesuai permintaan) -->
+                <div class="mb-6">
+                    <div class="glass rounded-xl p-6 shadow-md">
                         <h3 class="font-bold border-b pb-2 mb-4">Grafik Kehadiran Mingguan</h3>
-                        <div class="relative w-full h-64"><canvas id="attendanceChart"></canvas></div>
-                    </div>
-                    <div class="glass rounded-xl p-6 shadow-md flex flex-col">
-                        <h3 class="font-bold border-b pb-2 mb-4">Log Seluruh Sistem</h3>
-                        <div class="overflow-y-auto flex-1 h-64 pr-2 custom-scrollbar" id="recentLogs"></div>
+                        <div class="relative w-full h-64 sm:h-72"><canvas id="attendanceChart"></canvas></div>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="glass rounded-xl p-6 shadow-md">
                         <h3 class="font-bold border-b pb-2 mb-4">Grafik Tahunan</h3>
@@ -291,16 +295,30 @@
                 <div class="h-24 md:hidden w-full"></div>
             </div>
 
-            <!-- TAB 2: REKAP GAJI / HONOR -->
+            <!-- TAB 2: REKAP GAJI / HONOR / BISYAROH -->
             <div id="adminTabRekap" class="admin-content hidden">
                 <div class="glass rounded-xl p-6 shadow-md">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b dark:border-gray-700 pb-4 gap-4">
-                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-file-invoice-dollar mr-2 text-[#D4AF37]"></i>Rekap Kehadiran & Bisyaroh Pimpinan</h3>
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-white"><i class="fa-solid fa-file-invoice-dollar mr-2 text-[#D4AF37]"></i>Rekap Kehadiran & Bisyaroh</h3>
+                        
+                        <!-- Panel Kontrol Filter & Tombol Export -->
                         <div class="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Pilih Bulan:</label>
-                            <input type="month" id="filterBulanRekap" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm outline-none bg-white dark:bg-gray-700 dark:text-white" onchange="loadRekapData()">
+                            <label class="text-sm font-medium text-gray-600 dark:text-gray-300">Bulan:</label>
+                            <input type="month" id="filterBulanRekap" class="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm outline-none bg-white dark:bg-gray-700 dark:text-white" onchange="loadRekapData()">
+                            
+                            <div class="border-l border-gray-300 dark:border-gray-600 h-6 mx-1"></div>
+                            
+                            <!-- Tombol Export Excel -->
+                            <button onclick="exportRekapExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-bold transition flex items-center shadow-sm" title="Download Excel">
+                                <i class="fa-solid fa-file-excel"></i><span class="hidden sm:inline ml-1.5">Excel</span>
+                            </button>
+                            <!-- Tombol Export PDF -->
+                            <button onclick="exportRekapPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold transition flex items-center shadow-sm" title="Download PDF">
+                                <i class="fa-solid fa-file-pdf"></i><span class="hidden sm:inline ml-1.5">PDF</span>
+                            </button>
                         </div>
                     </div>
+                    
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-gray-500 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700/80 shadow-sm">
@@ -516,6 +534,10 @@
         let isEditMode = false; 
         let currentEditNiy = '';
         
+        // Data Variabel Export Rekap
+        let currentRekapData = [];
+        let currentRekapBulan = "";
+
         // Data Settings
         let jadwalLembagaData = {};
         let tarifJabatanData = {};
@@ -810,35 +832,135 @@
             hideLoading();
             
             const container = document.getElementById('rekapContainer');
-            if(res.success && res.data && res.data.length > 0) {
-                container.innerHTML = '';
-                let totalSistem = 0;
-                res.data.forEach(r => {
-                    totalSistem += r.totalHonor;
-                    
-                    // Indikator jam aktual vs jam diakui
-                    let jamAktualTeks = r.totalJam.toFixed(2);
-                    let jamDiakuiTeks = r.totalJamDiakui.toFixed(2);
-                    let indikatorJam = jamAktualTeks > r.totalJamDiakui ? 
-                        `<span class="text-xs text-red-500 block">Aktual: ${jamAktualTeks}</span>` : '';
+            if(res.success && res.data) {
+                // Simpan data untuk export
+                currentRekapData = res.data;
+                currentRekapBulan = val;
 
-                    container.innerHTML += `
-                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3"><p class="font-bold text-gray-800 dark:text-gray-200">${r.nama}</p><p class="text-[10px] text-gray-500">${r.niy}</p></td>
-                            <td class="px-4 py-3"><p class="font-medium text-gray-600 dark:text-gray-400">${r.jabatan}</p><p class="text-xs text-gray-500">${r.lembaga || '-'}</p></td>
-                            <td class="px-4 py-3 text-center font-bold text-blue-600">${r.totalHari}</td>
-                            <td class="px-4 py-3 text-center font-bold text-orange-600">
-                                ${jamDiakuiTeks} <span class="text-xs text-gray-500 font-normal">/ ${r.maxJam}</span>
-                                ${indikatorJam}
-                            </td>
-                            <td class="px-4 py-3 text-right font-mono font-bold text-green-600">${formatRupiah(r.totalHonor)}</td>
-                        </tr>
-                    `;
-                });
-                container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN BISYAROH:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
+                if (res.data.length > 0) {
+                    container.innerHTML = '';
+                    let totalSistem = 0;
+                    res.data.forEach(r => {
+                        totalSistem += r.totalHonor;
+                        
+                        let jamAktualTeks = r.totalJam.toFixed(2);
+                        let jamDiakuiTeks = r.totalJamDiakui.toFixed(2);
+                        let indikatorJam = jamAktualTeks > r.totalJamDiakui ? 
+                            `<span class="text-xs text-red-500 block">Aktual: ${jamAktualTeks}</span>` : '';
+
+                        container.innerHTML += `
+                            <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <td class="px-4 py-3"><p class="font-bold text-gray-800 dark:text-gray-200">${r.nama}</p><p class="text-[10px] text-gray-500">${r.niy}</p></td>
+                                <td class="px-4 py-3"><p class="font-medium text-gray-600 dark:text-gray-400">${r.jabatan}</p><p class="text-xs text-gray-500">${r.lembaga || '-'}</p></td>
+                                <td class="px-4 py-3 text-center font-bold text-blue-600">${r.totalHari}</td>
+                                <td class="px-4 py-3 text-center font-bold text-orange-600">
+                                    ${jamDiakuiTeks} <span class="text-xs text-gray-500 font-normal">/ ${r.maxJam}</span>
+                                    ${indikatorJam}
+                                </td>
+                                <td class="px-4 py-3 text-right font-mono font-bold text-green-600">${formatRupiah(r.totalHonor)}</td>
+                            </tr>
+                        `;
+                    });
+                    container.innerHTML += `<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="4" class="px-4 py-3 text-right">TOTAL PENGELUARAN BISYAROH:</td><td class="px-4 py-3 text-right text-lg text-green-700">${formatRupiah(totalSistem)}</td></tr>`;
+                } else {
+                    container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran (Di Dalam Area) pada bulan tersebut.</td></tr>';
+                }
             } else {
-                container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-gray-400">Tidak ada data kehadiran (Di Dalam Area) pada bulan tersebut.</td></tr>';
+                currentRekapData = [];
+                container.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-red-400">Terjadi kesalahan saat memuat data.</td></tr>';
             }
+        }
+
+        // FUNGSI EXPORT EXCEL
+        function exportRekapExcel() {
+            if (!currentRekapData || currentRekapData.length === 0) {
+                Swal.fire('Data Kosong', 'Tidak ada data rekapitulasi untuk diekspor.', 'info');
+                return;
+            }
+            
+            let totalSistem = 0;
+            const exportData = currentRekapData.map(r => {
+                totalSistem += r.totalHonor;
+                return {
+                    "NIY": r.niy,
+                    "Nama Pimpinan": r.nama,
+                    "Lembaga": r.lembaga || '-',
+                    "Jabatan": r.jabatan,
+                    "Total Hari": r.totalHari,
+                    "Total Jam Diakui": r.totalJamDiakui.toFixed(2),
+                    "Estimasi Bisyaroh": r.totalHonor
+                };
+            });
+
+            // Tambahkan baris Total
+            exportData.push({
+                "NIY": "", "Nama Pimpinan": "", "Lembaga": "", "Jabatan": "", "Total Hari": "", 
+                "Total Jam Diakui": "TOTAL KESELURUHAN", 
+                "Estimasi Bisyaroh": totalSistem
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap_Bisyaroh");
+            
+            const fileName = `Rekap_Bisyaroh_P2S_${currentRekapBulan}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // FUNGSI EXPORT PDF
+        function exportRekapPDF() {
+            if (!currentRekapData || currentRekapData.length === 0) {
+                Swal.fire('Data Kosong', 'Tidak ada data rekapitulasi untuk diekspor.', 'info');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4'); // mode portrait
+
+            // Header Dokumen
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Rekapitulasi Bisyaroh Pimpinan P2S Abu Zairi`, 40, 40);
+            
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Periode: Bulan ${currentRekapBulan}`, 40, 60);
+
+            // Persiapan Data Tabel
+            let totalSistem = 0;
+            const bodyData = currentRekapData.map(r => {
+                totalSistem += r.totalHonor;
+                return [
+                    r.niy,
+                    r.nama,
+                    r.lembaga || '-',
+                    r.jabatan,
+                    r.totalHari.toString(),
+                    r.totalJamDiakui.toFixed(2),
+                    formatRupiah(r.totalHonor)
+                ];
+            });
+
+            // Baris Total Akhir
+            bodyData.push([{ content: 'TOTAL KESELURUHAN', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold' } }, formatRupiah(totalSistem)]);
+
+            // Render Tabel PDF
+            doc.autoTable({
+                startY: 80,
+                head: [['NIY', 'Nama', 'Lembaga', 'Jabatan', 'Hari', 'Jam', 'Bisyaroh']],
+                body: bodyData,
+                theme: 'grid',
+                headStyles: { fillColor: [212, 175, 55], textColor: [255, 255, 255] },
+                styles: { fontSize: 9, cellPadding: 5 },
+                columnStyles: {
+                    4: { halign: 'center' },
+                    5: { halign: 'center' },
+                    6: { halign: 'right' }
+                }
+            });
+
+            const fileName = `Rekap_Bisyaroh_P2S_${currentRekapBulan}.pdf`;
+            doc.save(fileName);
         }
 
         async function loadAdminData() {
@@ -846,23 +968,6 @@
             if (res.success) {
                 document.getElementById('statTotal').innerText = res.data.totalPimpinan; 
                 document.getElementById('statHadir').innerText = res.data.hadirHariIni;
-                
-                const log = document.getElementById('recentLogs'); 
-                log.innerHTML = '';
-                if(res.data.history.length === 0) {
-                    log.innerHTML = '<div class="text-center mt-4 text-gray-400">Belum ada data.</div>';
-                } else { 
-                    res.data.history.forEach(r => { 
-                        let i = '';
-                        if(r[4] === 'Masuk') i = '<i class="fa-solid fa-arrow-right-to-bracket text-blue-500"></i>';
-                        else if(r[4] === 'Pulang') i = '<i class="fa-solid fa-arrow-right-from-bracket text-orange-500"></i>';
-                        else i = '<i class="fa-solid fa-envelope-open-text text-purple-500"></i>';
-
-                        let badgeStatus = (r[8]=='Di Dalam Area' || r[8]=='Izin Terdata') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-
-                        log.innerHTML += `<div class="flex items-center justify-between p-3 border-b text-sm"><div class="flex items-center space-x-3"><div class="w-8 h-8 rounded-full bg-white border flex items-center justify-center">${i}</div><div><p class="font-semibold">${r[3]}</p><p class="text-xs text-gray-500">${new Date(r[0]).toLocaleString('id-ID')}</p></div></div><span class="text-[10px] font-bold px-2 py-1 rounded ${badgeStatus}">${r[4]}</span></div>`; 
-                    }); 
-                }
 
                 const uc = document.getElementById('adminUserList'); 
                 uc.innerHTML = ''; 
