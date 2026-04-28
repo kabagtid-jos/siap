@@ -347,7 +347,7 @@
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-200"><i class="fa-solid fa-map-location-dot mr-2 text-[#A88C61]"></i>Peta Lokasi Geofence</label>
                             <span class="text-xs text-green-600 dark:text-green-400 font-semibold bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-md">Live Map Ready</span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Geser pin (marker) atau klik area pada peta untuk mengatur koordinat pusat secara otomatis.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Masukkan koordinat Latitude dan Longitude pada kolom di bawah untuk memperbarui titik lokasi pada peta.</p>
                         <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner overflow-hidden relative z-10"></div>
                     </div>
 
@@ -844,8 +844,8 @@
                 iconAnchor: [15, 42] // Posisi ujung bawah pin
             });
 
-            // Marker (Bisa Digeser)
-            mapMarker = L.marker([centerLat, centerLng], {draggable: true, icon: pinIcon}).addTo(mapInstance);
+            // Marker (Hanya Tampil, Tidak Bisa Digeser)
+            mapMarker = L.marker([centerLat, centerLng], {icon: pinIcon}).addTo(mapInstance);
 
             // Lingkaran Radius (Warna Emas menyesuaikan tema)
             mapCircle = L.circle([centerLat, centerLng], {
@@ -854,18 +854,6 @@
                 fillOpacity: 0.25,
                 radius: rad
             }).addTo(mapInstance);
-
-            // Event saat marker digeser
-            mapMarker.on('dragend', function(e) {
-                const position = mapMarker.getLatLng();
-                updateMapInputsAndCircle(position.lat, position.lng);
-            });
-
-            // Event saat peta diklik
-            mapInstance.on('click', function(e) {
-                mapMarker.setLatLng(e.latlng);
-                updateMapInputsAndCircle(e.latlng.lat, e.latlng.lng);
-            });
 
             // Event Listeners untuk Input Manual agar Peta Update Real-time
             document.getElementById('setLat').addEventListener('input', syncMapFromInputs);
@@ -880,13 +868,6 @@
                 }
             });
             observer.observe(mapContainer);
-        }
-
-        function updateMapInputsAndCircle(lat, lng) {
-            document.getElementById('setLat').value = lat.toFixed(6);
-            document.getElementById('setLng').value = lng.toFixed(6);
-            mapCircle.setLatLng([lat, lng]);
-            mapInstance.panTo([lat, lng]);
         }
 
         function syncMapFromInputs() {
