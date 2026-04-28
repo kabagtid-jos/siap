@@ -66,46 +66,43 @@
 </head>
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
 
-    <!-- Main Container -->
-    <div class="flex-1 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto mt-4 md:mt-6 custom-scrollbar">
-        
-        <!-- ================= GLOBAL PROFILE HEADER (Muncul Setelah Login) ================= -->
-        <div id="profileHeader" class="hidden fade-in w-full max-w-6xl mx-auto mb-6 glass rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
-            <div class="flex items-center space-x-4 w-full sm:w-auto">
-                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#A88C61] to-[#D4AF37] text-white flex items-center justify-center text-xl sm:text-2xl font-bold shadow-lg flex-shrink-0 border-2 border-white dark:border-gray-700">
+    <!-- ================= GLOBAL PROFILE HEADER (Muncul Setelah Login & Selalu Lengket di Atas) ================= -->
+    <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md z-50 rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between">
+            
+            <div class="flex items-center space-x-3">
+                <!-- Avatar Container -->
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-[#A88C61] to-[#D4AF37] flex items-center justify-center text-white text-base md:text-lg font-bold shadow-sm flex-shrink-0 border-2 border-white dark:border-gray-600 overflow-hidden relative">
                     <span id="headerInitials">AZ</span>
                 </div>
-                <div class="flex-1">
-                    <h2 id="headerNama" class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white leading-tight">Nama Lengkap</h2>
-                    <div class="flex flex-col sm:flex-row sm:space-x-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        <span class="flex items-center"><i class="fa-solid fa-id-badge w-4 text-[#D4AF37]"></i> <span id="headerNiy">NIY</span></span>
-                        <span class="flex items-center mt-1 sm:mt-0"><i class="fa-solid fa-building w-4 text-[#D4AF37]"></i> <span id="headerLembaga">Lembaga</span></span>
-                        <span class="flex items-center mt-1 sm:mt-0"><i class="fa-solid fa-briefcase w-4 text-[#D4AF37]"></i> <span id="headerJabatan">Jabatan</span></span>
+                <!-- User Info -->
+                <div class="flex flex-col text-white justify-center">
+                    <span class="text-[10px] md:text-xs font-medium opacity-90 leading-tight mb-0.5">Selamat datang,</span>
+                    <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate max-w-[150px] sm:max-w-xs md:max-w-md">Nama Lengkap</h2>
+                    <div class="flex flex-wrap gap-1.5 md:gap-2 mt-1">
+                        <span class="bg-black/20 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-semibold flex items-center tracking-wide">NIY: <span id="headerNiy" class="ml-1">000</span></span>
+                        <span id="headerJabatan" class="bg-white/30 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-bold tracking-wide">Admin</span>
                     </div>
                 </div>
             </div>
             
-            <!-- Right Section: Clock & Actions -->
-            <div class="flex flex-row items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto">
-                <!-- Clock -->
-                <div class="bg-[#FDF8E7] dark:bg-gray-800/80 border border-[#D4AF37]/30 text-[#A88C61] dark:text-[#D4AF37] px-4 py-2 rounded-xl flex items-center space-x-2 shadow-sm">
-                    <i class="fa-regular fa-clock text-lg"></i>
-                    <span id="currentTime" class="font-mono text-lg font-bold tracking-widest">00:00:00</span>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="flex items-center space-x-2">
-                    <button onclick="toggleDarkMode()" title="Ganti Tema" class="glass w-10 h-10 rounded-full flex items-center justify-center text-gray-600 dark:text-yellow-400 hover:text-[#D4AF37] transition shadow-sm">
-                        <i id="iconMoon" class="fa-solid fa-moon"></i>
-                        <i id="iconSun" class="fa-solid fa-sun hidden"></i>
-                    </button>
-                    <button onclick="logout()" title="Keluar" class="glass w-10 h-10 rounded-full flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 transition shadow-sm">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
+            <!-- Actions Buttons -->
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <button onclick="toggleDarkMode()" title="Ganti Tema" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
+                    <i id="iconMoon" class="fa-solid fa-moon text-xs md:text-sm"></i>
+                    <i id="iconSun" class="fa-solid fa-sun hidden text-xs md:text-sm"></i>
+                </button>
+                <button onclick="logout()" title="Keluar" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
+                    <i class="fa-solid fa-right-from-bracket text-xs md:text-sm"></i>
+                </button>
             </div>
-        </div>
 
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto custom-scrollbar">
+        
         <!-- ================= LOGIN SECTION ================= -->
         <div id="loginSection" class="fade-in w-full mx-auto mt-4 md:mt-10">
             <!-- Unified Card (Login + Public Log) -->
@@ -403,13 +400,6 @@
             Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454', didOpen: () => { Swal.showLoading() } });
         }
         function hideLoading() { Swal.close(); }
-        
-        function updateClock() {
-            if(document.getElementById('profileHeader').classList.contains('hidden')) return;
-            const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
-        }
-        setInterval(updateClock, 1000);
 
         window.addEventListener('DOMContentLoaded', () => {
             loadPublicLogs();
@@ -457,7 +447,6 @@
             document.getElementById('headerNama').innerText = user.nama;
             document.getElementById('headerNiy').innerText = user.niy;
             document.getElementById('headerJabatan').innerText = user.jabatan || user.role;
-            document.getElementById('headerLembaga').innerText = user.lembaga || 'Semua Unit';
             
             // Mengatur Avatar (Foto atau Inisial)
             let inisial = user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
