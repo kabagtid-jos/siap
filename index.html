@@ -81,7 +81,6 @@
                     <span id="headerInitials">AZ</span>
                 </div>
                 <div class="flex flex-col text-white justify-center">
-                    <span class="text-[10px] md:text-xs font-medium opacity-90 leading-tight mb-0.5">Selamat datang,</span>
                     <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate max-w-[150px] sm:max-w-xs md:max-w-md">Nama Lengkap</h2>
                     <div class="flex flex-wrap gap-1.5 md:gap-2 mt-1">
                         <span class="bg-black/20 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-semibold flex items-center tracking-wide">NIY: <span id="headerNiy" class="ml-1">000</span></span>
@@ -630,9 +629,12 @@
         });
 
         async function callAPI(params) {
-            const urlParams = new URLSearchParams(params).toString();
             try { 
-                const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: urlParams }); 
+                // FIX: Mengirim sebagai JSON string (text/plain) agar karakter Base64 (+) tidak rusak/menjadi spasi
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(params) 
+                }); 
                 return await response.json(); 
             } catch (error) { 
                 return { success: false, message: 'Gagal terhubung ke server.' }; 
