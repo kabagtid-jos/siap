@@ -69,6 +69,7 @@
                     <h2 id="headerNama" class="text-lg sm:text-xl font-bold text-gray-800 dark:text-white leading-tight">Nama Lengkap</h2>
                     <div class="flex flex-col sm:flex-row sm:space-x-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                         <span class="flex items-center"><i class="fa-solid fa-id-badge w-4 text-[#D4AF37]"></i> <span id="headerNiy">NIY</span></span>
+                        <span class="flex items-center mt-1 sm:mt-0"><i class="fa-solid fa-building w-4 text-[#D4AF37]"></i> <span id="headerLembaga">Lembaga</span></span>
                         <span class="flex items-center mt-1 sm:mt-0"><i class="fa-solid fa-briefcase w-4 text-[#D4AF37]"></i> <span id="headerJabatan">Jabatan</span></span>
                     </div>
                 </div>
@@ -287,6 +288,7 @@
                                 <tr>
                                     <th class="px-4 py-3 rounded-l-lg">NIY</th>
                                     <th class="px-4 py-3">Nama Lengkap</th>
+                                    <th class="px-4 py-3">Lembaga</th>
                                     <th class="px-4 py-3">Jabatan</th>
                                     <th class="px-4 py-3 rounded-r-lg">RFID</th>
                                 </tr>
@@ -316,6 +318,10 @@
                             <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Radius Toleransi (Meter)</label>
                             <input type="number" id="setRadius" required class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Daftar Lembaga (Pisahkan dengan koma)</label>
+                            <input type="text" id="setLembaga" placeholder="Contoh: SD, SMP, SMA" required class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
+                        </div>
                         <div class="md:col-span-3 flex justify-end mt-2">
                             <button type="submit" class="bg-gray-800 dark:bg-[#D4AF37] hover:bg-gray-900 dark:hover:bg-[#B8972E] text-white dark:text-gray-900 font-bold py-2.5 px-6 rounded-xl shadow-md transition flex items-center">
                                 <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Pengaturan
@@ -338,6 +344,7 @@
             <form onsubmit="handleAddUser(event)" class="space-y-4">
                 <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">NIY</label><input type="text" id="addNiy" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                 <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih Lembaga --</option></select></div>
                 <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><input type="text" id="addJabatan" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                 <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
                 <div><label class="text-sm font-medium text-gray-600 dark:text-gray-300">Kode Kartu RFID <span class="text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="text" id="addRfid" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
@@ -440,6 +447,7 @@
             document.getElementById('headerNama').innerText = user.nama;
             document.getElementById('headerNiy').innerText = user.niy;
             document.getElementById('headerJabatan').innerText = user.jabatan || user.role;
+            document.getElementById('headerLembaga').innerText = user.lembaga || 'Semua Unit';
             
             // Mengatur Avatar (Foto atau Inisial)
             let inisial = user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -670,6 +678,7 @@
                             <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                                 <td class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">${u.niy}</td>
                                 <td class="px-4 py-3 text-gray-800 dark:text-gray-200">${u.nama}</td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">${u.lembaga || '-'}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">${u.jabatan}</td>
                                 <td class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-500">${u.rfid ? u.rfid : '<span class="text-red-400 dark:text-red-500 italic">Belum Diatur</span>'}</td>
                             </tr>
@@ -689,6 +698,17 @@
                 document.getElementById('setLat').value = res.data['Lattitude_Kantor'] || '';
                 document.getElementById('setLng').value = res.data['Longitude_Kantor'] || '';
                 document.getElementById('setRadius').value = res.data['Radius_Max_Meter'] || '';
+                
+                let daftarLembaga = res.data['Daftar_Lembaga'] || 'SD, SMP, SMA';
+                document.getElementById('setLembaga').value = daftarLembaga;
+                
+                // Update dropdown menu form Tambah Pimpinan
+                const selectLembaga = document.getElementById('addLembaga');
+                selectLembaga.innerHTML = '<option value="">-- Pilih Lembaga --</option>';
+                daftarLembaga.split(',').forEach(item => {
+                    let val = item.trim();
+                    if(val) selectLembaga.innerHTML += `<option value="${val}">${val}</option>`;
+                });
             }
         }
 
@@ -698,7 +718,8 @@
                 action: 'saveSettings',
                 lat: document.getElementById('setLat').value,
                 lng: document.getElementById('setLng').value,
-                radius: document.getElementById('setRadius').value
+                radius: document.getElementById('setRadius').value,
+                lembaga: document.getElementById('setLembaga').value
             };
             
             showLoading();
@@ -781,6 +802,7 @@
 
             const payload = {
                 action: 'addUser', niy: document.getElementById('addNiy').value, nama: document.getElementById('addNama').value,
+                lembaga: document.getElementById('addLembaga').value,
                 jabatan: document.getElementById('addJabatan').value, password: document.getElementById('addPassword').value, rfid: document.getElementById('addRfid').value,
                 foto: fotoBase64
             };
