@@ -58,6 +58,15 @@
             .swal2-actions { margin-top: 0.5rem !important; }
             .swal2-styled { padding: 0.4em 1em !important; font-size: 0.9rem !important; }
         }
+        
+        /* Memperkecil SweetAlert pada Desktop */
+        @media (min-width: 641px) {
+            .swal2-popup { width: 26rem !important; padding: 1.5rem !important; border-radius: 1.25rem !important; }
+            .swal2-title { font-size: 1.3rem !important; }
+            .swal2-html-container { font-size: 0.9rem !important; }
+            .swal2-styled { padding: 0.5em 1.5em !important; font-size: 0.95rem !important; }
+        }
+
         .leaflet-container { z-index: 10 !important; font-family: 'Poppins', sans-serif;}
         .custom-pin { background: transparent; border: none; }
     </style>
@@ -112,7 +121,7 @@
                             <i class="fa-solid fa-lock absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
                             <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
                         </div>
-                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">Masuk Sistem</button>
+                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">Login</button>
                     </form>
                 </div>
                 <div class="p-5 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
@@ -461,7 +470,7 @@
 
     <!-- Modal Form (Tambah & Edit User) -->
     <div id="modalAddUser" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
             <div class="flex justify-between items-center mb-3 md:mb-4 border-b dark:border-gray-700 pb-2">
                 <h3 id="modalTitle" class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
                 <button onclick="closeModal()" type="button" class="text-gray-400 hover:text-red-500 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
