@@ -637,13 +637,23 @@
                 Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Harap tunggu hingga sistem mendapatkan lokasi GPS Anda.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
                 return;
             }
+            
+            // Ambil foto sesaat sebelum loading
             const fotoBase64 = takeSnapshot();
+            
             showLoading();
             const res = await callAPI({
                 action: 'attend', niy: currentUser.niy, nama: currentUser.nama, tipe: tipe,
                 lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64
             });
             hideLoading();
+            
+            // TUTUP KAMERA OTOMATIS SETELAH PROSES SELESAI
+            stopCamera();
+            document.getElementById('cameraPlaceholder').classList.remove('hidden');
+            document.getElementById('videoElement').classList.add('hidden');
+            document.getElementById('locationStatus').classList.add('hidden');
+            document.getElementById('actionButtons').classList.add('hidden');
             
             if (res.success) {
                 // Popup Berhasil
