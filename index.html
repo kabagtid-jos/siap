@@ -201,7 +201,7 @@
                 <div class="glass rounded-2xl p-6 h-max shadow-md">
                     <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-shield-halved mr-2 text-[#D4AF37]"></i>Aturan Geofencing</h3>
                     <ul class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
-                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area Yayasan P2S Abu Zairi yang telah ditentukan.</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan Anda berada di dalam radius area P2S Abu Zairi yang telah ditentukan.</li>
                         <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Pastikan penerangan cukup dan wajah terlihat jelas di kamera untuk verifikasi visual.</li>
                         <li class="flex items-start"><i class="fa-solid fa-check-circle text-[#D4AF37] mr-3 mt-0.5"></i> Sistem secara otomatis mencatat koordinat dan jarak secara real-time sebagai validasi.</li>
                     </ul>
@@ -660,7 +660,7 @@
                 let badge = 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300';
                 Swal.fire({
                     icon: 'success', title: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
-                    html: `Jarak: <b>${res.geofence.jarak}</b> dari Pusat Yayasan<br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
+                    html: `Jarak: <b>${res.geofence.jarak}</b> dari Pusat P2S Abu Zairi<br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
                 });
                 loadPersonalLog();
             } else {
