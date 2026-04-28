@@ -34,7 +34,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; }
         
-        /* Glassmorphism that adapts to Dark Mode */
         .glass {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
@@ -42,22 +41,20 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
         }
         .dark .glass {
-            background: rgba(31, 41, 55, 0.85); /* Gray-800 with opacity */
+            background: rgba(31, 41, 55, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #videoElement { transform: scaleX(-1); } /* Mirror effect */
+        #videoElement { transform: scaleX(-1); }
         
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #A88C61; }
 
-        /* SweetAlert2 Mobile Tweaks (Memperkecil Pop-up di Mobile) */
         @media (max-width: 640px) {
             .swal2-popup { font-size: 0.85rem !important; padding: 1rem !important; width: 85% !important; border-radius: 1rem !important; }
             .swal2-title { font-size: 1.2rem !important; }
@@ -67,23 +64,19 @@
             .swal2-styled { padding: 0.4em 1em !important; font-size: 0.9rem !important; }
         }
 
-        /* Penyesuaian Z-Index Peta agar tidak menimpa header/modal dan perbaikan Icon */
         .leaflet-container { z-index: 10 !important; font-family: 'Poppins', sans-serif;}
         .custom-pin { background: transparent; border: none; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased h-screen overflow-hidden flex flex-col relative transition-colors duration-300">
 
-    <!-- ================= GLOBAL PROFILE HEADER (Muncul Setelah Login & Selalu Lengket di Atas) ================= -->
+    <!-- ================= GLOBAL PROFILE HEADER ================= -->
     <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md z-50 rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between">
-            
             <div class="flex items-center space-x-3">
-                <!-- Avatar Container -->
                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-[#A88C61] to-[#D4AF37] flex items-center justify-center text-white text-base md:text-lg font-bold shadow-sm flex-shrink-0 border-2 border-white dark:border-gray-600 overflow-hidden relative">
                     <span id="headerInitials">AZ</span>
                 </div>
-                <!-- User Info -->
                 <div class="flex flex-col text-white justify-center">
                     <span class="text-[10px] md:text-xs font-medium opacity-90 leading-tight mb-0.5">Selamat datang,</span>
                     <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate max-w-[150px] sm:max-w-xs md:max-w-md">Nama Lengkap</h2>
@@ -94,7 +87,6 @@
                 </div>
             </div>
             
-            <!-- Actions Buttons -->
             <div class="flex items-center space-x-2 flex-shrink-0">
                 <button onclick="toggleDarkMode()" title="Ganti Tema" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
                     <i id="iconMoon" class="fa-solid fa-moon text-xs md:text-sm"></i>
@@ -104,7 +96,6 @@
                     <i class="fa-solid fa-right-from-bracket text-xs md:text-sm"></i>
                 </button>
             </div>
-
         </div>
     </header>
 
@@ -113,9 +104,7 @@
         
         <!-- ================= LOGIN SECTION ================= -->
         <div id="loginSection" class="fade-in w-full mx-auto mt-4 md:mt-10">
-            <!-- Unified Card (Login + Public Log) -->
             <div class="glass rounded-2xl max-w-4xl mx-auto flex flex-col md:flex-row overflow-hidden shadow-xl">
-                <!-- Left: Login Side -->
                 <div class="p-6 md:p-8 text-center md:w-1/2 flex flex-col justify-center bg-white/40 dark:bg-gray-800/40">
                     <div class="bg-[#FDF8E7] dark:bg-gray-900 text-[#D4AF37] w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-inner">
                         <i class="fa-solid fa-mosque text-3xl md:text-4xl"></i>
@@ -126,11 +115,11 @@
                     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-3 md:space-y-4">
                         <div class="relative">
                             <i class="fa-solid fa-id-card absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
+                            <input type="text" id="niy" placeholder="Nomor Induk Yayasan (NIY)" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
                         </div>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-4 top-3 md:top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
+                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
                         </div>
                         <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-semibold py-2.5 md:py-3 text-sm md:text-base rounded-xl transition shadow-md">
                             Masuk Sistem
@@ -138,7 +127,6 @@
                     </form>
                 </div>
 
-                <!-- Right: Public Log Side -->
                 <div class="p-5 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
                     <h3 class="font-bold text-base md:text-lg mb-3 md:mb-4 border-b border-gray-200/80 dark:border-gray-700 pb-2 text-gray-800 dark:text-gray-100 flex items-center">
                         <i class="fa-solid fa-list-check mr-2 text-[#D4AF37]"></i> Kehadiran Hari Ini
@@ -186,12 +174,12 @@
                         </div>
                     </div>
 
-                    <!-- Action Buttons (Muncul setelah kamera aktif) -->
+                    <!-- Action Buttons -->
                     <div id="actionButtons" class="grid grid-cols-2 gap-4 mt-6 hidden fade-in">
-                        <button onclick="jalankanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-blue-400 dark:border-blue-500 flex flex-col items-center justify-center">
+                        <button onclick="jalankanAbsen('Masuk')" class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-blue-400 flex flex-col items-center justify-center">
                             <i class="fa-solid fa-right-to-bracket mb-1 text-2xl"></i> Absen Masuk
                         </button>
-                        <button onclick="jalankanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform hover:-translate-y-1 border border-orange-400 dark:border-orange-500 flex flex-col items-center justify-center">
+                        <button onclick="jalankanAbsen('Pulang')" class="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg transition transform border border-orange-400 flex flex-col items-center justify-center">
                             <i class="fa-solid fa-right-from-bracket mb-1 text-2xl"></i> Absen Pulang
                         </button>
                     </div>
@@ -231,7 +219,7 @@
         <!-- ================= ADMIN DASHBOARD SECTION ================= -->
         <div id="adminSection" class="hidden fade-in max-w-6xl mx-auto pb-32 md:pb-10">
             
-            <!-- ADMIN NAVIGATION TABS (Sticky Bottom on Mobile) -->
+            <!-- ADMIN NAVIGATION TABS -->
             <div class="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:bg-transparent md:shadow-none flex justify-around md:justify-start md:space-x-4 px-2 py-3 md:px-0 md:py-0 md:mb-6 md:border-b border-gray-200 dark:border-gray-700 md:pb-2 overflow-x-auto custom-scrollbar rounded-t-2xl md:rounded-none transition-all">
                 <button onclick="switchAdminTab('dashboard')" id="btnTabDashboard" class="admin-tab active flex flex-col md:flex-row items-center justify-center w-full md:w-auto px-2 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:rounded-t-lg transition md:border-b-2 md:border-[#D4AF37] text-[#A88C61] whitespace-nowrap">
                     <i class="fa-solid fa-chart-line text-lg md:mr-2 mb-1 md:mb-0"></i> Dashboard
@@ -246,7 +234,6 @@
 
             <!-- 1. TAB DASHBOARD -->
             <div id="adminTabDashboard" class="admin-content">
-                <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="glass rounded-xl p-6 border-l-4 border-blue-500">
                         <div class="flex justify-between items-center">
@@ -254,9 +241,7 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Pimpinan</p>
                                 <h3 id="statTotal" class="text-3xl font-bold text-gray-800 dark:text-white">0</h3>
                             </div>
-                            <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full text-blue-500 dark:text-blue-400">
-                                <i class="fa-solid fa-users text-xl"></i>
-                            </div>
+                            <div class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full text-blue-500 dark:text-blue-400"><i class="fa-solid fa-users text-xl"></i></div>
                         </div>
                     </div>
                     <div class="glass rounded-xl p-6 border-l-4 border-[#D4AF37]">
@@ -265,23 +250,16 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Hadir Hari Ini</p>
                                 <h3 id="statHadir" class="text-3xl font-bold text-gray-800 dark:text-white">0</h3>
                             </div>
-                            <div class="bg-[#FDF8E7] dark:bg-yellow-900/30 p-3 rounded-full text-[#D4AF37]">
-                                <i class="fa-solid fa-clipboard-check text-xl"></i>
-                            </div>
+                            <div class="bg-[#FDF8E7] dark:bg-yellow-900/30 p-3 rounded-full text-[#D4AF37]"><i class="fa-solid fa-clipboard-check text-xl"></i></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <!-- Chart -->
                     <div class="glass rounded-xl p-6 lg:col-span-2 shadow-md">
                         <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Grafik Kehadiran Mingguan</h3>
-                        <div class="relative w-full h-64 sm:h-72">
-                            <canvas id="attendanceChart"></canvas>
-                        </div>
+                        <div class="relative w-full h-64 sm:h-72"><canvas id="attendanceChart"></canvas></div>
                     </div>
-                    
-                    <!-- Recent Logs -->
                     <div class="glass rounded-xl p-6 shadow-md flex flex-col">
                         <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Log Seluruh Sistem</h3>
                         <div class="overflow-y-auto flex-1 h-64 pr-2 custom-scrollbar" id="recentLogs">
@@ -290,22 +268,16 @@
                     </div>
                 </div>
 
-                <!-- NEW ROW: Tahunan & Lembaga -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="glass rounded-xl p-6 shadow-md">
                         <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Grafik Kehadiran Tahunan</h3>
-                        <div class="relative w-full h-64">
-                            <canvas id="yearlyChart"></canvas>
-                        </div>
+                        <div class="relative w-full h-64"><canvas id="yearlyChart"></canvas></div>
                     </div>
                     <div class="glass rounded-xl p-6 shadow-md">
                         <h3 class="font-bold text-gray-800 dark:text-white mb-4 border-b dark:border-gray-700 pb-2">Kehadiran Per Lembaga</h3>
-                        <div class="relative w-full h-64 flex justify-center">
-                            <canvas id="lembagaChart"></canvas>
-                        </div>
+                        <div class="relative w-full h-64 flex justify-center"><canvas id="lembagaChart"></canvas></div>
                     </div>
                 </div>
-                <!-- Spacer for mobile scroll bottom clearance -->
                 <div class="h-24 md:hidden w-full"></div>
             </div>
 
@@ -325,29 +297,27 @@
                                     <th class="px-4 py-3 rounded-l-lg">NIY</th>
                                     <th class="px-4 py-3">Nama Lengkap</th>
                                     <th class="px-4 py-3">Lembaga</th>
-                                    <th class="px-4 py-3 rounded-r-lg">Jabatan</th>
+                                    <th class="px-4 py-3">Jabatan</th>
+                                    <th class="px-4 py-3 rounded-r-lg text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="adminUserList">
-                                <tr><td colspan="4" class="text-center py-6 text-gray-400">Memuat data pimpinan...</td></tr>
+                                <tr><td colspan="5" class="text-center py-6 text-gray-400">Memuat data pimpinan...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <!-- Spacer for mobile scroll bottom clearance -->
                 <div class="h-24 md:hidden w-full"></div>
             </div>
 
             <!-- 3. TAB PENGATURAN -->
             <div id="adminTabSettings" class="admin-content hidden">
                 <div class="glass rounded-xl p-6 shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-white"><i class="fa-solid fa-sliders mr-2 text-[#D4AF37]"></i> Pengaturan Sistem (Geofencing & Lembaga)</h3>
+                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2 text-gray-800 dark:text-white"><i class="fa-solid fa-sliders mr-2 text-[#D4AF37]"></i> Pengaturan Sistem (Geofencing, Lembaga & Jabatan)</h3>
                     
-                    <!-- PETA GEOFENCE INTERAKTIF -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-200"><i class="fa-solid fa-map-location-dot mr-2 text-[#A88C61]"></i>Peta Lokasi Geofence</label>
-                            <span class="text-xs text-green-600 dark:text-green-400 font-semibold bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-md">Live Map Ready</span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Masukkan koordinat Latitude dan Longitude pada kolom di bawah untuk memperbarui titik lokasi pada peta.</p>
                         <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner overflow-hidden relative z-10"></div>
@@ -356,30 +326,37 @@
                     <form onsubmit="handleSaveSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Latitude Pusat</label>
-                            <input type="text" id="setLat" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
+                            <input type="text" id="setLat" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Longitude Pusat</label>
-                            <input type="text" id="setLng" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
+                            <input type="text" id="setLng" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-mono text-sm">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Radius Toleransi Absen (Meter)</label>
-                            <input type="number" id="setRadius" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] dark:focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-bold text-[#A88C61]">
+                            <input type="number" id="setRadius" required class="w-full px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm font-bold text-[#A88C61]">
                         </div>
                         
                         <!-- List UI Lembaga -->
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-building mr-2 text-[#A88C61]"></i>Daftar Lembaga</label>
-                            <div id="lembagaTags" class="flex flex-wrap gap-2 mb-3">
-                                <!-- Tags will be rendered here -->
-                            </div>
+                            <div id="lembagaTags" class="flex flex-wrap gap-2 mb-3"></div>
                             <div class="flex space-x-2">
                                 <input type="text" id="newLembagaInput" placeholder="Tambah lembaga baru..." class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
-                                <button type="button" onclick="tambahLembaga()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2.5 px-4 rounded-lg transition shadow-sm whitespace-nowrap">
-                                    <i class="fa-solid fa-plus"></i> Tambah
-                                </button>
+                                <button type="button" onclick="tambahLembaga()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2.5 px-4 rounded-lg transition shadow-sm whitespace-nowrap"><i class="fa-solid fa-plus"></i> Tambah</button>
                             </div>
                             <input type="hidden" id="setLembaga" required>
+                        </div>
+
+                        <!-- List UI Jabatan -->
+                        <div class="md:col-span-2 border-t dark:border-gray-700 pt-4 mt-2">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2"><i class="fa-solid fa-user-tie mr-2 text-[#A88C61]"></i>Daftar Jabatan</label>
+                            <div id="jabatanTags" class="flex flex-wrap gap-2 mb-3"></div>
+                            <div class="flex space-x-2">
+                                <input type="text" id="newJabatanInput" placeholder="Tambah jabatan baru..." class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-white dark:bg-gray-700 dark:text-white shadow-sm">
+                                <button type="button" onclick="tambahJabatan()" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white font-bold py-2.5 px-4 rounded-lg transition shadow-sm whitespace-nowrap"><i class="fa-solid fa-plus"></i> Tambah</button>
+                            </div>
+                            <input type="hidden" id="setJabatan" required>
                         </div>
 
                         <div class="md:col-span-2 flex justify-end mt-4">
@@ -389,28 +366,48 @@
                         </div>
                     </form>
                 </div>
-                <!-- Spacer for mobile scroll bottom clearance -->
                 <div class="h-24 md:hidden w-full"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- Modal Tambah User (Admin) -->
-    <div id="modalAddUser" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-[95%] md:w-full max-w-md shadow-2xl border border-gray-200 dark:border-gray-700">
+    <!-- Modal Form (Tambah & Edit User) -->
+    <div id="modalAddUser" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
             <div class="flex justify-between items-center mb-3 md:mb-4 border-b dark:border-gray-700 pb-2">
-                <h3 class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
+                <h3 id="modalTitle" class="font-bold text-lg md:text-xl text-gray-800 dark:text-white">Tambah Pimpinan</h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 bg-gray-100 dark:bg-gray-700 w-7 h-7 md:w-8 md:h-8 rounded-full transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleAddUser(event)" class="space-y-3 md:space-y-4">
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">NIY</label><input type="text" id="addNiy" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih Lembaga --</option></select></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><input type="text" id="addJabatan" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 md:py-2 text-sm md:text-base border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
-                <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-[10px] md:text-xs text-gray-400 font-normal">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 md:py-2 border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white text-xs md:text-sm file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] md:file:text-xs file:font-bold file:bg-[#FDF8E7] dark:file:bg-gray-600 file:text-[#A88C61] dark:file:text-yellow-400 hover:file:bg-[#D4AF37] hover:file:text-white transition"></div>
-                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2.5 md:py-3 rounded-xl mt-3 md:mt-4 shadow-md transition text-sm md:text-base">Simpan Data</button>
+            
+            <form id="formAddUser" onsubmit="handleAddUser(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">NIY (Unik)</label><input type="text" id="addNiy" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Nama Lengkap</label><input type="text" id="addNama" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Tanggal Lahir</label><input type="date" id="addTglLahir" class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jenis Kelamin</label>
+                        <select id="addJk" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white">
+                            <option value="">-- Pilih --</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Lembaga</label><select id="addLembaga" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih --</option></select></div>
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Jabatan</label><select id="addJabatan" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"><option value="">-- Pilih --</option></select></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Password</label><input type="password" id="addPassword" required class="w-full px-3 py-1.5 md:py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg outline-none focus:border-[#D4AF37] transition bg-gray-50 dark:bg-gray-700 dark:text-white"></div>
+                    <div><label class="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-300">Foto Profil <span class="text-[10px] text-gray-400">(Opsional)</span></label><input type="file" id="addFoto" accept="image/*" class="w-full px-3 py-1.5 md:py-2 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-gray-200 dark:file:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-lg dark:text-white"></div>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] hover:to-[#B8972E] text-white font-bold py-2.5 md:py-3 rounded-xl mt-4 shadow-md transition text-sm md:text-base">Simpan Data</button>
             </form>
         </div>
     </div>
@@ -433,6 +430,11 @@
         let mapMarker = null;
         let mapCircle = null;
 
+        // User Management Variables
+        let userMap = {}; // Untuk simpan data pimpinan lengkap by NIY
+        let isEditMode = false;
+        let currentEditNiy = '';
+
         // ================= UTILITIES & DARK MODE =================
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
@@ -442,26 +444,12 @@
             document.getElementById('iconMoon').classList.toggle('hidden', isDark);
             document.getElementById('iconSun').classList.toggle('hidden', !isDark);
 
-            // Update Chart Text Colors on Theme Toggle
             const textColor = isDark ? '#9ca3af' : '#4b5563';
-            if(weeklyChart) {
-                weeklyChart.options.scales.x.ticks.color = textColor;
-                weeklyChart.options.scales.y.ticks.color = textColor;
-                weeklyChart.update();
-            }
-            if(yearlyChart) {
-                yearlyChart.options.scales.x.ticks.color = textColor;
-                yearlyChart.options.scales.y.ticks.color = textColor;
-                yearlyChart.update();
-            }
-            if(lembagaChart) {
-                lembagaChart.options.plugins.legend.labels.color = textColor;
-                lembagaChart.data.datasets[0].borderColor = isDark ? '#1f2937' : '#ffffff';
-                lembagaChart.update();
-            }
+            if(weeklyChart) { weeklyChart.options.scales.x.ticks.color = textColor; weeklyChart.options.scales.y.ticks.color = textColor; weeklyChart.update(); }
+            if(yearlyChart) { yearlyChart.options.scales.x.ticks.color = textColor; yearlyChart.options.scales.y.ticks.color = textColor; yearlyChart.update(); }
+            if(lembagaChart) { lembagaChart.options.plugins.legend.labels.color = textColor; lembagaChart.data.datasets[0].borderColor = isDark ? '#1f2937' : '#ffffff'; lembagaChart.update(); }
         }
 
-        // Cek dan terapkan preferensi Dark Mode saat dimuat
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
             document.getElementById('iconMoon').classList.add('hidden');
@@ -473,24 +461,14 @@
         }
         function hideLoading() { Swal.close(); }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadPublicLogs();
-        });
+        window.addEventListener('DOMContentLoaded', () => { loadPublicLogs(); });
 
-        // ================= API CALLS =================
         async function callAPI(params) {
             const urlParams = new URLSearchParams(params).toString();
             try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: urlParams
-                });
+                const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: urlParams });
                 return await response.json();
-            } catch (error) {
-                console.error("API Error:", error);
-                return { success: false, message: 'Gagal terhubung ke server Google Sheets.' };
-            }
+            } catch (error) { return { success: false, message: 'Gagal terhubung ke server.' }; }
         }
 
         // ================= LOGIN LOGIC =================
@@ -503,24 +481,19 @@
             const res = await callAPI({ action: 'login', niy, password });
             hideLoading();
 
-            if (res.success) {
-                loginSuccess(res.user);
-            } else {
-                Swal.fire({icon: 'error', title: 'Login Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-            }
+            if (res.success) { loginSuccess(res.user); } 
+            else { Swal.fire({icon: 'error', title: 'Login Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
         }
 
         function loginSuccess(user) {
             currentUser = user;
             document.getElementById('loginSection').classList.add('hidden');
             
-            // Set data Header Profil Global
             document.getElementById('profileHeader').classList.remove('hidden');
             document.getElementById('headerNama').innerText = user.nama;
             document.getElementById('headerNiy').innerText = user.niy;
             document.getElementById('headerJabatan').innerText = user.jabatan || user.role;
             
-            // Mengatur Avatar (Foto atau Inisial)
             let inisial = user.nama.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             const headerAvatarBox = document.getElementById('headerInitials').parentElement;
             
@@ -539,13 +512,10 @@
                 loadSettings(); 
             } else {
                 document.getElementById('pimpinanSection').classList.remove('hidden');
-                
-                // Reset state kamera setiap kali pimpinan login
                 document.getElementById('cameraPlaceholder').classList.remove('hidden');
                 document.getElementById('videoElement').classList.add('hidden');
                 document.getElementById('locationStatus').classList.add('hidden');
                 document.getElementById('actionButtons').classList.add('hidden');
-                
                 loadPersonalLog(); 
             }
         }
@@ -565,7 +535,6 @@
         async function loadPublicLogs() {
             const res = await callAPI({ action: 'getPublicLogs' });
             const container = document.getElementById('publicLogContainer');
-            
             if (res.success && res.data && res.data.length > 0) {
                 container.innerHTML = '';
                 res.data.forEach(row => {
@@ -578,34 +547,29 @@
                         </tr>
                     `;
                 });
-            } else {
-                container.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500 dark:text-gray-400">Belum ada Pimpinan yang absen hari ini.</td></tr>';
-            }
+            } else { container.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500 dark:text-gray-400">Belum ada Pimpinan yang absen hari ini.</td></tr>'; }
         }
 
         // ================= PIMPINAN: CAMERA, LOKASI =================
         function initAttendance() {
-            // Sembunyikan placeholder, tampilkan kamera dan tombol
             document.getElementById('cameraPlaceholder').classList.add('hidden');
             document.getElementById('videoElement').classList.remove('hidden');
             document.getElementById('locationStatus').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
-            
-            startCamera();
-            getLocation();
+            startCamera(); getLocation();
         }
 
         function startCamera() {
             const video = document.getElementById('videoElement');
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                    .then(function(s) { stream = s; video.srcObject = stream; })
-                    .catch(function(err) { console.error("Camera error:", err); Swal.fire('Kamera Error', 'Mohon izinkan akses kamera untuk verifikasi wajah.', 'warning'); });
+                    .then(s => { stream = s; video.srcObject = stream; })
+                    .catch(err => { Swal.fire('Kamera Error', 'Mohon izinkan akses kamera.', 'warning'); });
             }
         }
 
         function stopCamera() {
-            if (stream) { stream.getTracks().forEach(track => track.stop()); document.getElementById('videoElement').srcObject = null; }
+            if (stream) { stream.getTracks().forEach(t => t.stop()); document.getElementById('videoElement').srcObject = null; }
         }
 
         function takeSnapshot() {
@@ -621,34 +585,24 @@
             const statusLabel = document.getElementById('locationStatus');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        currentLocation.lat = position.coords.latitude;
-                        currentLocation.lng = position.coords.longitude;
-                        statusLabel.innerHTML = `<i class="fa-solid fa-map-pin text-[#D4AF37]"></i> Akurasi: ${Math.round(position.coords.accuracy)}m`;
-                    },
-                    (error) => { statusLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Gagal ambil lokasi. Pastikan GPS aktif.`; },
+                    (p) => { currentLocation.lat = p.coords.latitude; currentLocation.lng = p.coords.longitude; statusLabel.innerHTML = `<i class="fa-solid fa-map-pin text-[#D4AF37]"></i> Akurasi: ${Math.round(p.coords.accuracy)}m`; },
+                    (e) => { statusLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Gagal ambil lokasi GPS.`; },
                     { enableHighAccuracy: true }
                 );
-            } else { statusLabel.innerHTML = "Browser tidak mendukung GPS."; }
+            }
         }
 
         async function jalankanAbsen(tipe) {
             if (!currentLocation.lat || !currentLocation.lng) {
-                Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Harap tunggu hingga sistem mendapatkan lokasi GPS Anda.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
+                Swal.fire({icon:'warning', title:'Lokasi Kosong', text:'Tunggu hingga sistem mendapat lokasi GPS.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
                 return;
             }
             
-            // Ambil foto sesaat sebelum loading
             const fotoBase64 = takeSnapshot();
-            
             showLoading();
-            const res = await callAPI({
-                action: 'attend', niy: currentUser.niy, nama: currentUser.nama, tipe: tipe,
-                lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64
-            });
+            const res = await callAPI({ action: 'attend', niy: currentUser.niy, nama: currentUser.nama, tipe: tipe, lat: currentLocation.lat, lng: currentLocation.lng, foto: fotoBase64 });
             hideLoading();
             
-            // TUTUP KAMERA OTOMATIS SETELAH PROSES SELESAI
             stopCamera();
             document.getElementById('cameraPlaceholder').classList.remove('hidden');
             document.getElementById('videoElement').classList.add('hidden');
@@ -656,7 +610,6 @@
             document.getElementById('actionButtons').classList.add('hidden');
             
             if (res.success) {
-                // Popup Berhasil
                 let badge = 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300';
                 Swal.fire({
                     icon: 'success', title: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
@@ -664,16 +617,13 @@
                 });
                 loadPersonalLog();
             } else {
-                // Popup Gagal (Bisa karena geofence atau error lain)
                 if(res.geofence) {
                     let badge = 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';
                     Swal.fire({
                         icon: 'error', title: 'Gagal Absen', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454',
                         html: `<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: <b>${res.geofence.jarak}</b><br>Status: <span class="px-2 py-1 rounded text-xs mt-2 inline-block font-bold ${badge}">${res.geofence.status}</span>`
                     });
-                } else {
-                    Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); 
-                }
+                } else { Swal.fire({icon: 'error', title: 'Gagal', text: res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
             }
         }
 
@@ -683,8 +633,7 @@
             if (res.success && res.data && res.data.length > 0) {
                 container.innerHTML = '';
                 res.data.forEach(row => {
-                    let isMasuk = row.tipe === 'Masuk';
-                    let badgeTipe = isMasuk ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300';
+                    let badgeTipe = row.tipe === 'Masuk' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300';
                     let badgeStatus = row.status === 'Di Dalam Area' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300';
                     container.innerHTML += `
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
@@ -697,34 +646,18 @@
             } else { container.innerHTML = '<tr><td colspan="3" class="text-center py-6 text-gray-400 dark:text-gray-500">Belum ada riwayat absensi.</td></tr>'; }
         }
 
-        // ================= ADMIN: NAVIGATION TAB =================
+        // ================= ADMIN: TAB NAVIGATION =================
         function switchAdminTab(tabName) {
-            document.querySelectorAll('.admin-content').forEach(el => {
-                el.classList.add('hidden');
-                el.classList.remove('fade-in');
-            });
-            document.querySelectorAll('.admin-tab').forEach(el => {
-                el.classList.remove('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
-                el.classList.add('md:border-transparent', 'text-gray-500', 'dark:text-gray-400');
-            });
-
+            document.querySelectorAll('.admin-content').forEach(el => { el.classList.add('hidden'); el.classList.remove('fade-in'); });
+            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]'); el.classList.add('md:border-transparent', 'text-gray-500', 'dark:text-gray-400'); });
+            
             const contentId = 'adminTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
-            document.getElementById(contentId).classList.remove('hidden');
-            document.getElementById(contentId).classList.add('fade-in');
+            document.getElementById(contentId).classList.remove('hidden'); document.getElementById(contentId).classList.add('fade-in');
             
-            const activeBtnId = 'btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
-            const activeBtn = document.getElementById(activeBtnId);
-            activeBtn.classList.remove('md:border-transparent', 'text-gray-500', 'dark:text-gray-400');
-            activeBtn.classList.add('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
+            const activeBtn = document.getElementById('btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+            activeBtn.classList.remove('md:border-transparent', 'text-gray-500', 'dark:text-gray-400'); activeBtn.classList.add('md:border-[#D4AF37]', 'text-[#A88C61]', 'dark:text-[#D4AF37]');
             
-            // Render ulang ukuran peta jika tab pengaturan dibuka
-            if (tabName === 'settings' && mapInstance) {
-                // Memastikan peta mendapatkan ukuran penuh sesaat setelah class hidden dihilangkan
-                setTimeout(() => {
-                    mapInstance.invalidateSize();
-                    if(mapMarker) mapInstance.panTo(mapMarker.getLatLng());
-                }, 100); 
-            }
+            if (tabName === 'settings' && mapInstance) { setTimeout(() => { mapInstance.invalidateSize(); if(mapMarker) mapInstance.panTo(mapMarker.getLatLng()); }, 100); }
         }
 
         // ================= ADMIN: DASHBOARD & PENGATURAN =================
@@ -734,12 +667,10 @@
                 document.getElementById('statTotal').innerText = res.data.totalPimpinan;
                 document.getElementById('statHadir').innerText = res.data.hadirHariIni;
                 
-                // Render Recent Logs
                 const logContainer = document.getElementById('recentLogs');
                 logContainer.innerHTML = '';
-                if(res.data.history.length === 0) {
-                    logContainer.innerHTML = '<div class="text-center text-gray-400 mt-4">Belum ada data absensi masuk.</div>';
-                } else {
+                if(res.data.history.length === 0) logContainer.innerHTML = '<div class="text-center text-gray-400 mt-4">Belum ada data absensi.</div>';
+                else {
                     res.data.history.forEach(row => {
                         let isMasuk = row[4] === 'Masuk';
                         let icon = isMasuk ? '<i class="fa-solid fa-arrow-right-to-bracket text-blue-500 dark:text-blue-400"></i>' : '<i class="fa-solid fa-arrow-right-from-bracket text-orange-500 dark:text-orange-400"></i>';
@@ -748,135 +679,106 @@
                             <div class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition text-sm">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-600 shadow-sm flex items-center justify-center">${icon}</div>
-                                    <div>
-                                        <p class="font-semibold text-gray-800 dark:text-gray-200">${row[3]} <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-1">(${row[2]})</span></p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${new Date(row[0]).toLocaleString('id-ID')}</p>
-                                    </div>
-                                </div>
-                                <span class="text-[10px] font-bold px-2 py-1 rounded ${badgeStatus}">${row[8]}</span>
-                            </div>
-                        `;
+                                    <div><p class="font-semibold text-gray-800 dark:text-gray-200">${row[3]} <span class="text-[10px] text-gray-400 ml-1">(${row[2]})</span></p>
+                                    <p class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i>${new Date(row[0]).toLocaleString('id-ID')}</p></div>
+                                </div><span class="text-[10px] font-bold px-2 py-1 rounded ${badgeStatus}">${row[8]}</span>
+                            </div>`;
                     });
                 }
 
-                // Render User List
+                // Render User List & Simpan ke Memory (Untuk fitur Edit/Hapus)
                 const userContainer = document.getElementById('adminUserList');
                 userContainer.innerHTML = '';
+                userMap = {}; // Reset state
                 if(res.data.userList && res.data.userList.length > 0) {
                     res.data.userList.forEach(u => {
+                        userMap[u.niy] = u; // Save state
                         userContainer.innerHTML += `
                             <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
                                 <td class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">${u.niy}</td>
                                 <td class="px-4 py-3 text-gray-800 dark:text-gray-200">${u.nama}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">${u.lembaga || '-'}</td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">${u.jabatan}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="openEditModal('${u.niy}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button onclick="confirmDelete('${u.niy}')" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     });
-                } else {
-                    userContainer.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-400 dark:text-gray-500">Belum ada data pimpinan terdaftar.</td></tr>';
-                }
+                } else { userContainer.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">Belum ada data pimpinan terdaftar.</td></tr>'; }
 
-                renderChart(res.data.charts); // Mengirim data grafik dari database ke fungsi perender
+                renderChart(res.data.charts);
             }
         }
 
-        // ================= FITUR DINAMIS LEMBAGA (PENGATURAN) =================
-        function renderLembagaTags() {
-            const str = document.getElementById('setLembaga').value;
-            const lembagas = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-            const container = document.getElementById('lembagaTags');
+        // ================= FITUR DINAMIS LEMBAGA & JABATAN =================
+        function renderTags(inputId, containerId, selectId) {
+            const str = document.getElementById(inputId).value;
+            const items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
+            const container = document.getElementById(containerId);
             container.innerHTML = '';
             
-            lembagas.forEach((l, index) => {
+            items.forEach((val, index) => {
                 container.innerHTML += `
                     <span class="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-lg text-sm flex items-center font-medium shadow-sm">
-                        ${l} 
-                        <button type="button" onclick="hapusLembaga(${index})" class="ml-2 w-5 h-5 flex items-center justify-center bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 rounded-full transition">
-                            <i class="fa-solid fa-xmark text-xs"></i>
-                        </button>
+                        ${val} <button type="button" onclick="hapusTag('${inputId}', '${containerId}', '${selectId}', ${index})" class="ml-2 w-5 h-5 flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-full transition"><i class="fa-solid fa-xmark text-xs"></i></button>
                     </span>`;
             });
             
-            // Perbarui juga Dropdown di form Tambah Pimpinan
-            const selectLembaga = document.getElementById('addLembaga');
-            selectLembaga.innerHTML = '<option value="">-- Pilih Lembaga --</option>';
-            lembagas.forEach(val => { selectLembaga.innerHTML += `<option value="${val}">${val}</option>`; });
+            // Perbarui Dropdown di Form
+            const selectEl = document.getElementById(selectId);
+            selectEl.innerHTML = '<option value="">-- Pilih --</option>';
+            items.forEach(val => { selectEl.innerHTML += `<option value="${val}">${val}</option>`; });
         }
 
-        function tambahLembaga() {
-            const input = document.getElementById('newLembagaInput');
+        function tambahTag(newInputId, hiddenInputId, containerId, selectId) {
+            const input = document.getElementById(newInputId);
             const val = input.value.trim();
             if(val) {
-                let str = document.getElementById('setLembaga').value;
-                let lembagas = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-                if(!lembagas.includes(val)) {
-                    lembagas.push(val);
-                    document.getElementById('setLembaga').value = lembagas.join(', ');
-                    renderLembagaTags();
+                let str = document.getElementById(hiddenInputId).value;
+                let items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
+                if(!items.includes(val)) {
+                    items.push(val);
+                    document.getElementById(hiddenInputId).value = items.join(', ');
+                    renderTags(hiddenInputId, containerId, selectId);
                     input.value = '';
-                } else {
-                    Swal.fire({icon:'info', title:'Sudah Ada', text:'Lembaga tersebut sudah ada dalam daftar.', timer:2000, showConfirmButton:false});
-                }
+                } else { Swal.fire({icon:'info', title:'Sudah Ada', timer:2000, showConfirmButton:false}); }
             }
         }
 
-        function hapusLembaga(index) {
-            let str = document.getElementById('setLembaga').value;
-            let lembagas = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
-            lembagas.splice(index, 1);
-            document.getElementById('setLembaga').value = lembagas.join(', ');
-            renderLembagaTags();
+        function hapusTag(hiddenInputId, containerId, selectId, index) {
+            let str = document.getElementById(hiddenInputId).value;
+            let items = str ? str.split(',').map(s => s.trim()).filter(s => s) : [];
+            items.splice(index, 1);
+            document.getElementById(hiddenInputId).value = items.join(', ');
+            renderTags(hiddenInputId, containerId, selectId);
         }
+
+        // Pembungkus untuk tombol HTML
+        function tambahLembaga() { tambahTag('newLembagaInput', 'setLembaga', 'lembagaTags', 'addLembaga'); }
+        function tambahJabatan() { tambahTag('newJabatanInput', 'setJabatan', 'jabatanTags', 'addJabatan'); }
+
 
         // Fitur Peta Leaflet
         function initGeofenceMap(lat, lng, radius) {
-            if (mapInstance) return; // Mencegah inisialisasi ganda
-
-            // Titik default jika kosong (Jember area)
-            const centerLat = parseFloat(lat) || -8.172533;
-            const centerLng = parseFloat(lng) || 113.702331;
-            const rad = parseFloat(radius) || 100;
-
+            if (mapInstance) return; 
+            const centerLat = parseFloat(lat) || -8.172533; const centerLng = parseFloat(lng) || 113.702331; const rad = parseFloat(radius) || 100;
             mapInstance = L.map('mapGeofence').setView([centerLat, centerLng], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
 
-            // Layer Peta OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(mapInstance);
-
-            // FIX: Gunakan Custom Icon dari FontAwesome agar pin tidak hilang (Leaflet image path bug)
-            const pinIcon = L.divIcon({
-                className: 'custom-pin',
-                html: '<i class="fa-solid fa-location-dot text-4xl text-red-500 drop-shadow-md" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"></i>',
-                iconSize: [30, 42],
-                iconAnchor: [15, 42] // Posisi ujung bawah pin
-            });
-
-            // Marker (Hanya Tampil, Tidak Bisa Digeser)
+            const pinIcon = L.divIcon({ className: 'custom-pin', html: '<i class="fa-solid fa-location-dot text-4xl text-red-500 drop-shadow-md"></i>', iconSize: [30, 42], iconAnchor: [15, 42] });
             mapMarker = L.marker([centerLat, centerLng], {icon: pinIcon}).addTo(mapInstance);
+            mapCircle = L.circle([centerLat, centerLng], { color: '#D4AF37', fillColor: '#D4AF37', fillOpacity: 0.25, radius: rad }).addTo(mapInstance);
 
-            // Lingkaran Radius (Warna Emas menyesuaikan tema)
-            mapCircle = L.circle([centerLat, centerLng], {
-                color: '#D4AF37',       // Stroke Emas
-                fillColor: '#D4AF37',   // Fill Emas
-                fillOpacity: 0.25,
-                radius: rad
-            }).addTo(mapInstance);
-
-            // Event Listeners untuk Input Manual agar Peta Update Real-time
             document.getElementById('setLat').addEventListener('input', syncMapFromInputs);
             document.getElementById('setLng').addEventListener('input', syncMapFromInputs);
             document.getElementById('setRadius').addEventListener('input', syncMapFromInputs);
 
-            // Observer untuk merender ulang peta saat tab dimunculkan (mengatasi bug peta abu-abu)
             const mapContainer = document.getElementById('mapGeofence');
-            const observer = new ResizeObserver(() => {
-                if (mapInstance) {
-                    mapInstance.invalidateSize();
-                }
-            });
-            observer.observe(mapContainer);
+            new ResizeObserver(() => { if (mapInstance) mapInstance.invalidateSize(); }).observe(mapContainer);
         }
 
         function syncMapFromInputs() {
@@ -884,12 +786,7 @@
             const lat = parseFloat(document.getElementById('setLat').value) || 0;
             const lng = parseFloat(document.getElementById('setLng').value) || 0;
             const rad = parseFloat(document.getElementById('setRadius').value) || 100;
-
-            if (lat !== 0 && lng !== 0) {
-                mapMarker.setLatLng([lat, lng]);
-                mapCircle.setLatLng([lat, lng]);
-                mapInstance.panTo([lat, lng]);
-            }
+            if (lat !== 0 && lng !== 0) { mapMarker.setLatLng([lat, lng]); mapCircle.setLatLng([lat, lng]); mapInstance.panTo([lat, lng]); }
             mapCircle.setRadius(rad);
         }
 
@@ -904,166 +801,130 @@
                 document.getElementById('setLng').value = lng;
                 document.getElementById('setRadius').value = radius;
                 
-                let daftarLembaga = res.data['Daftar_Lembaga'] || 'PAUD, SD, SMP, SMA';
-                document.getElementById('setLembaga').value = daftarLembaga;
-                renderLembagaTags(); // Merender tag dan dropdown
+                document.getElementById('setLembaga').value = res.data['Daftar_Lembaga'] || 'PAUD, SD, SMP, SMA';
+                renderTags('setLembaga', 'lembagaTags', 'addLembaga');
+                
+                document.getElementById('setJabatan').value = res.data['Daftar_Jabatan'] || 'Kepala Sekolah, Wakil Kepala, Guru';
+                renderTags('setJabatan', 'jabatanTags', 'addJabatan');
 
-                // Inisialisasi Peta setelah data kordinat dimuat
-                initGeofenceMap(lat, lng, radius);
-                // Sinkronisasi jika peta sudah pernah dirender sebelumnya
-                syncMapFromInputs(); 
+                initGeofenceMap(lat, lng, radius); syncMapFromInputs(); 
             }
         }
 
         async function handleSaveSettings(e) {
             e.preventDefault();
             const payload = {
-                action: 'saveSettings',
-                lat: document.getElementById('setLat').value,
-                lng: document.getElementById('setLng').value,
-                radius: document.getElementById('setRadius').value,
-                lembaga: document.getElementById('setLembaga').value
+                action: 'saveSettings', lat: document.getElementById('setLat').value, lng: document.getElementById('setLng').value,
+                radius: document.getElementById('setRadius').value, lembaga: document.getElementById('setLembaga').value, jabatanList: document.getElementById('setJabatan').value
             };
-            
-            showLoading();
-            const res = await callAPI(payload);
-            hideLoading();
-            
-            if(res.success) {
-                Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-            } else {
-                Swal.fire({icon:'error', title:'Error', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-            }
+            showLoading(); const res = await callAPI(payload); hideLoading();
+            if(res.success) Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
+            else Swal.fire({icon:'error', title:'Error', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
         }
 
         // ================= CHART RENDERER =================
         function renderChart(chartData) {
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#9ca3af' : '#4b5563';
-            
-            if (!chartData) return; // Mencegah error jika data grafik kosong
+            if (!chartData) return;
 
-            // Palet Warna Vibran & Menarik (Berwarna-warni)
-            const vibrantBgColors = [
-                'rgba(59, 130, 246, 0.8)',  // Blue
-                'rgba(239, 68, 68, 0.8)',   // Red
-                'rgba(16, 185, 129, 0.8)',  // Emerald
-                'rgba(245, 158, 11, 0.8)',  // Amber
-                'rgba(139, 92, 246, 0.8)',  // Violet
-                'rgba(6, 182, 212, 0.8)'    // Cyan
-            ];
-            
-            // Fungsi generator warna jika datanya banyak
-            const getColors = (len, opacity) => Array.from({length: len}, (_, i) => vibrantBgColors[i % vibrantBgColors.length].replace('0.8)', opacity + ')'));
+            const vibrantBgColors = ['rgba(59, 130, 246, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(6, 182, 212, 0.8)'];
+            const getColors = (len, op) => Array.from({length: len}, (_, i) => vibrantBgColors[i % vibrantBgColors.length].replace('0.8)', op + ')'));
 
-            // 1. Grafik Mingguan (Bar)
+            // Weekly
             const ctxWeekly = document.getElementById('attendanceChart').getContext('2d');
             if(weeklyChart) weeklyChart.destroy();
-            weeklyChart = new Chart(ctxWeekly, {
-                type: 'bar',
-                data: {
-                    labels: chartData.weekly.labels,
-                    datasets: [{
-                        label: 'Kehadiran', 
-                        data: chartData.weekly.data, 
-                        backgroundColor: getColors(chartData.weekly.data.length, 0.8),
-                        borderColor: getColors(chartData.weekly.data.length, 1),
-                        borderWidth: 1, 
-                        borderRadius: 6
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    scales: { 
-                        x: { ticks: { color: textColor } },
-                        y: { beginAtZero: true, suggestedMax: 20, ticks: { color: textColor, stepSize: 1 } } 
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
-            });
+            weeklyChart = new Chart(ctxWeekly, { type: 'bar', data: { labels: chartData.weekly.labels, datasets: [{ label: 'Kehadiran', data: chartData.weekly.data, backgroundColor: getColors(chartData.weekly.data.length, 0.8), borderColor: getColors(chartData.weekly.data.length, 1), borderWidth: 1, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { beginAtZero: true, suggestedMax: 20, ticks: { color: textColor, stepSize: 1 } } }, plugins: { legend: { display: false } } } });
 
-            // 2. Grafik Tahunan (Line)
+            // Yearly
             const ctxYearly = document.getElementById('yearlyChart').getContext('2d');
             if(yearlyChart) yearlyChart.destroy();
-            yearlyChart = new Chart(ctxYearly, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
-                    datasets: [{
-                        label: 'Total Kehadiran', 
-                        data: chartData.yearly.data, 
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)', // Light Blue Fill
-                        borderColor: '#3B82F6', // Blue Line
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4, // Membuat garis melengkung halus
-                        pointBackgroundColor: '#1D4ED8'
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    scales: { 
-                        x: { ticks: { color: textColor } },
-                        y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 } } 
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
-            });
+            yearlyChart = new Chart(ctxYearly, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'], datasets: [{ label: 'Total Kehadiran', data: chartData.yearly.data, backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3B82F6', borderWidth: 2, fill: true, tension: 0.4, pointBackgroundColor: '#1D4ED8' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: textColor } }, y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 } } }, plugins: { legend: { display: false } } } });
 
-            // 3. Grafik Per Lembaga (Doughnut)
+            // Lembaga
             const ctxLembaga = document.getElementById('lembagaChart').getContext('2d');
             if(lembagaChart) lembagaChart.destroy();
-            
             let lbgLabels = chartData.lembaga.labels.length > 0 ? chartData.lembaga.labels : ['Belum ada data'];
             let lbgData = chartData.lembaga.data.length > 0 ? chartData.lembaga.data : [1];
             let lbgColors = chartData.lembaga.data.length > 0 ? getColors(chartData.lembaga.data.length, 0.8) : ['rgba(156, 163, 175, 0.3)'];
+            lembagaChart = new Chart(ctxLembaga, { type: 'doughnut', data: { labels: lbgLabels, datasets: [{ data: lbgData, backgroundColor: lbgColors, borderColor: isDark ? '#1f2937' : '#ffffff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: textColor } } } } });
+        }
 
-            lembagaChart = new Chart(ctxLembaga, {
-                type: 'doughnut',
-                data: {
-                    labels: lbgLabels,
-                    datasets: [{
-                        data: lbgData,
-                        backgroundColor: lbgColors,
-                        borderColor: isDark ? '#1f2937' : '#ffffff',
-                        borderWidth: 2
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'right', labels: { color: textColor } } 
-                    } 
+        // ================= ADMIN: USER MANAGEMENT (ADD, EDIT, DELETE) =================
+        function closeModal() { document.getElementById('modalAddUser').classList.add('hidden'); }
+        
+        function showAddUserModal() { 
+            isEditMode = false; currentEditNiy = '';
+            document.getElementById('modalTitle').innerText = 'Tambah Pimpinan';
+            document.getElementById('formAddUser').reset();
+            
+            // NIY bisa diketik, Password Wajib
+            document.getElementById('addNiy').readOnly = false;
+            document.getElementById('addNiy').classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
+            document.getElementById('addPassword').required = true;
+            document.getElementById('addPassword').placeholder = 'Password Login';
+            
+            document.getElementById('modalAddUser').classList.remove('hidden'); 
+        }
+
+        function openEditModal(niy) {
+            let user = userMap[niy];
+            if(!user) return;
+            
+            isEditMode = true; currentEditNiy = niy;
+            document.getElementById('modalTitle').innerText = 'Edit Data Pimpinan';
+            
+            // Isi Form dengan data user
+            document.getElementById('addNiy').value = user.niy;
+            document.getElementById('addNiy').readOnly = true; // NIY tidak boleh diganti saat edit
+            document.getElementById('addNiy').classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
+            
+            document.getElementById('addNama').value = user.nama;
+            document.getElementById('addTglLahir').value = user.tglLahir;
+            document.getElementById('addJk').value = user.jk;
+            document.getElementById('addLembaga').value = user.lembaga;
+            document.getElementById('addJabatan').value = user.jabatan;
+            
+            // Kosongkan password. Jadikan Opsional
+            document.getElementById('addPassword').value = '';
+            document.getElementById('addPassword').required = false;
+            document.getElementById('addPassword').placeholder = '(Kosongkan jika tidak diubah)';
+            
+            document.getElementById('modalAddUser').classList.remove('hidden');
+        }
+        
+        function confirmDelete(niy) {
+            let user = userMap[niy];
+            Swal.fire({
+                title: 'Hapus Pimpinan?',
+                html: `Anda yakin ingin menghapus data pimpinan <b>${user.nama}</b>?<br>Data tidak bisa dikembalikan.`,
+                icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#8a8a8a',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    showLoading();
+                    const res = await callAPI({ action: 'deleteUser', niy: niy });
+                    hideLoading();
+                    if(res.success) { Swal.fire('Terhapus!', res.message, 'success'); loadAdminData(); } 
+                    else { Swal.fire('Gagal', res.message, 'error'); }
                 }
             });
         }
 
-        // ================= ADMIN: USER MANAGEMENT =================
-        function showAddUserModal() { document.getElementById('modalAddUser').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('modalAddUser').classList.add('hidden'); }
-        
-        // Fungsi Kompresi Gambar ke Base64 (Untuk Foto Profil)
+        // Kompres Foto
         function compressAvatar(file) {
             return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image(); img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const maxSize = 200; // Resolusi dikompres ke 200px agar database spreadsheet ringan
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } } 
-                        else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.6)); // Kualitas JPEG 60%
+                        let w = img.width, h = img.height; const maxSize = 200;
+                        if (w > h) { if (w > maxSize) { h *= maxSize / w; w = maxSize; } } else { if (h > maxSize) { w *= maxSize / h; h = maxSize; } }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
                     };
                 };
             });
@@ -1071,29 +932,26 @@
 
         async function handleAddUser(e) {
             e.preventDefault();
-            
             let fotoBase64 = '';
             const fileInput = document.getElementById('addFoto');
-            if (fileInput.files.length > 0) {
-                fotoBase64 = await compressAvatar(fileInput.files[0]);
-            }
+            if (fileInput.files.length > 0) fotoBase64 = await compressAvatar(fileInput.files[0]);
 
             const payload = {
-                action: 'addUser', niy: document.getElementById('addNiy').value, nama: document.getElementById('addNama').value,
+                action: isEditMode ? 'editUser' : 'addUser', 
+                niy: isEditMode ? currentEditNiy : document.getElementById('addNiy').value, 
+                nama: document.getElementById('addNama').value,
                 lembaga: document.getElementById('addLembaga').value,
-                jabatan: document.getElementById('addJabatan').value, password: document.getElementById('addPassword').value,
+                jabatan: document.getElementById('addJabatan').value, 
+                tglLahir: document.getElementById('addTglLahir').value,
+                jk: document.getElementById('addJk').value,
+                password: document.getElementById('addPassword').value, 
                 foto: fotoBase64
             };
             
-            showLoading();
-            const res = await callAPI(payload);
-            hideLoading();
-            
+            showLoading(); const res = await callAPI(payload); hideLoading();
             if(res.success) {
-                Swal.fire({icon:'success', title:'Berhasil', text:'Pimpinan baru telah didaftarkan.', background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
-                closeModal();
-                loadAdminData(); 
-                e.target.reset();
+                Swal.fire({icon:'success', title:'Berhasil', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'});
+                closeModal(); loadAdminData(); 
             } else { Swal.fire({icon:'error', title:'Error', text:res.message, background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff', color: document.documentElement.classList.contains('dark') ? '#fff' : '#545454'}); }
         }
     </script>
