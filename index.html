@@ -618,9 +618,36 @@
         window.addEventListener('DOMContentLoaded',()=>{loadPublicLogs();let d=new Date(),mm=String(d.getMonth()+1).padStart(2,'0'),td=`${d.getFullYear()}-${mm}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('filterBulanRekap').value=`${d.getFullYear()}-${mm}`;document.getElementById('izinTanggalMulai').value=td;document.getElementById('izinTanggalSelesai').value=td;updateClock();});
         async function callAPI(p){try{const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(p)});return await r.json();}catch(e){return{success:false,message:'Gagal terhubung ke server.'}}}
 
-        async function handleLogin(e){e.preventDefault();const b=document.getElementById('btnLogin'),bt=document.getElementById('btnLoginText'),sp=document.getElementById('btnLoginSpinner');b.disabled=true;bt.innerText='Memproses...';sp.classList.remove('hidden');const res=await callAPI({action:'login',niy:document.getElementById('niy').value,password:document.getElementById('password').value});b.disabled=false;bt.innerText='Login';sp.classList.add('hidden');if(res.success){loginSuccess(res.user)}else{Swal.fire({icon:'error',title:'Login Gagal',text:res.message})}}
-        function loginSuccess(u){currentUser=u;document.getElementById('loginSection').classList.add('hidden');document.getElementById('profileHeader').classList.remove('hidden');document.getElementById('headerNama').innerText=u.nama;document.getElementById('headerNiy').innerText=u.niy;document.getElementById('headerJabatan').innerText=u.jabatan||u.role;let inisial=u.nama.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();const hab=document.getElementById('headerInitials').parentElement;if(u.foto&&u.foto.startsWith('data:image')){hab.innerHTML=`<img src="${u.foto}" class="w-full h-full rounded-full object-cover">`;hab.classList.remove('bg-gradient-to-tr')}else{hab.innerHTML=`<span id="headerInitials">${inisial}</span>`;hab.classList.add('bg-gradient-to-tr')}if(u.role==='admin'){document.getElementById('adminSection').classList.remove('hidden');switchAdminTab('dashboard');loadAdminData();loadSettings()}else{document.getElementById('pimpinanSection').classList.remove('hidden');document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');loadPersonalLog()}}
+        async function handleLogin(e){e.preventDefault();const b=document.getElementById('btnLogin'),bt=document.getElementById('btnLoginText'),sp=document.getElementById('btnLoginSpinner');b.disabled=true;bt.innerText='Memproses...';sp.classList.remove('hidden');const res=await callAPI({action:'login',niy:document.getElementById('niy').value,password:document.getElementById('password').value});b.disabled=false;bt.innerText='Login';sp.classList.add('hidden');if(res.success){loginSuccess(res.user, res.birthdays)}else{Swal.fire({icon:'error',title:'Login Gagal',text:res.message})}}
+        function loginSuccess(u, birthdays = []){currentUser=u;document.getElementById('loginSection').classList.add('hidden');document.getElementById('profileHeader').classList.remove('hidden');document.getElementById('headerNama').innerText=u.nama;document.getElementById('headerNiy').innerText=u.niy;document.getElementById('headerJabatan').innerText=u.jabatan||u.role;let inisial=u.nama.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();const hab=document.getElementById('headerInitials').parentElement;if(u.foto&&u.foto.startsWith('data:image')){hab.innerHTML=`<img src="${u.foto}" class="w-full h-full rounded-full object-cover">`;hab.classList.remove('bg-gradient-to-tr')}else{hab.innerHTML=`<span id="headerInitials">${inisial}</span>`;hab.classList.add('bg-gradient-to-tr')}if(u.role==='admin'){document.getElementById('adminSection').classList.remove('hidden');switchAdminTab('dashboard');loadAdminData();loadSettings()}else{document.getElementById('pimpinanSection').classList.remove('hidden');document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');loadPersonalLog()}if(birthdays && birthdays.length > 0){showBirthdayAlert(birthdays);}}
         function logout(){location.reload()}
+
+        function showBirthdayAlert(birthdays) {
+            let htmlContent = '<div class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar p-1 mt-2">';
+            birthdays.forEach(b => {
+                let fotoSrc = (b.foto && b.foto.startsWith('data:image')) ? b.foto : 'https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png';
+                htmlContent += `
+                <div class="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-[#FDF8E7] dark:from-gray-700 dark:to-gray-800 rounded-xl border border-yellow-200 dark:border-gray-600 shadow-sm">
+                    <img src="${fotoSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-[#D4AF37] mr-3 shadow-sm">
+                    <div class="text-left flex-1">
+                        <h4 class="font-bold text-gray-800 dark:text-white text-sm leading-tight">${b.nama}</h4>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${b.jabatan} - ${b.lembaga}</p>
+                    </div>
+                    <i class="fa-solid fa-cake-candles text-[#D4AF37] text-2xl animate-bounce ml-2"></i>
+                </div>`;
+            });
+            htmlContent += '</div>';
+            let titleText = birthdays.length > 1 ? `🎉 Ultah ${birthdays.length} Pimpinan! 🎉` : '🎉 Selamat Ulang Tahun! 🎉';
+            
+            Swal.fire({
+                title: `<span class="text-xl font-bold text-[#D4AF37]">${titleText}</span>`,
+                html: htmlContent,
+                confirmButtonText: 'Tutup Notifikasi',
+                confirmButtonColor: '#A88C61',
+                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
+                backdrop: `rgba(0,0,0,0.6) url("https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHRnN3J1bW83ZnlpeHh1NncxbWpqdHZ0aXlyY2I2bGFveXg2MGFyeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZsUptGz7B7F5E9W/giphy.gif") left top no-repeat`
+            });
+        }
 
         function initAttendance(){document.getElementById('cameraPlaceholder').classList.add('hidden');document.getElementById('videoElement').classList.remove('hidden');document.getElementById('locationStatus').classList.remove('hidden');document.getElementById('actionButtons').classList.remove('hidden');document.getElementById('btnOpenCamera').classList.remove('animate-pulse');startCamera();getLocation()}
         function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(s=>{stream=s;document.getElementById('videoElement').srcObject=stream}).catch(err=>{Swal.fire('Error','Izinkan akses kamera browser Anda.','warning')})}
