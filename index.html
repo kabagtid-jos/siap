@@ -674,7 +674,24 @@
         
         async function loadPublicLogs(){const res=await callAPI({action:'getPublicLogs'});const c=document.getElementById('publicLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3 font-semibold">${r.nama}</td><td class="px-4 py-3">${new Date(r.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td><td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded-lg font-bold ${bt}">${r.tipe}</span></td></tr>`})}else{c.innerHTML='<tr><td colspan="3" class="text-center py-8 text-gray-500">Belum ada kehadiran/izin hari ini.</td></tr>'}}
 
-        function switchAdminTab(t){document.querySelectorAll('.admin-content').forEach(el=>el.classList.add('hidden'));document.querySelectorAll('.admin-tab').forEach(el=>{el.classList.remove('md:border-[#D4AF37]','text-[#A88C61]');el.classList.add('md:border-transparent','text-gray-500')});document.getElementById('adminTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('hidden');document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');if(t==='settings'&&mapInstance){setTimeout(()=>{mapInstance.invalidateSize()},100)}if(t==='rekap')loadRekapData()}
+        function switchAdminTab(t){
+            document.querySelectorAll('.admin-content').forEach(el=>el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el=>{el.classList.remove('md:border-[#D4AF37]','text-[#A88C61]');el.classList.add('md:border-transparent','text-gray-500')});
+            document.getElementById('adminTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('hidden');
+            document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');
+            
+            // FIX: Perpanjang waktu render ulang map saat tab dibuka & kunci ulang kordinat tengahnya
+            if(t==='settings' && mapInstance){
+                setTimeout(() => {
+                    mapInstance.invalidateSize(); // Hitung ulang ukuran canvas
+                    let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
+                    let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
+                    mapInstance.setView([lat, lng], 17); // Kunci posisi tengah
+                }, 300); // Tunggu 300ms sampai animasi tab benar-benar terbuka
+            }
+            if(t==='rekap') loadRekapData()
+        }
+        
         function showTodayList(t){let ti='',ls=[],ht='<div class="text-left text-sm max-h-64 overflow-y-auto custom-scrollbar">';if(t==='hadir'){ti='Pimpinan Hadir';ls=todayDataLists.hadir.list}else if(t==='izin'){ti='Pimpinan Izin/Dinas';ls=todayDataLists.izin.list}else{ti='Pimpinan Sakit';ls=todayDataLists.sakit.list}if(ls.length===0){ht+='<p class="text-center text-gray-500 py-6">Tidak ada data hari ini.</p>'}else{ls.forEach(i=>{ht+=`<div class="border-b dark:border-gray-700 py-3 flex flex-col"><span class="font-bold">${i.nama}</span><span class="text-[11px] text-gray-500"><i class="fa-solid fa-building text-[#D4AF37] mr-1"></i> ${i.lembaga||'-'} <i class="fa-regular fa-clock text-[#A88C61] ml-1 mr-1"></i> <span class="italic text-gray-400">${i.detail}</span></span></div>`})}ht+='</div>';Swal.fire({title:ti,html:ht,confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
 
         function filterPimpinan(){let v=document.getElementById('searchPimpinan').value.toLowerCase(),r=document.getElementById('adminUserList').getElementsByTagName('tr');for(let i=0;i<r.length;i++){r[i].style.display=r[i].innerText.toLowerCase().includes(v)?'':'none'}}
