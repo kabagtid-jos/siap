@@ -683,20 +683,22 @@
             document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');
             
             if(t==='settings'){
-                // SOLUSI PALING JITU: Hancurkan peta abu-abu, dan gambar ulang peta fresh!
+                // FIX FINAL: Animasi CSS .fade-in berjalan 0.4 detik (400ms).
+                // Kita tunggu 550ms agar elemen DOM berhenti bergerak sepenuhnya, barulah Leaflet dirender.
                 setTimeout(() => {
                     let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
                     let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
                     let rad = parseFloat(document.getElementById('setRadius').value) || 100;
                     
-                    if (mapInstance) {
-                        mapInstance.remove(); // Hapus instance yang rusak
-                        mapInstance = null;
-                        document.getElementById('mapGeofence').innerHTML = ''; // Bersihkan container
+                    if (!mapInstance) {
+                        initGeofenceMap(lat, lng, rad);
+                    } else {
+                        // Tidak perlu dihancurkan, cukup paksa kalkulasi ulang ukuran kanvasnya
+                        mapInstance.invalidateSize(true);
                     }
-                    initGeofenceMap(lat, lng, rad); // Buat ulang peta secara segar
                     syncMapFromInputs();
-                }, 300); // 300ms cukup menunggu animasi tab CSS terbuka
+                    mapInstance.setView([lat, lng], 17); // Kunci posisi agar tidak bergeser
+                }, 550); 
             }
             if(t==='rekap') loadRekapData();
         }
