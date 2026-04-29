@@ -555,6 +555,48 @@
         </div>
     </div>
 
+    <!-- Modal PDF Preview -->
+    <div id="modalPdfPreview" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-5 w-full max-w-5xl shadow-2xl border dark:border-gray-700 h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i> Preview Rekap Bisyaroh</h3>
+                <button onclick="closePdfPreview()" class="text-gray-400 hover:text-red-500 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex flex-wrap gap-4 mb-4 items-end">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Ukuran Kertas</label>
+                    <select id="pdfPageSize" onchange="updatePdfPreview()" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        <option value="a4">A4</option>
+                        <option value="f4">F4 (Folio)</option>
+                        <option value="legal">Legal</option>
+                        <option value="letter">Letter</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Orientasi</label>
+                    <select id="pdfOrientation" onchange="updatePdfPreview()" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        <option value="p">Portrait</option>
+                        <option value="l">Landscape</option>
+                    </select>
+                </div>
+                <div class="ml-auto flex w-full sm:w-auto mt-2 sm:mt-0">
+                    <button onclick="downloadPdfFromPreview()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md flex items-center justify-center">
+                        <i class="fa-solid fa-download mr-2"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 border dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
+                <div id="pdfLoading" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 z-10 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-sm hidden">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+                    <span class="text-sm">Menerapkan Pengaturan...</span>
+                </div>
+                <iframe id="pdfPreviewFrame" class="w-full h-full border-none relative z-0" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweZs6jjAUyHWeMLzgdG3RNyL4ovaaLOHjLWd8mqs2BEM1BNYL0bbQ-NxHzZXoZGjbYPA/exec';
         let currentUser=null,currentLocation={lat:0,lng:0},stream=null,weeklyChart=null,yearlyChart=null,lembagaChart=null;
@@ -667,7 +709,70 @@
         }
 
         function exportRekapExcel(){if(!filteredRekapData||filteredRekapData.length===0){Swal.fire('Data Kosong','Tidak ada data untuk diekspor.','info');return}let t=0;const exp=filteredRekapData.map(r=>{t+=r.totalHonor;let pct=(r.maxJam==='-'||r.maxJam==0)?100:Math.min(100,Math.round((r.totalJamDiakui/r.maxJam)*100));return{"NIY":r.niy,"Nama":r.nama,"Lembaga":r.lembaga||'-',"Jabatan":r.jabatan,"Total Hari":r.totalHari,"Jam Diakui":r.totalJamDiakui.toFixed(2),"Persentase":pct+"%","Estimasi Bisyaroh":r.totalHonor}});exp.push({"NIY":"","Nama":"","Lembaga":"","Jabatan":"","Total Hari":"","Jam Diakui":"","Persentase":"TOTAL","Estimasi Bisyaroh":t});const ws=XLSX.utils.json_to_sheet(exp),wb=XLSX.utils.book_new();let filterName = document.getElementById('filterLembagaRekap').value; XLSX.utils.book_append_sheet(wb,ws,"Rekap");XLSX.writeFile(wb,`Rekap_P2S_${filterName}_${currentRekapBulan}.xlsx`)}
-        function exportRekapPDF(){if(!filteredRekapData||filteredRekapData.length===0){Swal.fire('Data Kosong','Tidak ada data untuk diekspor.','info');return}const{jsPDF}=window.jspdf,d=new jsPDF('p','pt','a4');d.setFontSize(16);d.text(`Rekapitulasi Bisyaroh P2S Abu Zairi`,40,40);d.setFontSize(11);let filterName = document.getElementById('filterLembagaRekap').value;d.text(`Periode: Bulan ${currentRekapBulan} | Lembaga: ${filterName}`,40,60);let t=0;const b=filteredRekapData.map(r=>{t+=r.totalHonor;let pct=(r.maxJam==='-'||r.maxJam==0)?100:Math.min(100,Math.round((r.totalJamDiakui/r.maxJam)*100));return[r.niy,r.nama,r.lembaga||'-',r.jabatan,r.totalHari.toString(),r.totalJamDiakui.toFixed(2),pct+'%',formatRupiah(r.totalHonor)]});b.push([{content:'TOTAL KESELURUHAN',colSpan:7,styles:{halign:'right',fontStyle:'bold'}},formatRupiah(t)]);d.autoTable({startY:80,head:[['NIY','Nama','Lembaga','Jabatan','Hari','Jam','%','Bisyaroh']],body:b,theme:'grid',headStyles:{fillColor:[212,175,55]},styles:{fontSize:9},columnStyles:{4:{halign:'center'},5:{halign:'center'},6:{halign:'center'},7:{halign:'right'}}});d.save(`Rekap_P2S_${filterName}_${currentRekapBulan}.pdf`)}
+        
+        let currentPdfDoc = null;
+        function generateRekapPDF(orientation, format) {
+            if(!filteredRekapData||filteredRekapData.length===0) return null;
+            const {jsPDF} = window.jspdf;
+            const d = new jsPDF(orientation, 'pt', format);
+            d.setFontSize(16);
+            d.text(`Rekapitulasi Bisyaroh P2S Abu Zairi`, 40, 40);
+            d.setFontSize(11);
+            let filterName = document.getElementById('filterLembagaRekap').value;
+            d.text(`Periode: Bulan ${currentRekapBulan} | Lembaga: ${filterName}`, 40, 60);
+            let t = 0;
+            const b = filteredRekapData.map(r => {
+                t += r.totalHonor;
+                let pct = (r.maxJam === '-' || r.maxJam == 0) ? 100 : Math.min(100, Math.round((r.totalJamDiakui / r.maxJam) * 100));
+                return [r.niy, r.nama, r.lembaga || '-', r.jabatan, r.totalHari.toString(), r.totalJamDiakui.toFixed(2), pct + '%', formatRupiah(r.totalHonor)];
+            });
+            b.push([{content:'TOTAL KESELURUHAN', colSpan:7, styles:{halign:'right', fontStyle:'bold'}}, formatRupiah(t)]);
+            d.autoTable({
+                startY: 80,
+                head: [['NIY','Nama','Lembaga','Jabatan','Hari','Jam','%','Bisyaroh']],
+                body: b,
+                theme: 'grid',
+                headStyles: {fillColor: [212, 175, 55]},
+                styles: {fontSize: 9},
+                columnStyles: {4:{halign:'center'}, 5:{halign:'center'}, 6:{halign:'center'}, 7:{halign:'right'}}
+            });
+            return d;
+        }
+
+        function exportRekapPDF() {
+            if(!filteredRekapData||filteredRekapData.length===0){Swal.fire('Data Kosong','Tidak ada data untuk diekspor.','info');return}
+            document.getElementById('modalPdfPreview').classList.remove('hidden');
+            updatePdfPreview();
+        }
+
+        function updatePdfPreview() {
+            document.getElementById('pdfLoading').classList.remove('hidden');
+            setTimeout(() => {
+                const size = document.getElementById('pdfPageSize').value;
+                const orientation = document.getElementById('pdfOrientation').value;
+                let formatArgs = size;
+                if(size === 'f4') formatArgs = [612, 936]; // F4 (Folio) dikonversi khusus ke ukuran points
+                
+                currentPdfDoc = generateRekapPDF(orientation, formatArgs);
+                if(currentPdfDoc) {
+                    const pdfDataUri = currentPdfDoc.output('datauristring');
+                    document.getElementById('pdfPreviewFrame').src = pdfDataUri;
+                }
+                document.getElementById('pdfLoading').classList.add('hidden');
+            }, 100);
+        }
+
+        function downloadPdfFromPreview() {
+            if(currentPdfDoc) {
+                let filterName = document.getElementById('filterLembagaRekap').value;
+                currentPdfDoc.save(`Rekap_P2S_${filterName}_${currentRekapBulan}.pdf`);
+            }
+        }
+
+        function closePdfPreview() {
+            document.getElementById('modalPdfPreview').classList.add('hidden');
+            document.getElementById('pdfPreviewFrame').src = ''; // Bersihkan memori IFrame
+        }
 
         function renderJadwalLembaga(){const c=document.getElementById('lembagaTableBody'),s=document.getElementById('addLembaga'), fl=document.getElementById('filterLembagaRekap');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';let flVal = fl ? fl.value : 'Semua'; if(fl) fl.innerHTML = '<option value="Semua">Semua Lembaga</option>';for(let n in jadwalLembagaData){let j=jadwalLembagaData[n];c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3">${j.masuk}</td><td class="p-3">${j.pulang}</td><td class="p-3 text-center"><button type="button" onclick="editJadwalLembaga('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusJadwalLembaga('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`;s.innerHTML+=`<option value="${n}">${n}</option>`;if(fl) fl.innerHTML+=`<option value="${n}">${n}</option>`;}if(fl) fl.value = flVal;document.getElementById('setJadwalLembaga').value=JSON.stringify(jadwalLembagaData)}
         function editJadwalLembaga(n){editingLembagaOldName=n;document.getElementById('newLembagaNama').value=n;document.getElementById('newLembagaMasuk').value=jadwalLembagaData[n].masuk;document.getElementById('newLembagaPulang').value=jadwalLembagaData[n].pulang;let b=document.getElementById('btnTambahLembaga');b.innerHTML='Update';b.className='w-full bg-blue-500 text-white font-bold py-2 rounded-lg text-sm'}
