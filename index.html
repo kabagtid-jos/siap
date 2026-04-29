@@ -411,20 +411,24 @@
                     <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-sliders text-[#D4AF37] mr-2"></i> Pengaturan Sistem</h3>
                     <div class="mb-6">
                         <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-map-location-dot text-[#A88C61] mr-2"></i>Peta Geofencing</label>
-                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner z-10"></div>
+                        <!-- Wadah Peta -->
+                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner z-10 relative"></div>
                     </div>
                     <form onsubmit="handleSaveSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-xl border dark:border-gray-700">
                         <div>
                             <label class="block text-xs font-medium mb-1">Latitude Kantor</label>
-                            <input type="text" id="setLat" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
+                            <!-- FIX: Tambahkan oninput="syncMapFromInputs()" pada form -->
+                            <input type="text" id="setLat" oninput="syncMapFromInputs()" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
                         </div>
                         <div>
                             <label class="block text-xs font-medium mb-1">Longitude Kantor</label>
-                            <input type="text" id="setLng" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
+                            <!-- FIX: Tambahkan oninput="syncMapFromInputs()" pada form -->
+                            <input type="text" id="setLng" oninput="syncMapFromInputs()" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium mb-1">Radius (Meter)</label>
-                            <input type="number" id="setRadius" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
+                            <!-- FIX: Tambahkan oninput="syncMapFromInputs()" pada form -->
+                            <input type="number" id="setRadius" oninput="syncMapFromInputs()" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
                         </div>
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
                             <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-building text-[#A88C61] mr-2"></i>Daftar Lembaga & Jam Kerja</label>
@@ -676,6 +680,38 @@
         
         async function loadPublicLogs(){const res=await callAPI({action:'getPublicLogs'});const c=document.getElementById('publicLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3 font-semibold">${r.nama}</td><td class="px-4 py-3">${new Date(r.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td><td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded-lg font-bold ${bt}">${r.tipe}</span></td></tr>`})}else{c.innerHTML='<tr><td colspan="3" class="text-center py-8 text-gray-500">Belum ada kehadiran/izin hari ini.</td></tr>'}}
 
+        // FIX MAP (FINAL)
+        function renderMapSafe(){
+            let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
+            let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
+            let rad = parseFloat(document.getElementById('setRadius').value) || 100;
+            
+            let mapEl = document.getElementById('mapGeofence');
+            if (!mapEl) return;
+
+            // Hancurkan map yang tersangkut sepenuhnya
+            if (mapInstance) {
+                mapInstance.remove();
+                mapInstance = null;
+            }
+            
+            // Bersihkan sisa DOM Leaflet yang bikin map jadi abu-abu
+            mapEl.innerHTML = '';
+            
+            // Render peta dari 0
+            mapInstance = L.map('mapGeofence').setView([lat, lng], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapInstance);
+            
+            const pin = L.divIcon({className:'custom-pin',html:'<i class="fa-solid fa-location-dot text-4xl text-red-500"></i>',iconSize:[30,42],iconAnchor:[15,42]});
+            mapMarker = L.marker([lat, lng], {icon: pin}).addTo(mapInstance);
+            mapCircle = L.circle([lat, lng], {color:'#D4AF37',fillColor:'#D4AF37',fillOpacity:0.25,radius:rad}).addTo(mapInstance);
+            
+            // Beri jaminan ukuran dirender di frame UI selanjutnya
+            setTimeout(() => {
+                if(mapInstance) mapInstance.invalidateSize(true);
+            }, 50);
+        }
+
         function switchAdminTab(t){
             document.querySelectorAll('.admin-content').forEach(el=>el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab').forEach(el=>{el.classList.remove('md:border-[#D4AF37]','text-[#A88C61]');el.classList.add('md:border-transparent','text-gray-500')});
@@ -683,22 +719,10 @@
             document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');
             
             if(t==='settings'){
-                // FIX FINAL: Animasi CSS .fade-in berjalan 0.4 detik (400ms).
-                // Kita tunggu 550ms agar elemen DOM berhenti bergerak sepenuhnya, barulah Leaflet dirender.
+                // Tunggu 400ms sampai animasi css fade-in tab selesai sepenuhnya
                 setTimeout(() => {
-                    let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
-                    let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
-                    let rad = parseFloat(document.getElementById('setRadius').value) || 100;
-                    
-                    if (!mapInstance) {
-                        initGeofenceMap(lat, lng, rad);
-                    } else {
-                        // Tidak perlu dihancurkan, cukup paksa kalkulasi ulang ukuran kanvasnya
-                        mapInstance.invalidateSize(true);
-                    }
-                    syncMapFromInputs();
-                    mapInstance.setView([lat, lng], 17); // Kunci posisi agar tidak bergeser
-                }, 550); 
+                    renderMapSafe();
+                }, 400); 
             }
             if(t==='rekap') loadRekapData();
         }
@@ -814,23 +838,31 @@
         function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;let b=document.getElementById('btnTambahJabatan');b.innerHTML='+ Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm';renderTarifJabatan();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value=''}
         function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan()}
 
-        let mapObserver = null;
-        function initGeofenceMap(lat,lng,rad){
-            if(mapInstance)return;
-            mapInstance=L.map('mapGeofence').setView([lat,lng],17);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
-            const pin=L.divIcon({className:'custom-pin',html:'<i class="fa-solid fa-location-dot text-4xl text-red-500"></i>',iconSize:[30,42],iconAnchor:[15,42]});
-            mapMarker=L.marker([lat,lng],{icon:pin}).addTo(mapInstance);
-            mapCircle=L.circle([lat,lng],{color:'#D4AF37',fillColor:'#D4AF37',fillOpacity:0.25,radius:rad}).addTo(mapInstance);
-            ['setLat','setLng','setRadius'].forEach(id=>document.getElementById(id).addEventListener('input',syncMapFromInputs));
-            
-            if(mapObserver) mapObserver.disconnect();
-            mapObserver = new ResizeObserver(()=>{if(mapInstance)mapInstance.invalidateSize()});
-            mapObserver.observe(document.getElementById('mapGeofence'));
+        function syncMapFromInputs(){
+            if(!mapInstance)return;
+            let lat=parseFloat(document.getElementById('setLat').value)||0;
+            let lng=parseFloat(document.getElementById('setLng').value)||0;
+            let rad=parseFloat(document.getElementById('setRadius').value)||100;
+            if(lat&&lng){
+                mapMarker.setLatLng([lat,lng]);
+                mapCircle.setLatLng([lat,lng]);
+                mapInstance.panTo([lat,lng]);
+            }
+            mapCircle.setRadius(rad);
         }
-        function syncMapFromInputs(){if(!mapInstance)return;let lat=parseFloat(document.getElementById('setLat').value)||0,lng=parseFloat(document.getElementById('setLng').value)||0,rad=parseFloat(document.getElementById('setRadius').value)||100;if(lat&&lng){mapMarker.setLatLng([lat,lng]);mapCircle.setLatLng([lat,lng]);mapInstance.panTo([lat,lng])}mapCircle.setRadius(rad)}
-        
-        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();}}
+
+        async function loadSettings(){
+            const res=await callAPI({action:'getSettings'});
+            if(res.success){
+                document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';
+                document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';
+                document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';
+                try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}
+                renderTarifJabatan();
+                try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}
+                renderJadwalLembaga();
+            }
+        }
         
         async function handleSaveSettings(e){e.preventDefault();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
 
