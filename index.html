@@ -603,7 +603,7 @@
         let mapInstance=null,mapMarker=null,mapCircle=null,userMap={},isEditMode=false,currentEditNiy='';
         let todayDataLists={hadir:[],izin:[],sakit:[]},currentRekapData=[],filteredRekapData=[],currentRekapBulan="";
         let jadwalLembagaData={},tarifJabatanData={},editingLembagaOldName=null,editingJabatanOldName=null;
-        let btnInterval=null; // Untuk interval countdown tombol absen
+        let btnInterval=null;
 
         function formatRupiah(num){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num);}
         function formatRupiahInput(inp){let val=inp.value.replace(/[^,\d]/g,'');inp.value=val?parseInt(val).toLocaleString('id-ID'):'';}
@@ -639,7 +639,9 @@
             const cIcon=document.getElementById('camIcon'),cText=document.getElementById('camText'),btnCam=document.getElementById('btnOpenCamera');
             
             // Reset UI Kamera ke kondisi awal (jika ganti hari/user)
-            bm.classList.remove('hidden');bp.classList.add('hidden');bw.classList.add('hidden');
+            if(bm) bm.classList.remove('hidden');
+            if(bp) bp.classList.add('hidden');
+            if(bw) bw.classList.add('hidden');
             if(btnCam) btnCam.classList.remove('hidden');
             if(cIcon) cIcon.className='fa-solid fa-video-slash text-5xl mb-4 opacity-50';
             if(cText) cText.innerHTML='Kamera belum diaktifkan';
@@ -653,17 +655,17 @@
                 const hasPulang = tl.some(r => r.tipe === 'Pulang');
                 
                 if(hasPulang){
-                    bm.classList.add('hidden');
+                    if(bm) bm.classList.add('hidden');
                     if(btnCam) btnCam.classList.add('hidden');
                     if(cIcon) cIcon.className='fa-solid fa-circle-check text-5xl mb-4 text-green-500 opacity-100';
                     if(cText) cText.innerHTML='<span class="font-bold text-green-500 block mb-1">Absensi Selesai</span><span class="text-xs text-gray-400">Anda telah absen pulang hari ini.</span>';
                 } else if(tl[0].tipe==='Masuk'){
-                    bm.classList.add('hidden');
+                    if(bm) bm.classList.add('hidden');
                     const mt=new Date(tl[0].timestamp).getTime();
                     const chk=()=>{
                         const ms=new Date().getTime()-mt,hrs=ms/(1000*60*60);
-                        if(hrs>=1){bw.classList.add('hidden');bp.classList.remove('hidden');if(btnInterval)clearInterval(btnInterval);}
-                        else{bw.classList.remove('hidden');bp.classList.add('hidden');document.getElementById('waktuTungguText').innerText=`dalam ${Math.ceil(60-(ms/(1000*60)))} mnt`;}
+                        if(hrs>=1){if(bw) bw.classList.add('hidden'); if(bp) bp.classList.remove('hidden');if(btnInterval)clearInterval(btnInterval);}
+                        else{if(bw) bw.classList.remove('hidden'); if(bp) bp.classList.add('hidden'); document.getElementById('waktuTungguText').innerText=`dalam ${Math.ceil(60-(ms/(1000*60)))} mnt`;}
                     };
                     chk();btnInterval=setInterval(chk,60000);
                 }
@@ -681,25 +683,24 @@
             document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');
             
             if(t==='settings'){
-                // FIX: Animasi CSS fade-in berjalan selama 400ms (0.4 detik). 
-                // Kita harus atur timeout di angka 500ms agar peta dirender setelah animasi 100% selesai.
+                // SOLUSI PALING JITU: Hancurkan peta abu-abu, dan gambar ulang peta fresh!
                 setTimeout(() => {
                     let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
                     let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
                     let rad = parseFloat(document.getElementById('setRadius').value) || 100;
                     
-                    if (!mapInstance) {
-                        initGeofenceMap(lat, lng, rad);
-                    } else {
-                        mapInstance.invalidateSize();
-                        mapInstance.setView([lat, lng], 17); // Kunci posisi agar tidak lari
+                    if (mapInstance) {
+                        mapInstance.remove(); // Hapus instance yang rusak
+                        mapInstance = null;
+                        document.getElementById('mapGeofence').innerHTML = ''; // Bersihkan container
                     }
+                    initGeofenceMap(lat, lng, rad); // Buat ulang peta secara segar
                     syncMapFromInputs();
-                }, 500); // Ubah dari 100 menjadi 500 di sini
+                }, 300); // 300ms cukup menunggu animasi tab CSS terbuka
             }
-            if(t==='rekap') loadRekapData()
+            if(t==='rekap') loadRekapData();
         }
-        
+
         function showTodayList(t){let ti='',ls=[],ht='<div class="text-left text-sm max-h-64 overflow-y-auto custom-scrollbar">';if(t==='hadir'){ti='Pimpinan Hadir';ls=todayDataLists.hadir.list}else if(t==='izin'){ti='Pimpinan Izin/Dinas';ls=todayDataLists.izin.list}else{ti='Pimpinan Sakit';ls=todayDataLists.sakit.list}if(ls.length===0){ht+='<p class="text-center text-gray-500 py-6">Tidak ada data hari ini.</p>'}else{ls.forEach(i=>{ht+=`<div class="border-b dark:border-gray-700 py-3 flex flex-col"><span class="font-bold">${i.nama}</span><span class="text-[11px] text-gray-500"><i class="fa-solid fa-building text-[#D4AF37] mr-1"></i> ${i.lembaga||'-'} <i class="fa-regular fa-clock text-[#A88C61] ml-1 mr-1"></i> <span class="italic text-gray-400">${i.detail}</span></span></div>`})}ht+='</div>';Swal.fire({title:ti,html:ht,confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
 
         function filterPimpinan(){let v=document.getElementById('searchPimpinan').value.toLowerCase(),r=document.getElementById('adminUserList').getElementsByTagName('tr');for(let i=0;i<r.length;i++){r[i].style.display=r[i].innerText.toLowerCase().includes(v)?'':'none'}}
@@ -811,10 +812,24 @@
         function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;let b=document.getElementById('btnTambahJabatan');b.innerHTML='+ Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm';renderTarifJabatan();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value=''}
         function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan()}
 
-        function initGeofenceMap(lat,lng,rad){if(mapInstance)return;mapInstance=L.map('mapGeofence').setView([lat,lng],17);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);const pin=L.divIcon({className:'custom-pin',html:'<i class="fa-solid fa-location-dot text-4xl text-red-500"></i>',iconSize:[30,42],iconAnchor:[15,42]});mapMarker=L.marker([lat,lng],{icon:pin}).addTo(mapInstance);mapCircle=L.circle([lat,lng],{color:'#D4AF37',fillColor:'#D4AF37',fillOpacity:0.25,radius:rad}).addTo(mapInstance);['setLat','setLng','setRadius'].forEach(id=>document.getElementById(id).addEventListener('input',syncMapFromInputs));new ResizeObserver(()=>{if(mapInstance)mapInstance.invalidateSize()}).observe(document.getElementById('mapGeofence'))}
+        let mapObserver = null;
+        function initGeofenceMap(lat,lng,rad){
+            if(mapInstance)return;
+            mapInstance=L.map('mapGeofence').setView([lat,lng],17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+            const pin=L.divIcon({className:'custom-pin',html:'<i class="fa-solid fa-location-dot text-4xl text-red-500"></i>',iconSize:[30,42],iconAnchor:[15,42]});
+            mapMarker=L.marker([lat,lng],{icon:pin}).addTo(mapInstance);
+            mapCircle=L.circle([lat,lng],{color:'#D4AF37',fillColor:'#D4AF37',fillOpacity:0.25,radius:rad}).addTo(mapInstance);
+            ['setLat','setLng','setRadius'].forEach(id=>document.getElementById(id).addEventListener('input',syncMapFromInputs));
+            
+            if(mapObserver) mapObserver.disconnect();
+            mapObserver = new ResizeObserver(()=>{if(mapInstance)mapInstance.invalidateSize()});
+            mapObserver.observe(document.getElementById('mapGeofence'));
+        }
         function syncMapFromInputs(){if(!mapInstance)return;let lat=parseFloat(document.getElementById('setLat').value)||0,lng=parseFloat(document.getElementById('setLng').value)||0,rad=parseFloat(document.getElementById('setRadius').value)||100;if(lat&&lng){mapMarker.setLatLng([lat,lng]);mapCircle.setLatLng([lat,lng]);mapInstance.panTo([lat,lng])}mapCircle.setRadius(rad)}
         
         async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();}}
+        
         async function handleSaveSettings(e){e.preventDefault();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
 
         function renderChart(cd){const tc=document.documentElement.classList.contains('dark')?'#9ca3af':'#4b5563';if(!cd)return;const gc=(l,op)=>Array.from({length:l},(_,i)=>['rgba(59,130,246,0.8)','rgba(239,68,68,0.8)','rgba(16,185,129,0.8)','rgba(245,158,11,0.8)','rgba(139,92,246,0.8)'][i%5].replace('0.8)',op+')'));if(weeklyChart)weeklyChart.destroy();weeklyChart=new Chart(document.getElementById('attendanceChart').getContext('2d'),{type:'bar',data:{labels:cd.weekly.labels,datasets:[{data:cd.weekly.data,backgroundColor:gc(cd.weekly.data.length,0.8),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{display:false}},y:{ticks:{color:tc,beginAtZero:true,stepSize:1}}}}});if(yearlyChart)yearlyChart.destroy();yearlyChart=new Chart(document.getElementById('yearlyChart').getContext('2d'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'],datasets:[{data:cd.yearly.data,borderColor:'#3B82F6',fill:true,backgroundColor:'rgba(59,130,246,0.15)',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{display:false}},y:{ticks:{color:tc,beginAtZero:true,stepSize:1}}}}});if(lembagaChart)lembagaChart.destroy();lembagaChart=new Chart(document.getElementById('lembagaChart').getContext('2d'),{type:'doughnut',data:{labels:cd.lembaga.labels.length?cd.lembaga.labels:['Kosong'],datasets:[{data:cd.lembaga.data.length?cd.lembaga.data:[1],backgroundColor:cd.lembaga.data.length?gc(cd.lembaga.data.length,0.8):['#ccc'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,boxWidth:12}}},cutout:'70%'}})}
@@ -826,7 +841,6 @@
         function compressAvatar(f){return new Promise((r)=>{const reader=new FileReader();reader.readAsDataURL(f);reader.onload=(e)=>{const img=new Image();img.src=e.target.result;img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>200){h*=200/w;w=200}}else{if(h>200){w*=200/h;h=200}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',0.6))}}})}
         async function handleAddUser(e){e.preventDefault();let f='';if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);showLoading();const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,password:document.getElementById('addPassword').value,foto:f});hideLoading();if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData()}else{Swal.fire('Error',res.message,'error')}}
 
-        // Setup PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const sw = "self.addEventListener('fetch', (e) => {});";
