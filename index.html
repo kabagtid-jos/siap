@@ -681,19 +681,21 @@
             document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');
             
             if(t==='settings'){
-                let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
-                let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
-                let rad = parseFloat(document.getElementById('setRadius').value) || 100;
-                
-                // FIX TERBAIK PETA: Render peta HANYA setelah tab terbuka sepenuhnya (tidak hidden lagi)
+                // FIX: Animasi CSS fade-in berjalan selama 400ms (0.4 detik). 
+                // Kita harus atur timeout di angka 500ms agar peta dirender setelah animasi 100% selesai.
                 setTimeout(() => {
+                    let lat = parseFloat(document.getElementById('setLat').value) || -8.172533;
+                    let lng = parseFloat(document.getElementById('setLng').value) || 113.702331;
+                    let rad = parseFloat(document.getElementById('setRadius').value) || 100;
+                    
                     if (!mapInstance) {
                         initGeofenceMap(lat, lng, rad);
                     } else {
                         mapInstance.invalidateSize();
+                        mapInstance.setView([lat, lng], 17); // Kunci posisi agar tidak lari
                     }
                     syncMapFromInputs();
-                }, 100);
+                }, 500); // Ubah dari 100 menjadi 500 di sini
             }
             if(t==='rekap') loadRekapData()
         }
