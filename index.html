@@ -1,842 +1,611 @@
-<!DOCTYPE html>
-<html lang="id" class="transition-colors duration-300">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIAP P2S Abu Zairi</title>
+/**
+ * SIAP P2S Abu Zairi - Backend System
+ * Deployment: Web App (Execute as: Me, Access: Anyone)
+ */
+
+const DB_ID = '1cLykevFInlWsBr426nd2TG3hVggQo3l7M9Id75vbM74';
+
+function setupDatabase() {
+  try {
+    let ss = SpreadsheetApp.openById(DB_ID);
     
-    <meta name="theme-color" content="#D4AF37">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SIAP P2S Abu Zairi">
-    <link rel="apple-touch-icon" href="https://i.ibb.co.com/93wzS3dG/Chat-GPT-Image-Apr-29-2026-02-43-44-AM.png">
+    let sheetUsers = ss.getSheetByName('Users');
+    if (!sheetUsers) {
+      sheetUsers = ss.getSheets()[0]; 
+      sheetUsers.setName('Users');
+      sheetUsers.appendRow(['NIY', 'Nama', 'Password', 'Jabatan', 'Role', 'RFID', 'Foto_Base64', 'Lembaga', 'Tgl_Lahir', 'Jenis_Kelamin']);
+      sheetUsers.appendRow(['admin', 'Administrator', 'admin123', 'Admin System', 'admin', '', '', 'Semua Lembaga', '', '']);
+    }
     
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22SIAP%20P2S%20Abu%20Zairi%22%2C%22short_name%22%3A%22SIAP%20P2S%22%2C%22description%22%3A%22Sistem%20Absensi%20Pimpinan%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23111827%22%2C%22theme_color%22%3A%22%23D4AF37%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co.com%2F93wzS3dG%2FChat-GPT-Image-Apr-29-2026-02-43-44-AM.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
-    <link rel="icon" type="image/png" href="https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={darkMode:'class',theme:{extend:{colors:{darkBg:'#111827',darkCard:'#1f2937'},keyframes:{heartbeat:{'0%, 100%':{transform:'scale(1)'},'50%':{transform:'scale(1.25)'}}},animation:{heartbeat:'heartbeat 1s ease-in-out infinite'}}}}</script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-        body{font-family:'Outfit',sans-serif}.glass{background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.4);box-shadow:0 8px 32px 0 rgba(31,38,135,0.05)}.dark .glass{background:rgba(31,41,55,0.7);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 32px 0 rgba(0,0,0,0.3)}.fade-in{animation:fadeIn 0.4s ease-in-out}@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}#videoElement{transform:scaleX(-1)}.custom-scrollbar::-webkit-scrollbar{width:6px;height:6px}.custom-scrollbar::-webkit-scrollbar-track{background:transparent}.custom-scrollbar::-webkit-scrollbar-thumb{background:#D4AF37;border-radius:4px}.custom-scrollbar::-webkit-scrollbar-thumb:hover{background:#A88C61}
-        @media(max-width:640px){.swal2-popup{font-size:.85rem!important;padding:1rem!important;width:85%!important;border-radius:1rem!important}.swal2-title{font-size:1.2rem!important}.swal2-icon{transform:scale(.7);margin:.5rem auto!important}.swal2-html-container{margin:.5em 1em .3em!important;font-size:.85rem!important}.swal2-actions{margin-top:.5rem!important}.swal2-styled{padding:.4em 1em!important;font-size:.9rem!important}}
-        @media(min-width:641px){.swal2-popup{width:26rem!important;padding:1.5rem!important;border-radius:1.25rem!important}.swal2-title{font-size:1.3rem!important}.swal2-html-container{font-size:.9rem!important}.swal2-styled{padding:.5em 1.5em!important;font-size:.95rem!important}}
-        .leaflet-container{z-index:10!important;font-family:'Outfit',sans-serif}.custom-pin{background:transparent;border:none}.clock-glow{text-shadow:0 0 10px rgba(212,175,55,0.4)}
-        
-        /* Modern Aurora Glow Animation */
-        .aurora-1{position:fixed;top:-100px;left:-100px;width:500px;height:500px;border-radius:50%;background:rgba(212,175,55,0.3);filter:blur(80px);animation:float 10s ease-in-out infinite;z-index:-1;pointer-events:none;}
-        .aurora-2{position:fixed;bottom:-150px;right:-100px;width:600px;height:600px;border-radius:50%;background:rgba(168,140,97,0.25);filter:blur(100px);animation:float 14s ease-in-out infinite reverse;z-index:-1;pointer-events:none;}
-        .dark .aurora-1{background:rgba(212,175,55,0.15);}
-        .dark .aurora-2{background:rgba(168,140,97,0.12);}
-        @keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-30px) scale(1.1);}}
-
-        /* Fix Footer Margin untuk Admin & Centering Login */
-        body:has(#adminSection:not(.hidden)) #appFooter { padding-bottom: 6rem; }
-        @media (min-width: 768px) { body:has(#adminSection:not(.hidden)) #appFooter { padding-bottom: 1.5rem; } }
-    </style>
-</head>
-<body class="bg-gray-50 dark:bg-darkBg text-gray-800 dark:text-gray-100 antialiased min-h-screen h-[100dvh] flex flex-col relative transition-colors duration-300">
+    if (!ss.getSheetByName('Attendance')) {
+      let sheetAtt = ss.insertSheet('Attendance');
+      sheetAtt.appendRow(['Timestamp', 'Tanggal', 'NIY', 'Nama', 'Tipe', 'Lokasi', 'Foto_Base64', 'Jarak_Meter', 'Status_Geofence']);
+    }
     
-    <div class="aurora-1"></div>
-    <div class="aurora-2"></div>
+    if (!ss.getSheetByName('Settings')) {
+      let sheetSet = ss.insertSheet('Settings');
+      sheetSet.appendRow(['Key', 'Value']);
+      sheetSet.appendRow(['Lattitude_Kantor', "'-8.172533"]); 
+      sheetSet.appendRow(['Longitude_Kantor', "'113.702331"]);
+      sheetSet.appendRow(['Radius_Max_Meter', '100']); 
+      
+      let defaultJadwal = {"PAUD":{"masuk":"07:00","pulang":"11:00"},"SD":{"masuk":"06:30","pulang":"13:00"}};
+      sheetSet.appendRow(['Jadwal_Lembaga', "'" + JSON.stringify(defaultJadwal)]); 
+      
+      let defaultTarif = {"Kepala Sekolah": {"tarif": 10000, "jamEfektif": 120}, "Wakil Kepala": {"tarif": 8000, "jamEfektif": 140}, "Guru": {"tarif": 5000, "jamEfektif": 160}};
+      sheetSet.appendRow(['Tarif_Jabatan', "'" + JSON.stringify(defaultTarif)]); 
+    }
+    
+    return "Setup Berhasil! Data telah ditambahkan ke Spreadsheet Anda.";
+  } catch (e) {
+    return "Error Setup: " + e.toString();
+  }
+}
 
-    <header id="profileHeader" class="hidden w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] dark:from-gray-800 dark:to-gray-900 shadow-md sticky top-0 z-[100] rounded-b-2xl sm:rounded-none flex-shrink-0 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-3 md:px-8 md:py-4 flex items-center justify-between gap-3">
-            <div class="flex items-center space-x-3 flex-1 min-w-0">
-                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-[#A88C61] to-[#D4AF37] flex items-center justify-center text-white text-base md:text-lg font-bold shadow-sm flex-shrink-0 border-2 border-white dark:border-gray-600 overflow-hidden relative">
-                    <span id="headerInitials">AZ</span>
-                </div>
-                <div class="flex flex-col text-white justify-center flex-1 min-w-0">
-                    <h2 id="headerNama" class="text-sm md:text-lg font-bold leading-tight truncate w-full">Nama Lengkap</h2>
-                    <div class="flex flex-wrap gap-1.5 md:gap-2 mt-1">
-                        <span class="bg-black/20 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-semibold flex items-center tracking-wide truncate max-w-[100px] sm:max-w-none">
-                            NIY: <span id="headerNiy" class="ml-1">000</span>
-                        </span>
-                        <span id="headerJabatan" class="bg-white/30 text-white text-[9px] md:text-xs px-2 py-0.5 rounded-md font-bold tracking-wide truncate max-w-[100px] sm:max-w-none">Admin</span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2 flex-shrink-0">
-                <button onclick="toggleDarkMode()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
-                    <i id="iconMoon" class="fa-solid fa-moon text-xs md:text-sm"></i>
-                    <i id="iconSun" class="fa-solid fa-sun hidden text-xs md:text-sm"></i>
-                </button>
-                <button onclick="logout()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition shadow-sm backdrop-blur-sm">
-                    <i class="fa-solid fa-right-from-bracket text-xs md:text-sm"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+function getDatabase() { 
+  return SpreadsheetApp.openById(DB_ID); 
+}
 
-    <div class="flex-1 min-h-0 overflow-y-auto relative p-4 md:p-8 w-full max-w-7xl mx-auto custom-scrollbar flex flex-col">
-        <div id="loginSection" class="fade-in w-full mx-auto flex flex-col items-center justify-center flex-1">
-            <div class="glass rounded-2xl w-full max-w-4xl mx-auto flex flex-col md:flex-row overflow-hidden shadow-xl">
-                <div class="p-6 md:p-8 text-center md:w-1/2 flex flex-col justify-center bg-white/40 dark:bg-gray-800/40">
-                    <div class="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 shadow-md overflow-hidden border-2 border-[#D4AF37]/50 bg-white dark:bg-gray-800">
-                        <img src="https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png" alt="Logo" class="w-full h-full object-cover">
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold mb-1 text-gray-800 dark:text-white">S.I.A.P</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Sistem Absensi Pimpinan</p>
-                    <p class="text-gray-800 dark:text-gray-300 text-[11px] md:text-xs font-bold mb-6 mt-1 uppercase tracking-wide">Pondok Pesantren Salafiyah Abu Zairi</p>
-                    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                        <div class="relative">
-                            <i class="fa-solid fa-id-card absolute left-4 top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="text" id="niy" placeholder="Masukkan NIY" required class="w-full pl-10 pr-4 py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
-                        </div>
-                        <div class="relative">
-                            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400 text-sm md:text-base"></i>
-                            <input type="password" id="password" placeholder="Password" required class="w-full pl-10 pr-12 py-3 text-sm md:text-base rounded-xl border border-gray-200 dark:border-gray-600 focus:border-[#D4AF37] focus:ring-2 outline-none transition bg-white/80 dark:bg-gray-700 dark:text-white">
-                            <button type="button" onclick="togglePassword()" class="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-                                <i id="eyeIcon" class="fa-solid fa-eye"></i>
-                            </button>
-                        </div>
-                        <button type="submit" id="btnLogin" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] hover:from-[#927850] text-white font-semibold py-3 rounded-xl transition shadow-md flex items-center justify-center">
-                            <span id="btnLoginText">Login</span>
-                            <i id="btnLoginSpinner" class="fa-solid fa-spinner fa-spin hidden ml-2"></i>
-                        </button>
-                    </form>
-                </div>
-                <div class="p-5 md:p-8 md:w-1/2 bg-gray-50/50 dark:bg-gray-800/30 border-t md:border-t-0 md:border-l border-gray-200/50 dark:border-gray-700/50 flex flex-col">
-                    <h3 class="font-bold text-base md:text-lg mb-3 md:mb-4 border-b dark:border-gray-700 pb-2 flex items-center">
-                        <i class="fa-solid fa-list-check mr-2 text-[#D4AF37]"></i> Kehadiran Hari Ini
-                    </h3>
-                    <div class="overflow-y-auto flex-1 max-h-[300px] md:max-h-[400px] pr-2 custom-scrollbar">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-gray-100/80 dark:bg-gray-700/80 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-4 py-3 rounded-l-lg">Pimpinan</th>
-                                    <th class="px-4 py-3">Waktu</th>
-                                    <th class="px-4 py-3 rounded-r-lg">Ket</th>
-                                </tr>
-                            </thead>
-                            <tbody id="publicLogContainer">
-                                <tr>
-                                    <td colspan="3" class="text-center py-10 text-gray-400">
-                                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i>Memuat...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+function doGet(e) { return handleRequest(e.parameter); }
 
-        <div id="pimpinanSection" class="hidden fade-in max-w-5xl mx-auto pb-10 w-full">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass rounded-2xl p-6 lg:col-span-2 shadow-md">
-                    <div class="flex flex-col sm:flex-row justify-between items-center mb-5 border-b dark:border-gray-700 pb-4">
-                        <h3 class="font-bold text-lg mb-2 sm:mb-0">
-                            <i class="fa-solid fa-camera mr-2 text-[#A88C61]"></i> Verifikasi Kehadiran
-                        </h3>
-                        <div class="text-center sm:text-right">
-                            <div id="realtimeClock" class="text-3xl font-bold font-mono clock-glow tracking-widest">00:00:00</div>
-                            <div id="realtimeDate" class="text-xs text-gray-500 mt-0.5">Memuat tanggal...</div>
-                        </div>
-                    </div>
-                    <div class="relative w-full h-64 sm:h-80 bg-gray-900 rounded-xl overflow-hidden mb-4 flex items-center justify-center border-2 border-gray-200 dark:border-gray-700">
-                        <div id="cameraPlaceholder" class="text-center text-gray-400 z-20"><i id="camIcon" class="fa-solid fa-video-slash text-5xl mb-4 opacity-50"></i><p id="camText" class="text-sm mb-5">Kamera belum diaktifkan</p><button id="btnOpenCamera" onclick="initAttendance()" class="bg-[#D4AF37] hover:bg-[#A88C61] text-white px-6 py-3 rounded-xl font-bold shadow-lg transition transform hover:-translate-y-1 animate-pulse"><i class="fa-solid fa-power-off mr-2"></i> Nyalakan Kamera</button></div>
-                        <video id="videoElement" autoplay class="w-full h-full object-cover hidden"></video>
-                        <canvas id="canvasElement" class="hidden"></canvas>
-                        <div id="locationStatus" class="hidden absolute bottom-3 left-3 right-3 bg-black/70 text-white text-xs p-2.5 rounded-xl backdrop-blur-sm z-20 flex items-center justify-center">
-                            <i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37] mr-2 text-lg"></i> 
-                            <span id="locationText">Menyelaraskan GPS...</span>
-                        </div>
-                    </div>
-        
-                    <div id="actionButtons" class="grid grid-cols-1 gap-4 mt-6 hidden fade-in">
-                        <button id="btnAbsenMasuk" onclick="jalankanAbsen('Masuk')" class="bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex flex-col items-center w-full">
-                            <i class="fa-solid fa-right-to-bracket mb-1 text-2xl"></i> Masuk
-                        </button>
-                        <button id="btnAbsenPulang" onclick="jalankanAbsen('Pulang')" class="hidden bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex flex-col items-center w-full">
-                            <i class="fa-solid fa-right-from-bracket mb-1 text-2xl"></i> Pulang
-                        </button>
-                        <button id="btnAbsenMenunggu" disabled class="hidden bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 py-4 rounded-xl font-bold text-lg border-2 border-dashed border-gray-400 dark:border-gray-500 flex flex-col items-center w-full cursor-not-allowed opacity-80">
-                            <i class="fa-solid fa-hourglass-half mb-1 text-2xl"></i> 
-                            <span class="text-sm mt-1">Tombol Pulang Aktif <span id="waktuTungguText"></span></span>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex flex-col gap-6">
-                    <div class="glass rounded-2xl p-5 shadow-md flex flex-col items-center text-center">
-                        <div class="w-12 h-12 bg-[#FDF8E7] dark:bg-gray-800 rounded-full flex items-center justify-center mb-3 text-[#D4AF37]">
-                            <i class="fa-solid fa-scale-balanced text-xl"></i>
-                        </div>
-                        <h3 class="font-bold text-base mb-1">Aturan Absensi</h3>
-                        <p class="text-xs text-gray-500 mb-4 px-2">Klik tombol di bawah untuk panduan absensi dan geofencing.</p>
-                        <button onclick="showRulesAlert()" class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 font-semibold py-2 rounded-lg text-sm border dark:border-gray-600">
-                            <i class="fa-solid fa-book-open-reader mr-2 text-[#A88C61]"></i> Baca Aturan
-                        </button>
-                    </div>
-                    <div class="glass rounded-2xl p-5 shadow-md flex-1">
-                        <h3 class="font-bold text-base mb-4 border-b dark:border-gray-700 pb-2">
-                            <i class="fa-solid fa-envelope-open-text mr-2 text-[#D4AF37]"></i> Form Izin
-                        </h3>
-                        <form id="formIzin" onsubmit="handleIzin(event)" class="flex flex-col gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold mb-1 text-gray-500 uppercase">Tipe</label>
-                                <select id="izinTipe" required class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm outline-none">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="Sakit">Sakit</option>
-                                    <option value="Izin">Izin</option>
-                                    <option value="Cuti">Cuti</option>
-                                    <option value="Dinas Luar">Dinas Luar</option>
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] font-bold mb-1 text-gray-500 uppercase">Dari</label>
-                                    <input type="date" id="izinTanggalMulai" required class="w-full px-2 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-[11px] outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold mb-1 text-gray-500 uppercase">Sampai</label>
-                                    <input type="date" id="izinTanggalSelesai" required class="w-full px-2 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-[11px] outline-none">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold mb-1 text-gray-500 uppercase">Keterangan</label>
-                                <textarea id="izinAlasan" required rows="2" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm outline-none" placeholder="Alasan..."></textarea>
-                            </div>
-                            <button type="submit" class="mt-1 w-full bg-gray-800 dark:bg-gray-600 hover:bg-gray-900 text-white font-bold py-2.5 rounded-lg text-sm">
-                                <i class="fa-solid fa-paper-plane mr-2 text-[#D4AF37]"></i> Kirim
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 glass rounded-2xl p-6 shadow-md mb-8">
-                <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2">
-                    <i class="fa-solid fa-clock-rotate-left mr-2 text-[#D4AF37]"></i> Log Absensi & Izin Anda
-                </h3>
-                <div class="overflow-x-auto custom-scrollbar max-h-64">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700/80 sticky top-0">
-                            <tr>
-                                <th class="px-4 py-3">Tanggal & Waktu</th>
-                                <th class="px-4 py-3">Tipe</th>
-                                <th class="px-4 py-3">Keterangan / Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="personalLogContainer">
-                            <tr>
-                                <td colspan="3" class="text-center py-4 text-gray-400">Memuat...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+function doPost(e) { 
+  // FIX: Membaca payload JSON murni agar string Base64 foto tidak rusak (karakter + hilang)
+  let params = e.parameter;
+  if (e.postData && e.postData.contents) {
+    try { params = JSON.parse(e.postData.contents); } catch(err) {}
+  }
+  return handleRequest(params); 
+}
 
-        <div id="adminSection" class="hidden fade-in max-w-6xl mx-auto pb-32 md:pb-10 w-full">
-            <div class="fixed bottom-0 left-0 right-0 z-[60] bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-[0_-4px_20px_rgba(0,0,0,0.08)] md:static md:bg-transparent md:shadow-none flex justify-around md:justify-start md:space-x-4 px-2 py-2 md:px-0 md:py-0 md:mb-6 md:border-b border-gray-200 dark:border-gray-700 md:pb-2">
-                <button onclick="switchAdminTab('dashboard')" id="btnTabDashboard" class="admin-tab active flex flex-col md:flex-row items-center justify-center w-1/4 md:w-auto px-1 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:border-b-2 text-[#A88C61] border-[#D4AF37]">
-                    <i class="fa-solid fa-chart-line text-lg md:mr-2"></i>
-                    <span class="hidden md:inline">Dashboard</span>
-                    <span class="md:hidden mt-0.5">Dashboard</span>
-                </button>
-                <button onclick="switchAdminTab('rekap')" id="btnTabRekap" class="admin-tab flex flex-col md:flex-row items-center justify-center w-1/4 md:w-auto px-1 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:border-b-2 text-gray-500 border-transparent hover:text-[#A88C61]">
-                    <i class="fa-solid fa-file-invoice-dollar text-lg md:mr-2"></i>
-                    <span class="hidden md:inline">Rekap Bisyaroh</span>
-                    <span class="md:hidden mt-0.5">Rekap</span>
-                </button>
-                <button onclick="switchAdminTab('pimpinan')" id="btnTabPimpinan" class="admin-tab flex flex-col md:flex-row items-center justify-center w-1/4 md:w-auto px-1 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:border-b-2 text-gray-500 border-transparent hover:text-[#A88C61]">
-                    <i class="fa-solid fa-address-book text-lg md:mr-2"></i>
-                    <span class="hidden md:inline">Data Pimpinan</span>
-                    <span class="md:hidden mt-0.5">Pimpinan</span>
-                </button>
-                <button onclick="switchAdminTab('settings')" id="btnTabSettings" class="admin-tab flex flex-col md:flex-row items-center justify-center w-1/4 md:w-auto px-1 md:px-4 py-2 font-bold text-[10px] md:text-sm rounded-lg md:border-b-2 text-gray-500 border-transparent hover:text-[#A88C61]">
-                    <i class="fa-solid fa-sliders text-lg md:mr-2"></i>
-                    <span class="hidden md:inline">Pengaturan</span>
-                    <span class="md:hidden mt-0.5">Settings</span>
-                </button>
-            </div>
-            
-            <div id="adminTabDashboard" class="admin-content w-full">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold hidden sm:block">Dashboard Statistik</h2>
-                    <div class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-1.5 rounded-lg border dark:border-gray-700 shadow-sm ml-auto">
-                        <label class="text-sm font-medium text-gray-600 dark:text-gray-300 ml-1">Tahun:</label>
-                        <select id="filterTahunDashboard" onchange="loadAdminData()" class="px-3 py-1 border-none rounded text-sm outline-none bg-transparent font-bold text-[#A88C61]"></select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="glass rounded-xl p-4 border-b-4 border-gray-400 flex flex-col justify-between">
-                        <p class="text-xs text-gray-500 font-medium mb-1">Total Pimpinan</p>
-                        <div class="flex justify-between items-end">
-                            <h3 id="statTotal" class="text-2xl font-bold">0</h3>
-                            <i class="fa-solid fa-users text-gray-400 text-lg"></i>
-                        </div>
-                    </div>
-                    <div onclick="showTodayList('hadir')" class="glass rounded-xl p-4 border-b-4 border-green-500 cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20 group">
-                        <p class="text-xs text-gray-500 font-medium mb-1 group-hover:text-green-600 transition">Hadir Hari Ini</p>
-                        <div class="flex justify-between items-end">
-                            <h3 id="statHadir" class="text-2xl font-bold group-hover:text-green-600 transition">0</h3>
-                            <i class="fa-solid fa-clipboard-check text-green-500 text-lg group-hover:scale-110 transition"></i>
-                        </div>
-                    </div>
-                    <div onclick="showTodayList('izin')" class="glass rounded-xl p-4 border-b-4 border-purple-500 cursor-pointer hover:bg-red-50 dark:hover:bg-purple-900/20 group">
-                        <p class="text-xs text-gray-500 font-medium mb-1 group-hover:text-purple-600 transition">Izin Hari Ini</p>
-                        <div class="flex justify-between items-end">
-                            <h3 id="statIzin" class="text-2xl font-bold group-hover:text-purple-600 transition">0</h3>
-                            <i class="fa-solid fa-envelope-open-text text-purple-500 text-lg group-hover:scale-110 transition"></i>
-                        </div>
-                    </div>
-                    <div onclick="showTodayList('sakit')" class="glass rounded-xl p-4 border-b-4 border-red-500 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 group">
-                        <p class="text-xs text-gray-500 font-medium mb-1 group-hover:text-red-600 transition">Sakit Hari Ini</p>
-                        <div class="flex justify-between items-end">
-                            <h3 id="statSakit" class="text-2xl font-bold group-hover:text-red-600 transition">0</h3>
-                            <i class="fa-solid fa-bed-pulse text-red-500 text-lg group-hover:scale-110 transition"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="glass rounded-xl p-6 lg:col-span-2 shadow-md">
-                        <h3 class="font-bold border-b dark:border-gray-700 pb-2 mb-4">Grafik Mingguan <span class="text-xs font-normal text-gray-500">(Tanpa Jumat)</span></h3>
-                        <div class="relative w-full h-64 sm:h-72">
-                            <canvas id="attendanceChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="glass rounded-xl p-6 shadow-md flex flex-col">
-                        <h3 class="font-bold border-b dark:border-gray-700 pb-2 mb-4">Aktivitas Terkini</h3>
-                        <div class="overflow-y-auto flex-1 h-64 sm:h-72 pr-2 custom-scrollbar" id="recentLogs"></div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass rounded-xl p-6 shadow-md">
-                        <h3 class="font-bold border-b dark:border-gray-700 pb-2 mb-4">Grafik Tahunan</h3>
-                        <div class="relative w-full h-64">
-                            <canvas id="yearlyChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="glass rounded-xl p-6 shadow-md">
-                        <h3 class="font-bold border-b dark:border-gray-700 pb-2 mb-4">Per Lembaga</h3>
-                        <div class="relative w-full h-64 flex justify-center">
-                            <canvas id="lembagaChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
+function handleRequest(params) {
+  let action = params.action;
+  let response = { success: false, message: 'Unknown action' };
+  
+  try {
+    if (action === 'login') response = doLogin(params.niy, params.password);
+    else if (action === 'attend') response = doAttend(params);
+    else if (action === 'submitIzin') response = submitIzin(params);
+    else if (action === 'getAdminData') response = getAdminData(params.tahun); // Update parameter tahun
+    else if (action === 'addUser') response = addUser(params);
+    else if (action === 'editUser') response = editUser(params);
+    else if (action === 'deleteUser') response = deleteUser(params.niy);
+    else if (action === 'getSettings') response = getSettings();
+    else if (action === 'saveSettings') response = saveSettings(params);
+    else if (action === 'getPersonalLog') response = getPersonalLog(params.niy);
+    else if (action === 'getPublicLogs') response = getPublicLogs();
+    else if (action === 'getRekapKehadiran') response = getRekapKehadiran(params.bulan);
+  } catch (error) { 
+    response = { success: false, message: error.toString() }; 
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+}
 
-            <div id="adminTabRekap" class="admin-content hidden w-full">
-                <div class="glass rounded-xl p-6 shadow-md">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 border-b dark:border-gray-700 pb-4 gap-4">
-                        <h3 class="font-bold text-lg"><i class="fa-solid fa-file-invoice-dollar text-[#D4AF37] mr-2"></i>Rekap Bisyaroh</h3>
-                        <div class="flex flex-wrap items-center gap-2 justify-end">
-                            <div class="flex items-center bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg border dark:border-gray-700">
-                                <label class="text-xs font-medium mx-2">Lembaga:</label>
-                                <select id="filterLembagaRekap" onchange="applyRekapFilter()" class="px-2 py-1 border-none bg-transparent text-sm font-bold text-[#A88C61] outline-none">
-                                    <option value="Semua">Semua Lembaga</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center bg-gray-50 dark:bg-gray-800 p-1.5 rounded-lg border dark:border-gray-700">
-                                <label class="text-xs font-medium mx-2">Bulan:</label>
-                                <input type="month" id="filterBulanRekap" onchange="loadRekapData()" class="px-2 py-1 border-none bg-transparent text-sm font-bold text-[#A88C61] outline-none">
-                            </div>
-                            <div class="relative w-full sm:w-auto">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
-                                <input type="text" id="searchRekap" onkeyup="filterRekap()" placeholder="Cari..." class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                            </div>
-                            <button onclick="exportRekapExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
-                                <i class="fa-solid fa-file-excel"></i>
-                            </button>
-                            <button onclick="exportRekapPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-y-auto max-h-[500px] custom-scrollbar rounded-lg border dark:border-gray-700">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-4 py-3">Pimpinan</th>
-                                    <th class="px-4 py-3">Lembaga & Jabatan</th>
-                                    <th class="px-4 py-3 text-center">Total Hari</th>
-                                    <th class="px-4 py-3 text-center">Jam Diakui</th>
-                                    <th class="px-4 py-3 text-center">% Kehadiran</th>
-                                    <th class="px-4 py-3 text-right">Bisyaroh</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rekapContainer">
-                                <tr>
-                                    <td colspan="6" class="text-center py-10">Pilih bulan...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+function doLogin(niy, password) {
+  let sheet = getDatabase().getSheetByName('Users');
+  let data = sheet.getDataRange().getValues();
+  let userMatch = null;
+  let todaysBirthdays = [];
+  
+  let today = new Date();
+  let tDate = today.getDate();
+  let tMonth = today.getMonth() + 1;
 
-            <div id="adminTabPimpinan" class="admin-content hidden w-full">
-                <div class="glass rounded-xl p-6 shadow-md">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 border-b dark:border-gray-700 pb-4 gap-4">
-                        <h3 class="font-bold text-lg"><i class="fa-solid fa-address-book text-[#D4AF37] mr-2"></i>Data Pimpinan</h3>
-                        <div class="flex w-full md:w-auto items-center gap-2">
-                            <div class="relative flex-grow">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
-                                <input type="text" id="searchPimpinan" onkeyup="filterPimpinan()" placeholder="Cari pimpinan..." class="w-full pl-8 pr-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                            </div>
-                            <button onclick="showAddUserModal()" class="bg-gradient-to-r from-[#A88C61] to-[#D4AF37] text-white px-4 py-2 rounded-lg text-sm font-bold shadow">
-                                <i class="fa-solid fa-user-plus sm:mr-2"></i> <span class="hidden sm:inline">Tambah</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-y-auto max-h-[500px] custom-scrollbar rounded-lg border dark:border-gray-700">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-4 py-3">NIY</th>
-                                    <th class="px-4 py-3">Nama</th>
-                                    <th class="px-4 py-3">Lembaga</th>
-                                    <th class="px-4 py-3">Jabatan</th>
-                                    <th class="px-4 py-3 text-center"><i class="fa-solid fa-gear"></i></th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminUserList"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adminTabSettings" class="admin-content hidden w-full">
-                <div class="glass rounded-xl p-6 shadow-md mb-8">
-                    <h3 class="font-bold text-lg mb-4 border-b dark:border-gray-700 pb-2"><i class="fa-solid fa-sliders text-[#D4AF37] mr-2"></i> Pengaturan Sistem</h3>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2"><i class="fa-solid fa-map-location-dot text-[#A88C61] mr-2"></i>Peta Geofencing</label>
-                        <div id="mapGeofence" class="w-full h-64 md:h-80 rounded-xl border-2 border-[#D4AF37]/50 shadow-inner z-10"></div>
-                    </div>
-                    <form onsubmit="handleSaveSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 dark:bg-gray-800/30 p-5 rounded-xl border dark:border-gray-700">
-                        <div>
-                            <label class="block text-xs font-medium mb-1">Latitude Kantor</label>
-                            <input type="text" id="setLat" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium mb-1">Longitude Kantor</label>
-                            <input type="text" id="setLng" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 focus:border-[#D4AF37]">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-medium mb-1">Radius (Meter)</label>
-                            <input type="number" id="setRadius" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
-                        </div>
-                        <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
-                            <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-building text-[#A88C61] mr-2"></i>Daftar Lembaga & Jam Kerja</label>
-                            <div class="overflow-x-auto mb-3 border dark:border-gray-700 rounded-lg">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-gray-100 dark:bg-gray-700/80">
-                                        <tr>
-                                            <th class="p-3">Lembaga</th>
-                                            <th class="p-3">Masuk</th>
-                                            <th class="p-3">Pulang</th>
-                                            <th class="p-3 text-center"><i class="fa-solid fa-gear"></i></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="lembagaTableBody"></tbody>
-                                </table>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                                <input type="text" id="newLembagaNama" placeholder="Nama Lembaga..." class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                                <input type="time" id="newLembagaMasuk" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                                <input type="time" id="newLembagaPulang" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                                <button type="button" id="btnTambahLembaga" onclick="tambahJadwalLembaga()" class="w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm">
-                                    <i class="fa-solid fa-plus"></i> Tambah
-                                </button>
-                            </div>
-                            <input type="hidden" id="setJadwalLembaga">
-                        </div>
-                        <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
-                            <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-user-tie text-[#A88C61] mr-2"></i>Daftar Jabatan & Tarif Bisyaroh</label>
-                            <div class="overflow-x-auto border dark:border-gray-700 rounded-t-lg">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-gray-100 dark:bg-gray-700/80">
-                                        <tr>
-                                            <th class="p-3">Jabatan</th>
-                                            <th class="p-3 text-right">Tarif/Jam</th>
-                                            <th class="p-3 text-center">Max Jam</th>
-                                            <th class="p-3 text-center"><i class="fa-solid fa-gear"></i></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="jabatanTableBody"></tbody>
-                                </table>
-                            </div>
-                            <div id="jabatanPagination" class="flex justify-between items-center px-4 py-2 bg-gray-50 dark:bg-gray-700/50 border-x border-b dark:border-gray-700 rounded-b-lg mb-3 text-xs"></div>
-                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                                <input type="text" id="newJabatanNama" placeholder="Jabatan..." class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                                <div class="relative">
-                                    <span class="absolute left-3 top-2 text-gray-500 text-sm">Rp</span>
-                                    <input type="text" id="newJabatanTarif" oninput="formatRupiahInput(this)" placeholder="7000" class="w-full pl-8 pr-3 py-2 border rounded-lg text-sm font-mono dark:bg-gray-700 dark:border-gray-600">
-                                </div>
-                                <input type="number" id="newJabatanJam" placeholder="Max Jam" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                                <button type="button" id="btnTambahJabatan" onclick="tambahTarifJabatan()" class="w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm">
-                                    <i class="fa-solid fa-plus"></i> Tambah
-                                </button>
-                            </div>
-                            <input type="hidden" id="setTarifJabatan">
-                        </div>
-                        <div class="md:col-span-2 flex justify-end mt-4">
-                            <button type="submit" class="bg-gray-800 dark:bg-[#D4AF37] text-white font-bold py-3 px-8 rounded-xl shadow-md">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Konfigurasi
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <footer id="appFooter" class="w-full text-center mt-auto py-6 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-            Made with <i class="fa-solid fa-heart text-red-500 animate-heartbeat mx-1 text-xs"></i> Kabag IT P2S Abu Zairi
-        </footer>
-    </div>
-
-    <div id="modalAddUser" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-md shadow-2xl border dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
-            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-3">
-                <h3 id="modalTitle" class="font-bold text-lg">Tambah Pimpinan</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form id="formAddUser" onsubmit="handleAddUser(event)" class="space-y-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">NIY</label>
-                        <input type="text" id="addNiy" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Nama</label>
-                        <input type="text" id="addNama" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Tgl Lahir</label>
-                        <input type="date" id="addTglLahir" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Kelamin</label>
-                        <select id="addJk" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                            <option value="">-- Pilih --</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Lembaga</label>
-                        <select id="addLembaga" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Jabatan</label>
-                        <select id="addJabatan" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Password</label>
-                        <input type="password" id="addPassword" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Foto Profil</label>
-                        <input type="file" id="addFoto" accept="image/*" class="w-full px-2 py-1.5 text-xs border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] text-white font-bold py-3 rounded-xl mt-5 shadow-md">
-                    <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Data
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal PDF Preview -->
-    <div id="modalPdfPreview" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-5 w-full max-w-5xl shadow-2xl border dark:border-gray-700 h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-3">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-file-pdf text-red-500 mr-2"></i> Preview Rekap Bisyaroh</h3>
-                <button onclick="closePdfPreview()" class="text-gray-400 hover:text-red-500 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="flex flex-wrap gap-4 mb-4 items-end">
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Ukuran Kertas</label>
-                    <select id="pdfPageSize" onchange="updatePdfPreview()" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                        <option value="a4">A4</option>
-                        <option value="f4">F4 (Folio)</option>
-                        <option value="legal">Legal</option>
-                        <option value="letter">Letter</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Orientasi</label>
-                    <select id="pdfOrientation" onchange="updatePdfPreview()" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                        <option value="p">Portrait</option>
-                        <option value="l">Landscape</option>
-                    </select>
-                </div>
-                <div class="ml-auto flex w-full sm:w-auto mt-2 sm:mt-0">
-                    <button onclick="downloadPdfFromPreview()" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md flex items-center justify-center">
-                        <i class="fa-solid fa-download mr-2"></i> Download PDF
-                    </button>
-                </div>
-            </div>
-            <div class="flex-1 border dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
-                <div id="pdfLoading" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 z-10 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-sm hidden">
-                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
-                    <span class="text-sm">Menerapkan Pengaturan...</span>
-                </div>
-                <iframe id="pdfPreviewFrame" class="w-full h-full border-none relative z-0" src=""></iframe>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweZs6jjAUyHWeMLzgdG3RNyL4ovaaLOHjLWd8mqs2BEM1BNYL0bbQ-NxHzZXoZGjbYPA/exec';
-        let currentUser=null,currentLocation={lat:0,lng:0},stream=null,weeklyChart=null,yearlyChart=null,lembagaChart=null;
-        let mapInstance=null,mapMarker=null,mapCircle=null,userMap={},isEditMode=false,currentEditNiy='';
-        let todayDataLists={hadir:[],izin:[],sakit:[]},currentRekapData=[],filteredRekapData=[],currentRekapBulan="";
-        let jadwalLembagaData={},tarifJabatanData={},editingLembagaOldName=null,editingJabatanOldName=null;
-        let btnInterval=null; // Untuk interval countdown tombol absen
-
-        function formatRupiah(num){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num);}
-        function formatRupiahInput(inp){let val=inp.value.replace(/[^,\d]/g,'');inp.value=val?parseInt(val).toLocaleString('id-ID'):'';}
-        function parseRupiahInput(str){return parseInt(str.replace(/\./g,''))||0;}
-        function togglePassword(){const p=document.getElementById('password'),i=document.getElementById('eyeIcon');if(p.type==='password'){p.type='text';i.className='fa-solid fa-eye-slash'}else{p.type='password';i.className='fa-solid fa-eye'}}
-        function updateClock(){const c=document.getElementById('realtimeClock'),d=document.getElementById('realtimeDate');if(c&&d&&!c.parentElement.parentElement.parentElement.classList.contains('hidden')){const n=new Date();c.innerText=n.toLocaleTimeString('id-ID',{hour12:false});d.innerText=`${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][n.getDay()]}, ${n.getDate()} ${['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][n.getMonth()]} ${n.getFullYear()}`;}}
-        setInterval(updateClock,1000);
-        function toggleDarkMode(){document.documentElement.classList.toggle('dark');localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light');document.getElementById('iconMoon').classList.toggle('hidden',document.documentElement.classList.contains('dark'));document.getElementById('iconSun').classList.toggle('hidden',!document.documentElement.classList.contains('dark'));const tc=document.documentElement.classList.contains('dark')?'#9ca3af':'#4b5563';if(weeklyChart){weeklyChart.options.scales.x.ticks.color=tc;weeklyChart.options.scales.y.ticks.color=tc;weeklyChart.update()}if(yearlyChart){yearlyChart.options.scales.x.ticks.color=tc;yearlyChart.options.scales.y.ticks.color=tc;yearlyChart.update()}if(lembagaChart){lembagaChart.options.plugins.legend.labels.color=tc;lembagaChart.data.datasets[0].borderColor=document.documentElement.classList.contains('dark')?'#1f2937':'#ffffff';lembagaChart.update()}}
-        if(localStorage.getItem('theme')==='dark'||(!('theme' in localStorage)&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');document.getElementById('iconMoon').classList.add('hidden');document.getElementById('iconSun').classList.remove('hidden')}
-        function showLoading(){Swal.fire({title:'Memproses...',allowOutsideClick:false,showConfirmButton:false,background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454',didOpen:()=>{Swal.showLoading()}})}
-        function hideLoading(){Swal.close()}
-        window.addEventListener('DOMContentLoaded',()=>{loadPublicLogs();let d=new Date(),mm=String(d.getMonth()+1).padStart(2,'0'),td=`${d.getFullYear()}-${mm}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('filterBulanRekap').value=`${d.getFullYear()}-${mm}`;document.getElementById('izinTanggalMulai').value=td;document.getElementById('izinTanggalSelesai').value=td;updateClock();});
-        async function callAPI(p){try{const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(p)});return await r.json();}catch(e){return{success:false,message:'Gagal terhubung ke server.'}}}
-
-        async function handleLogin(e){e.preventDefault();const b=document.getElementById('btnLogin'),bt=document.getElementById('btnLoginText'),sp=document.getElementById('btnLoginSpinner');b.disabled=true;bt.innerText='Memproses...';sp.classList.remove('hidden');const res=await callAPI({action:'login',niy:document.getElementById('niy').value,password:document.getElementById('password').value});b.disabled=false;bt.innerText='Login';sp.classList.add('hidden');if(res.success){loginSuccess(res.user, res.birthdays)}else{Swal.fire({icon:'error',title:'Login Gagal',text:res.message})}}
-        function loginSuccess(u, birthdays = []){currentUser=u;document.getElementById('loginSection').classList.add('hidden');document.getElementById('profileHeader').classList.remove('hidden');document.getElementById('headerNama').innerText=u.nama;document.getElementById('headerNiy').innerText=u.niy;document.getElementById('headerJabatan').innerText=u.jabatan||u.role;let inisial=u.nama.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();const hab=document.getElementById('headerInitials').parentElement;if(u.foto&&u.foto.startsWith('data:image')){hab.innerHTML=`<img src="${u.foto}" class="w-full h-full rounded-full object-cover">`;hab.classList.remove('bg-gradient-to-tr')}else{hab.innerHTML=`<span id="headerInitials">${inisial}</span>`;hab.classList.add('bg-gradient-to-tr')}if(u.role==='admin'){document.getElementById('adminSection').classList.remove('hidden');switchAdminTab('dashboard');loadAdminData();loadSettings()}else{document.getElementById('pimpinanSection').classList.remove('hidden');document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');loadPersonalLog()}if(birthdays && birthdays.length > 0){showBirthdayAlert(birthdays);}}
-        function logout(){location.reload()}
-
-        function showBirthdayAlert(birthdays) {
-            let htmlContent = '<div class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar p-1 mt-2">';
-            birthdays.forEach(b => {
-                let fotoSrc = (b.foto && b.foto.startsWith('data:image')) ? b.foto : 'https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png';
-                htmlContent += `
-                <div class="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-[#FDF8E7] dark:from-gray-700 dark:to-gray-800 rounded-xl border border-yellow-200 dark:border-gray-600 shadow-sm">
-                    <img src="${fotoSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-[#D4AF37] mr-3 shadow-sm">
-                    <div class="text-left flex-1">
-                        <h4 class="font-bold text-gray-800 dark:text-white text-sm leading-tight">${b.nama}</h4>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">${b.jabatan} - ${b.lembaga}</p>
-                    </div>
-                    <i class="fa-solid fa-cake-candles text-[#D4AF37] text-2xl animate-bounce ml-2"></i>
-                </div>`;
-            });
-            htmlContent += '</div>';
-            let titleText = birthdays.length > 1 ? `🎉 Ultah ${birthdays.length} Pimpinan! 🎉` : '🎉 Selamat Ulang Tahun! 🎉';
-            
-            Swal.fire({
-                title: `<span class="text-xl font-bold text-[#D4AF37]">${titleText}</span>`,
-                html: htmlContent,
-                confirmButtonText: 'Tutup Notifikasi',
-                confirmButtonColor: '#A88C61',
-                background: document.documentElement.classList.contains('dark') ? '#1f2937' : '#fff',
-                backdrop: `rgba(0,0,0,0.6) url("https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHRnN3J1bW83ZnlpeHh1NncxbWpqdHZ0aXlyY2I2bGFveXg2MGFyeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6ZsUptGz7B7F5E9W/giphy.gif") left top no-repeat`
-            });
+  for (let i = 1; i < data.length; i++) {
+    // 1. Cek kecocokan Login
+    if (data[i][0].toString() === niy && data[i][2].toString() === password) {
+      userMatch = { niy: data[i][0], nama: data[i][1], jabatan: data[i][3], role: data[i][4], foto: data[i][6] || '', lembaga: data[i][7] || '' };
+    }
+    
+    // 2. Cek Siapa saja yang Ulang Tahun Hari ini (kecuali akun admin)
+    let tglLahirStr = data[i][8];
+    if (tglLahirStr && data[i][4] !== 'admin') {
+      let birthDate = new Date(tglLahirStr);
+      if (!isNaN(birthDate.getTime())) {
+        if (birthDate.getDate() === tDate && (birthDate.getMonth() + 1) === tMonth) {
+          // Masukkan ke keranjang Ulang Tahun
+          todaysBirthdays.push({
+            nama: data[i][1],
+            jabatan: data[i][3],
+            lembaga: data[i][7] || '-',
+            foto: data[i][6] || 'https://i.ibb.co.com/F4g702NG/Chat-GPT-Image-Apr-28-2026-11-36-18-PM.png'
+          });
         }
+      }
+    }
+  }
 
-        function initAttendance(){document.getElementById('cameraPlaceholder').classList.add('hidden');document.getElementById('videoElement').classList.remove('hidden');document.getElementById('locationStatus').classList.remove('hidden');document.getElementById('actionButtons').classList.remove('hidden');document.getElementById('btnOpenCamera').classList.remove('animate-pulse');startCamera();getLocation()}
-        function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(s=>{stream=s;document.getElementById('videoElement').srcObject=stream}).catch(err=>{Swal.fire('Error','Izinkan akses kamera browser Anda.','warning')})}
-        function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());document.getElementById('videoElement').srcObject=null}}
-        function takeSnapshot(){const c=document.getElementById('canvasElement');c.width=320;c.height=240;c.getContext('2d').drawImage(document.getElementById('videoElement'),0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.5)}
-        function getLocation(){if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{currentLocation.lat=p.coords.latitude;currentLocation.lng=p.coords.longitude;document.getElementById('locationText').innerText=`Akurasi GPS: ${Math.round(p.coords.accuracy)} meter`},e=>{document.getElementById('locationText').innerText=`Gagal mendapatkan sinyal GPS.`},{enableHighAccuracy:true})}}
-        async function jalankanAbsen(tipe){if(!currentLocation.lat||!currentLocation.lng){Swal.fire({icon:'warning',title:'Lokasi Kosong',text:'Tunggu hingga proses penyelarasan GPS selesai.'});return}showLoading();const res=await callAPI({action:'attend',niy:currentUser.niy,nama:currentUser.nama,lembaga:currentUser.lembaga,tipe:tipe,lat:currentLocation.lat,lng:currentLocation.lng,foto:takeSnapshot()});hideLoading();stopCamera();document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');if(res.success){Swal.fire({icon:'success',title:res.message,html:`Jarak: <b>${res.geofence.jarak}</b><br>Status: ${res.geofence.status}`});loadPersonalLog()}else{if(res.geofence){Swal.fire({icon:'error',title:'Ditolak',html:`<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: ${res.geofence.jarak}<br>Status: ${res.geofence.status}`})}else{Swal.fire({icon:'error',title:'Gagal',text:res.message})}}}
+  if (userMatch) {
+    return { success: true, user: userMatch, birthdays: todaysBirthdays };
+  }
+  return { success: false, message: 'NIY atau Password salah!' };
+}
+
+function doAttend(params) {
+  let db = getDatabase();
+  let sheetAtt = db.getSheetByName('Attendance');
+  let timestamp = new Date();
+  let tanggal = Utilities.formatDate(timestamp, "GMT+7", "yyyy-MM-dd");
+  let settings = getSettings().data;
+  
+  if (params.lembaga) {
+    let jadwalStr = settings['Jadwal_Lembaga'];
+    if (jadwalStr) {
+      try {
+        let jadwal = typeof jadwalStr === 'object' ? jadwalStr : JSON.parse(jadwalStr);
+        // FIX: Pencarian jadwal lembaga dibuat kebal spasi ekstra dan huruf besar/kecil
+        let userLembaga = params.lembaga.toString().trim().toLowerCase();
+        let lembagaKey = Object.keys(jadwal).find(k => k.toString().trim().toLowerCase() === userLembaga);
         
-        function showRulesAlert(){Swal.fire({title:'Aturan & Panduan Absensi',html:`<ul class="text-left space-y-3 text-sm mt-3 border-t border-gray-200 dark:border-gray-700 pt-4"><li class="flex items-start"><i class="fa-solid fa-location-dot text-red-500 w-5 mt-0.5"></i> <span>Anda wajib berada di dalam radius area Yayasan.</span></li><li class="flex items-start"><i class="fa-solid fa-clock text-blue-500 w-5 mt-0.5"></i> <span>Absen masuk dikunci dan hanya terbuka sesuai jam jadwal lembaga.</span></li><li class="flex items-start"><i class="fa-solid fa-envelope text-purple-500 w-5 mt-0.5"></i> <span>Pengajuan izin (Sakit/Dinas) tidak menambah hitungan hari kehadiran.</span></li></ul>`,confirmButtonText:'Saya Mengerti',confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
-        
-        async function handleIzin(e){e.preventDefault();const tp=document.getElementById('izinTipe').value,tm=document.getElementById('izinTanggalMulai').value,ts=document.getElementById('izinTanggalSelesai').value,al=document.getElementById('izinAlasan').value;if(!tp||!tm||!ts||!al.trim()){Swal.fire({icon:'warning',title:'Form Tidak Lengkap'});return}if(new Date(tm)>new Date(ts)){Swal.fire({icon:'warning',title:'Tanggal Tidak Valid',text:'Tanggal Selesai tidak boleh mendahului Tanggal Mulai.'});return}showLoading();const res=await callAPI({action:'submitIzin',niy:currentUser.niy,nama:currentUser.nama,tipe:tp,tanggalMulai:tm,tanggalSelesai:ts,alasan:al});hideLoading();if(res.success){Swal.fire({icon:'success',title:'Berhasil',text:res.message});document.getElementById('formIzin').reset();let d=new Date(),td=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;document.getElementById('izinTanggalMulai').value=td;document.getElementById('izinTanggalSelesai').value=td;loadPersonalLog()}else{Swal.fire({icon:'error',title:'Gagal',text:res.message})}}
-        
-        function updateBtnState(d){
-            if(btnInterval)clearInterval(btnInterval);
-            const bm=document.getElementById('btnAbsenMasuk'),bp=document.getElementById('btnAbsenPulang'),bw=document.getElementById('btnAbsenMenunggu');
-            const cIcon=document.getElementById('camIcon'),cText=document.getElementById('camText'),btnCam=document.getElementById('btnOpenCamera');
+        if (lembagaKey) {
+          let jamMasukSetting = jadwal[lembagaKey].masuk;
+          let jamPulangSetting = jadwal[lembagaKey].pulang;
+          let currentServerTime = Utilities.formatDate(timestamp, "GMT+7", "HH:mm");
+          
+          // FIX: Konversi waktu ke menit untuk menghindari bug komparasi string (misal karena spasi tak terlihat)
+          const timeToMins = (t) => {
+              if (!t) return 0;
+              let p = t.toString().trim().split(':');
+              return (parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0);
+          };
+          
+          let currentMins = timeToMins(currentServerTime);
+          let masukMins = timeToMins(jamMasukSetting);
+          let pulangMins = timeToMins(jamPulangSetting);
+          
+          if (params.tipe === 'Masuk') {
+            let isShiftMalam = masukMins > pulangMins;
             
-            // Reset UI Kamera ke kondisi awal (jika ganti hari/user)
-            bm.classList.remove('hidden');bp.classList.add('hidden');bw.classList.add('hidden');
-            if(btnCam) btnCam.classList.remove('hidden');
-            if(cIcon) cIcon.className='fa-solid fa-video-slash text-5xl mb-4 opacity-50';
-            if(cText) cText.innerHTML='Kamera belum diaktifkan';
-
-            if(!d||d.length===0)return;
-            const ts=new Date().toDateString(),tl=d.filter(r=>new Date(r.timestamp).toDateString()===ts);
-            if(tl.length>0){
-                tl.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-                
-                // Cek jika sudah absen pulang hari ini
-                const hasPulang = tl.some(r => r.tipe === 'Pulang');
-                
-                if(hasPulang){
-                    bm.classList.add('hidden');
-                    if(btnCam) btnCam.classList.add('hidden');
-                    if(cIcon) cIcon.className='fa-solid fa-circle-check text-5xl mb-4 text-green-500 opacity-100';
-                    if(cText) cText.innerHTML='<span class="font-bold text-green-500 block mb-1">Absensi Selesai</span><span class="text-xs text-gray-400">Anda telah absen pulang hari ini.</span>';
-                } else if(tl[0].tipe==='Masuk'){
-                    bm.classList.add('hidden');
-                    const mt=new Date(tl[0].timestamp).getTime();
-                    const chk=()=>{
-                        const ms=new Date().getTime()-mt,hrs=ms/(1000*60*60);
-                        if(hrs>=1){bw.classList.add('hidden');bp.classList.remove('hidden');if(btnInterval)clearInterval(btnInterval);}
-                        else{bw.classList.remove('hidden');bp.classList.add('hidden');document.getElementById('waktuTungguText').innerText=`dalam ${Math.ceil(60-(ms/(1000*60)))} mnt`;}
-                    };
-                    chk();btnInterval=setInterval(chk,60000);
+            if (isShiftMalam) {
+               // FIX: Logika untuk shift malam (lintas hari, contoh 20:00 - 00:55)
+               // Waktu yang DITOLAK adalah waktu jeda antara jam pulang (pagi) sampai sebelum jam masuk (malam)
+               if (currentMins >= pulangMins && currentMins < masukMins) {
+                   return { success: false, message: `Absen Ditolak! Waktu absen masuk ${params.lembaga} hanya dapat dilakukan antara pukul ${jamMasukSetting.toString().trim()} s/d ${jamPulangSetting.toString().trim()} WIB.`, geofence: null };
+               }
+            } else {
+               // Logika untuk shift normal siang (contoh 07:00 - 14:00)
+               if (jamMasukSetting && currentMins < masukMins) {
+                 return { success: false, message: `Belum waktunya! Jam masuk absen ${params.lembaga} dibuka mulai pukul ${jamMasukSetting.toString().trim()} WIB.`, geofence: null };
+               }
+               if (jamPulangSetting && currentMins >= pulangMins) {
+                 return { success: false, message: `Absen Ditolak! Waktu absen masuk ${params.lembaga} sudah ditutup karena melewati batas jam pulang (${jamPulangSetting.toString().trim()} WIB).`, geofence: null };
+               }
+            }
+          } else if (params.tipe === 'Pulang') {
+            // Loloskan pulang dari jadwal lembaga, tapi cek minimal 1 jam dari absen masuk terakhir hari ini
+            let attData = sheetAtt.getDataRange().getValues();
+            for (let i = attData.length - 1; i >= 1; i--) {
+                if (attData[i][2] === params.niy && attData[i][4] === 'Masuk' && attData[i][1] === tanggal) {
+                    let jamMasuk = new Date(attData[i][0]).getTime();
+                    let selisihJam = (timestamp.getTime() - jamMasuk) / (1000 * 60 * 60);
+                    if (selisihJam < 1) {
+                        let sisaMenit = Math.ceil(60 - (selisihJam * 60));
+                        return { success: false, message: `Belum bisa pulang! Anda baru bisa absen pulang minimal 1 jam setelah masuk. Tunggu ${sisaMenit} menit lagi.`, geofence: null };
+                    }
+                    break;
                 }
             }
+          }
         }
+      } catch(e) {
+          console.log("Error parse jadwal: " + e.toString());
+      } 
+    }
+  }
 
-        async function loadPersonalLog(){const res=await callAPI({action:'getPersonalLog',niy:currentUser.niy});const c=document.getElementById('personalLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';let st=r.status.startsWith('Alasan:')?`<span class="italic text-xs text-gray-500">${r.status}</span>`:r.status;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3">${new Date(r.timestamp).toLocaleString('id-ID')}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-lg font-bold ${bt}">${r.tipe}</span></td><td class="px-4 py-3">${st}</td></tr>`});updateBtnState(res.data);}else{c.innerHTML='<tr><td colspan="3" class="text-center py-6 text-gray-400">Belum ada riwayat.</td></tr>';updateBtnState([]);}}
+  let latKantor = parseFloat(settings['Lattitude_Kantor'].toString().replace(',', '.'));
+  let lonKantor = parseFloat(settings['Longitude_Kantor'].toString().replace(',', '.'));
+  let userLat = parseFloat(params.lat.toString().replace(',', '.'));
+  let userLng = parseFloat(params.lng.toString().replace(',', '.'));
+
+  if (Math.abs(latKantor) > 90) latKantor = latKantor / 1000000;
+  if (Math.abs(lonKantor) > 180) lonKantor = lonKantor / 1000000;
+
+  let maxRadius = parseFloat(settings['Radius_Max_Meter']);
+  let jarak = calculateDistance(latKantor, lonKantor, userLat, userLng);
+  
+  let statusGeofence = (!isNaN(jarak) && jarak <= maxRadius) ? 'Di Dalam Area' : 'Di Luar Area';
+  let jarakFormatted = jarak >= 1000 ? (jarak / 1000).toFixed(2) + ' km' : (isNaN(jarak) ? 'Tidak Valid' : Math.round(jarak) + ' meter');
+
+  if (statusGeofence === 'Di Luar Area') {
+    return { success: false, message: 'Absen Ditolak! Anda berada di luar radius absensi P2S Abu Zairi.', geofence: { jarak: jarakFormatted, status: statusGeofence } };
+  }
+  
+  sheetAtt.appendRow([timestamp, tanggal, params.niy, params.nama, params.tipe, `${userLat}, ${userLng}`, params.foto, jarak.toFixed(2), statusGeofence]);
+  return { success: true, message: `Berhasil absen ${params.tipe}!`, geofence: { jarak: jarakFormatted, status: statusGeofence } };
+}
+
+function submitIzin(params) {
+  let db = getDatabase();
+  let sheetAtt = db.getSheetByName('Attendance');
+  let timestamp = new Date();
+  let start = new Date(params.tanggalMulai);
+  let end = new Date(params.tanggalSelesai);
+  
+  if (start > end) return { success: false, message: "Tanggal mulai tidak boleh lebih dari tanggal selesai." };
+
+  let loopDate = new Date(start);
+  let addedCount = 0;
+  
+  while (loopDate <= end) {
+    let dateStr = Utilities.formatDate(loopDate, "GMT+7", "yyyy-MM-dd");
+    sheetAtt.appendRow([ timestamp, dateStr, params.niy, params.nama, params.tipe, 'Alasan: ' + params.alasan, '', '0', 'Izin Terdata' ]);
+    loopDate.setDate(loopDate.getDate() + 1);
+    addedCount++;
+    if (addedCount > 30) break;
+  }
+  return { success: true, message: `Pengajuan ${params.tipe} untuk ${addedCount} hari berhasil dicatat.` };
+}
+
+function getAdminData(tahunFilter) {
+  let db = getDatabase();
+  let attData = db.getSheetByName('Attendance').getDataRange().getValues();
+  let userData = db.getSheetByName('Users').getDataRange().getValues();
+  
+  attData.shift(); userData.shift();
+  
+  // FIX: Filter berdasarkan NIY bukan role, untuk menghindari gagal baca jika teks role diubah manual di sheet
+  let pimpinanData = userData.filter(r => r[0] && r[0].toString().toLowerCase() !== 'admin').map(r => ({
+    niy: r[0], nama: r[1], jabatan: r[3], foto: r[6] || '', lembaga: r[7] || '', tglLahir: r[8] || '', jk: r[9] || ''
+  }));
+  
+  let niyToLembaga = {};
+  pimpinanData.forEach(p => { niyToLembaga[p.niy] = p.lembaga || 'Lainnya'; });
+
+  // 1. Ekstrak Tahun Tersedia & Tentukan Tahun Filter
+  let availableYears = [...new Set(attData.map(r => new Date(r[0]).getFullYear()))].filter(y => !isNaN(y)).sort((a,b) => b-a);
+  if(availableYears.length === 0) availableYears = [new Date().getFullYear()];
+  let selectedYear = tahunFilter ? parseInt(tahunFilter) : availableYears[0];
+  if(!availableYears.includes(selectedYear)) availableYears.push(selectedYear);
+  availableYears.sort((a,b) => b-a);
+
+  // 2. Statistik & Daftar Klik HARI INI
+  let todayStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd");
+  let todayHadirList = [];
+  let todayIzinList = [];
+  let todaySakitList = [];
+
+  // Agar tidak double count jika 1 orang absen masuk & pulang hari ini
+  let countedHadirNiy = new Set();
+  let countedIzinNiy = new Set();
+  let countedSakitNiy = new Set();
+
+  attData.forEach(r => {
+    // FIX: Pastikan membandingkan tanggal menggunakan object Date dari Timestamp agar kebal dari perubahan format kolom Sheet
+    let rowDateStr = Utilities.formatDate(new Date(r[0]), "GMT+7", "yyyy-MM-dd");
+    if (rowDateStr === todayStr) {
+        let niy = r[2];
+        let lembaga = niyToLembaga[niy];
+        let statusGeo = r[8] ? r[8].toString().trim() : '';
         
-        async function loadPublicLogs(){const res=await callAPI({action:'getPublicLogs'});const c=document.getElementById('publicLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3 font-semibold">${r.nama}</td><td class="px-4 py-3">${new Date(r.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td><td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded-lg font-bold ${bt}">${r.tipe}</span></td></tr>`})}else{c.innerHTML='<tr><td colspan="3" class="text-center py-8 text-gray-500">Belum ada kehadiran/izin hari ini.</td></tr>'}}
-
-        function switchAdminTab(t){document.querySelectorAll('.admin-content').forEach(el=>el.classList.add('hidden'));document.querySelectorAll('.admin-tab').forEach(el=>{el.classList.remove('md:border-[#D4AF37]','text-[#A88C61]');el.classList.add('md:border-transparent','text-gray-500')});document.getElementById('adminTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('hidden');document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('md:border-[#D4AF37]','text-[#A88C61]');if(t==='settings'&&mapInstance){setTimeout(()=>{mapInstance.invalidateSize()},100)}if(t==='rekap')loadRekapData()}
-        function showTodayList(t){let ti='',ls=[],ht='<div class="text-left text-sm max-h-64 overflow-y-auto custom-scrollbar">';if(t==='hadir'){ti='Pimpinan Hadir';ls=todayDataLists.hadir.list}else if(t==='izin'){ti='Pimpinan Izin/Dinas';ls=todayDataLists.izin.list}else{ti='Pimpinan Sakit';ls=todayDataLists.sakit.list}if(ls.length===0){ht+='<p class="text-center text-gray-500 py-6">Tidak ada data hari ini.</p>'}else{ls.forEach(i=>{ht+=`<div class="border-b dark:border-gray-700 py-3 flex flex-col"><span class="font-bold">${i.nama}</span><span class="text-[11px] text-gray-500"><i class="fa-solid fa-building text-[#D4AF37] mr-1"></i> ${i.lembaga||'-'} <i class="fa-regular fa-clock text-[#A88C61] ml-1 mr-1"></i> <span class="italic text-gray-400">${i.detail}</span></span></div>`})}ht+='</div>';Swal.fire({title:ti,html:ht,confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
-
-        function filterPimpinan(){let v=document.getElementById('searchPimpinan').value.toLowerCase(),r=document.getElementById('adminUserList').getElementsByTagName('tr');for(let i=0;i<r.length;i++){r[i].style.display=r[i].innerText.toLowerCase().includes(v)?'':'none'}}
-        function filterRekap(){let v=document.getElementById('searchRekap').value.toLowerCase(),r=document.getElementById('rekapContainer').getElementsByTagName('tr');for(let i=0;i<r.length;i++){if(r[i].classList.contains('bg-gray-100'))continue;r[i].style.display=r[i].innerText.toLowerCase().includes(v)?'':'none'}}
-
-        async function loadAdminData(){const f=document.getElementById('filterTahunDashboard'),y=f.value||'';if(!y){['statTotal','statHadir','statIzin','statSakit'].forEach(i=>document.getElementById(i).innerHTML='<i class="fa-solid fa-spinner fa-spin text-lg"></i>')}const res=await callAPI({action:'getAdminData',tahun:y});if(res.success){if(f.options.length===0){f.innerHTML='';res.data.availableYears.forEach(yr=>{f.innerHTML+=`<option value="${yr}" ${yr==res.data.selectedYear?'selected':''}>${yr}</option>`})}document.getElementById('statTotal').innerText=res.data.totalPimpinan;document.getElementById('statHadir').innerText=res.data.todayStats.hadir.count;document.getElementById('statIzin').innerText=res.data.todayStats.izin.count;document.getElementById('statSakit').innerText=res.data.todayStats.sakit.count;todayDataLists.hadir.list=res.data.todayStats.hadir.list;todayDataLists.izin.list=res.data.todayStats.izin.list;todayDataLists.sakit.list=res.data.todayStats.sakit.list;const log=document.getElementById('recentLogs');log.innerHTML='';const hd=res.data.history||[];if(hd.length===0){log.innerHTML='<div class="text-center mt-6 text-gray-400">Belum ada aktivitas.</div>'}else{hd.forEach(r=>{let i='';if(r[4]==='Masuk')i='<i class="fa-solid fa-arrow-right-to-bracket text-blue-500"></i>';else if(r[4]==='Pulang')i='<i class="fa-solid fa-arrow-right-from-bracket text-orange-500"></i>';else i='<i class="fa-solid fa-envelope-open-text text-purple-500"></i>';let bs=(r[8]=='Di Dalam Area'||r[8]=='Izin Terdata')?'bg-green-100 text-green-700':'bg-red-100 text-red-700';log.innerHTML+=`<div class="flex items-center justify-between p-3 border-b dark:border-gray-700 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition rounded-lg"><div class="flex items-center space-x-3"><div class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border shadow-sm flex items-center justify-center">${i}</div><div><p class="font-semibold">${r[3]}</p><p class="text-[11px] text-gray-500">${new Date(r[0]).toLocaleString('id-ID')}</p></div></div><span class="text-[10px] font-bold px-2 py-1 rounded-lg ${bs}">${r[4]}</span></div>`})}const uc=document.getElementById('adminUserList');uc.innerHTML='';userMap={};if(res.data.userList&&res.data.userList.length>0){res.data.userList.forEach(u=>{userMap[u.niy]=u;uc.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3 font-semibold">${u.niy}</td><td class="px-4 py-3">${u.nama}</td><td class="px-4 py-3">${u.lembaga||'-'}</td><td class="px-4 py-3">${u.jabatan}</td><td class="px-4 py-3 text-center whitespace-nowrap"><button onclick="openEditModal('${u.niy}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelete('${u.niy}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash-can"></i></button></td></tr>`})}else{uc.innerHTML='<tr><td colspan="5" class="text-center py-6">Belum ada data pimpinan.</td></tr>'}renderChart(res.data.charts);filterPimpinan()}}
-
-        async function loadRekapData(){const v=document.getElementById('filterBulanRekap').value;if(!v)return;showLoading();const res=await callAPI({action:'getRekapKehadiran',bulan:v});hideLoading();const c=document.getElementById('rekapContainer');if(res.success&&res.data){currentRekapData=res.data;currentRekapBulan=v; applyRekapFilter();}else{currentRekapData=[];filteredRekapData=[];c.innerHTML='<tr><td colspan="6" class="text-center py-10 text-red-400">Gagal memuat data.</td></tr>'}}
-        
-        function applyRekapFilter() {
-            const l = document.getElementById('filterLembagaRekap').value;
-            filteredRekapData = (l === 'Semua') ? currentRekapData : currentRekapData.filter(r => (r.lembaga || '') === l);
-            renderRekapTable();
+        if (r[4] === 'Masuk' && statusGeo === 'Di Dalam Area' && !countedHadirNiy.has(niy)) {
+            todayHadirList.push({ nama: r[3], lembaga: lembaga, detail: 'Jam ' + Utilities.formatDate(new Date(r[0]), "GMT+7", "HH:mm") });
+            countedHadirNiy.add(niy);
+        } else if (r[4] === 'Sakit' && !countedSakitNiy.has(niy)) {
+            todaySakitList.push({ nama: r[3], lembaga: lembaga, detail: r[5].toString().replace('Alasan: ', '') });
+            countedSakitNiy.add(niy);
+        } else if (['Izin', 'Cuti', 'Dinas Luar'].includes(r[4]) && !countedIzinNiy.has(niy)) {
+            todayIzinList.push({ nama: r[3], lembaga: lembaga, detail: r[4] + ' - ' + r[5].toString().replace('Alasan: ', '') });
+            countedIzinNiy.add(niy);
         }
+    }
+  });
 
-        function renderRekapTable() {
-            const c=document.getElementById('rekapContainer');
-            if(filteredRekapData.length>0){
-                c.innerHTML='';let t=0;
-                filteredRekapData.forEach(r=>{
-                    t+=r.totalHonor;
-                    let ja=r.totalJam.toFixed(2),jd=r.totalJamDiakui.toFixed(2),ij=ja>r.totalJamDiakui?`<span class="text-[10px] text-red-500 block mt-0.5">Aktual: ${ja}</span>`:'';
-                    let pct=(r.maxJam==='-'||r.maxJam==0)?100:Math.min(100,Math.round((r.totalJamDiakui/r.maxJam)*100));
-                    let pc=pct>=80?'text-green-600':(pct>=50?'text-orange-500':'text-red-500');
-                    c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3"><p class="font-bold">${r.nama}</p><p class="text-[10px] text-gray-500 font-mono">${r.niy}</p></td><td class="px-4 py-3"><p class="font-medium">${r.jabatan}</p><p class="text-xs text-gray-500">${r.lembaga||'-'}</p></td><td class="px-4 py-3 text-center font-bold text-blue-600">${r.totalHari}</td><td class="px-4 py-3 text-center font-bold text-orange-600">${jd} <span class="text-[10px] text-gray-400">/ ${r.maxJam}</span>${ij}</td><td class="px-4 py-3 text-center font-bold ${pc}">${pct}%</td><td class="px-4 py-3 text-right font-mono font-bold text-green-600">${formatRupiah(r.totalHonor)}</td></tr>`
-                });
-                c.innerHTML+=`<tr class="bg-gray-100 dark:bg-gray-800 font-bold"><td colspan="5" class="px-4 py-4 text-right uppercase">Total Pengeluaran Bisyaroh:</td><td class="px-4 py-4 text-right text-lg text-green-700">${formatRupiah(t)}</td></tr>`
-            }else{
-                c.innerHTML='<tr><td colspan="6" class="text-center py-12 text-gray-400">Tidak ada data untuk lembaga ini pada bulan tersebut.</td></tr>'
-            }
-            filterRekap();
-        }
+  // 3. Grafik Mingguan (Cari 6 Hari Kerja Mundur, SKIP JUMAT)
+  let weeklyLabels = [];
+  let weeklyData = [];
+  let daysName = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+  let tempDate = new Date();
+  
+  while (weeklyLabels.length < 6) {
+    if (tempDate.getDay() !== 5) { // JIKA BUKAN HARI JUMAT (5)
+      let dStr = Utilities.formatDate(tempDate, "GMT+7", "yyyy-MM-dd");
+      weeklyLabels.unshift(daysName[tempDate.getDay()]);
+      
+      // Hitung kehadiran (unik per NIY) pada hari tersebut
+      let niyHadirHariItu = new Set();
+      attData.forEach(r => {
+          let rowDateStr = Utilities.formatDate(new Date(r[0]), "GMT+7", "yyyy-MM-dd");
+          let statusGeo = r[8] ? r[8].toString().trim() : '';
+          if (rowDateStr === dStr && r[4] === 'Masuk' && statusGeo === 'Di Dalam Area') niyHadirHariItu.add(r[2]);
+      });
+      weeklyData.unshift(niyHadirHariItu.size);
+    }
+    tempDate.setDate(tempDate.getDate() - 1); // Mundur 1 hari
+  }
 
-        function exportRekapExcel(){if(!filteredRekapData||filteredRekapData.length===0){Swal.fire('Data Kosong','Tidak ada data untuk diekspor.','info');return}let t=0;const exp=filteredRekapData.map(r=>{t+=r.totalHonor;let pct=(r.maxJam==='-'||r.maxJam==0)?100:Math.min(100,Math.round((r.totalJamDiakui/r.maxJam)*100));return{"NIY":r.niy,"Nama":r.nama,"Lembaga":r.lembaga||'-',"Jabatan":r.jabatan,"Total Hari":r.totalHari,"Jam Diakui":r.totalJamDiakui.toFixed(2),"Persentase":pct+"%","Estimasi Bisyaroh":r.totalHonor}});exp.push({"NIY":"","Nama":"","Lembaga":"","Jabatan":"","Total Hari":"","Jam Diakui":"","Persentase":"TOTAL","Estimasi Bisyaroh":t});const ws=XLSX.utils.json_to_sheet(exp),wb=XLSX.utils.book_new();let filterName = document.getElementById('filterLembagaRekap').value; XLSX.utils.book_append_sheet(wb,ws,"Rekap");XLSX.writeFile(wb,`Rekap_P2S_${filterName}_${currentRekapBulan}.xlsx`)}
-        
-        let currentPdfDoc = null;
-        function generateRekapPDF(orientation, format) {
-            if(!filteredRekapData||filteredRekapData.length===0) return null;
-            const {jsPDF} = window.jspdf;
-            const d = new jsPDF(orientation, 'pt', format);
-            d.setFontSize(16);
-            d.text(`Rekapitulasi Bisyaroh P2S Abu Zairi`, 40, 40);
-            d.setFontSize(11);
-            let filterName = document.getElementById('filterLembagaRekap').value;
-            d.text(`Periode: Bulan ${currentRekapBulan} | Lembaga: ${filterName}`, 40, 60);
-            let t = 0;
-            const b = filteredRekapData.map(r => {
-                t += r.totalHonor;
-                let pct = (r.maxJam === '-' || r.maxJam == 0) ? 100 : Math.min(100, Math.round((r.totalJamDiakui / r.maxJam) * 100));
-                return [r.niy, r.nama, r.lembaga || '-', r.jabatan, r.totalHari.toString(), r.totalJamDiakui.toFixed(2), pct + '%', formatRupiah(r.totalHonor)];
-            });
-            b.push([{content:'TOTAL KESELURUHAN', colSpan:7, styles:{halign:'right', fontStyle:'bold'}}, formatRupiah(t)]);
-            d.autoTable({
-                startY: 80,
-                head: [['NIY','Nama','Lembaga','Jabatan','Hari','Jam','%','Bisyaroh']],
-                body: b,
-                theme: 'grid',
-                headStyles: {fillColor: [212, 175, 55]},
-                styles: {fontSize: 9},
-                columnStyles: {4:{halign:'center'}, 5:{halign:'center'}, 6:{halign:'center'}, 7:{halign:'right'}}
-            });
-            return d;
-        }
+  // 4. Grafik Tahunan & Lembaga (Berdasarkan Tahun yang Difilter)
+  let yearlyData = new Array(12).fill(0);
+  let lembagaCount = {};
+  
+  let uniqueHadirYearly = new Set(); // Mencegah double hitung masuk & pulang di hari yang sama
 
-        function exportRekapPDF() {
-            if(!filteredRekapData||filteredRekapData.length===0){Swal.fire('Data Kosong','Tidak ada data untuk diekspor.','info');return}
-            document.getElementById('modalPdfPreview').classList.remove('hidden');
-            updatePdfPreview();
-        }
+  attData.forEach(r => {
+     let attDate = new Date(r[0]);
+     if(attDate.getFullYear() === selectedYear) {
+         if(r[4] === 'Masuk' && r[8] === 'Di Dalam Area') {
+             let uniqueKey = r[1] + "_" + r[2]; // Tanggal_NIY
+             if(!uniqueHadirYearly.has(uniqueKey)) {
+                 yearlyData[attDate.getMonth()]++;
+                 let lmbg = niyToLembaga[r[2]] || 'Lainnya';
+                 lembagaCount[lmbg] = (lembagaCount[lmbg] || 0) + 1;
+                 uniqueHadirYearly.add(uniqueKey);
+             }
+         }
+     }
+  });
 
-        function updatePdfPreview() {
-            document.getElementById('pdfLoading').classList.remove('hidden');
-            setTimeout(() => {
-                const size = document.getElementById('pdfPageSize').value;
-                const orientation = document.getElementById('pdfOrientation').value;
-                let formatArgs = size;
-                if(size === 'f4') formatArgs = [612, 936]; // F4 (Folio) dikonversi khusus ke ukuran points
-                
-                currentPdfDoc = generateRekapPDF(orientation, formatArgs);
-                if(currentPdfDoc) {
-                    const pdfDataUri = currentPdfDoc.output('datauristring');
-                    document.getElementById('pdfPreviewFrame').src = pdfDataUri;
-                }
-                document.getElementById('pdfLoading').classList.add('hidden');
-            }, 100);
-        }
+  return {
+    success: true,
+    data: {
+      totalPimpinan: pimpinanData.length,
+      availableYears: availableYears,
+      selectedYear: selectedYear,
+      history: attData.slice(-50).reverse(),
+      todayStats: {
+          hadir: { count: todayHadirList.length, list: todayHadirList },
+          izin: { count: todayIzinList.length, list: todayIzinList },
+          sakit: { count: todaySakitList.length, list: todaySakitList }
+      },
+      userList: pimpinanData, 
+      charts: { 
+          weekly: { labels: weeklyLabels, data: weeklyData }, 
+          yearly: { data: yearlyData }, 
+          lembaga: { labels: Object.keys(lembagaCount), data: Object.values(lembagaCount) } 
+      }
+    }
+  };
+}
 
-        function downloadPdfFromPreview() {
-            if(currentPdfDoc) {
-                let filterName = document.getElementById('filterLembagaRekap').value;
-                currentPdfDoc.save(`Rekap_P2S_${filterName}_${currentRekapBulan}.pdf`);
-            }
-        }
+function addUser(params) {
+  let sheet = getDatabase().getSheetByName('Users');
+  let data = sheet.getDataRange().getValues();
+  for(let i=1; i<data.length; i++) {
+    if(data[i][0].toString() === params.niy) return { success: false, message: 'NIY sudah terdaftar!' };
+  }
+  sheet.appendRow([params.niy, params.nama, params.password, params.jabatan, 'pimpinan', '', params.foto, params.lembaga, params.tglLahir, params.jk]);
+  return { success: true, message: 'Pimpinan berhasil ditambahkan.' };
+}
 
-        function closePdfPreview() {
-            document.getElementById('modalPdfPreview').classList.add('hidden');
-            document.getElementById('pdfPreviewFrame').src = ''; // Bersihkan memori IFrame
-        }
+function editUser(params) {
+  let sheet = getDatabase().getSheetByName('Users');
+  let data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0].toString() === params.niy.toString()) {
+      let row = i + 1;
+      sheet.getRange(row, 2).setValue(params.nama);
+      if (params.password && params.password.trim() !== '') sheet.getRange(row, 3).setValue(params.password);
+      sheet.getRange(row, 4).setValue(params.jabatan);
+      if (params.foto && params.foto !== '') sheet.getRange(row, 7).setValue(params.foto);
+      sheet.getRange(row, 8).setValue(params.lembaga);
+      sheet.getRange(row, 9).setValue(params.tglLahir);
+      sheet.getRange(row, 10).setValue(params.jk);
+      return { success: true, message: 'Data pimpinan berhasil diperbarui.' };
+    }
+  }
+  return { success: false, message: 'Pimpinan tidak ditemukan.' };
+}
 
-        function renderJadwalLembaga(){const c=document.getElementById('lembagaTableBody'),s=document.getElementById('addLembaga'), fl=document.getElementById('filterLembagaRekap');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';let flVal = fl ? fl.value : 'Semua'; if(fl) fl.innerHTML = '<option value="Semua">Semua Lembaga</option>';for(let n in jadwalLembagaData){let j=jadwalLembagaData[n];c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3">${j.masuk}</td><td class="p-3">${j.pulang}</td><td class="p-3 text-center"><button type="button" onclick="editJadwalLembaga('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusJadwalLembaga('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`;s.innerHTML+=`<option value="${n}">${n}</option>`;if(fl) fl.innerHTML+=`<option value="${n}">${n}</option>`;}if(fl) fl.value = flVal;document.getElementById('setJadwalLembaga').value=JSON.stringify(jadwalLembagaData)}
-        function editJadwalLembaga(n){editingLembagaOldName=n;document.getElementById('newLembagaNama').value=n;document.getElementById('newLembagaMasuk').value=jadwalLembagaData[n].masuk;document.getElementById('newLembagaPulang').value=jadwalLembagaData[n].pulang;let b=document.getElementById('btnTambahLembaga');if(b){b.innerHTML='<i class="fa-solid fa-pen"></i> Update';b.className='w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm transition';}}
-        function tambahJadwalLembaga(){const n=document.getElementById('newLembagaNama').value.trim(),m=document.getElementById('newLembagaMasuk').value,p=document.getElementById('newLembagaPulang').value;if(!n||!m||!p){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingLembagaOldName&&editingLembagaOldName!==n)delete jadwalLembagaData[editingLembagaOldName];jadwalLembagaData[n]={masuk:m,pulang:p};editingLembagaOldName=null;let b=document.getElementById('btnTambahLembaga');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderJadwalLembaga();document.getElementById('newLembagaNama').value='';document.getElementById('newLembagaMasuk').value='';document.getElementById('newLembagaPulang').value=''}
-        function hapusJadwalLembaga(n){delete jadwalLembagaData[n];renderJadwalLembaga()}
+function deleteUser(niy) {
+  let sheet = getDatabase().getSheetByName('Users');
+  let data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0].toString() === niy.toString()) {
+      sheet.deleteRow(i + 1); 
+      return { success: true, message: 'Data pimpinan berhasil dihapus.' };
+    }
+  }
+  return { success: false, message: 'Data tidak ditemukan.' };
+}
 
-        let currentJabatanPage=1;const jabatanPerPage=5;
-        function changeJabatanPage(dir){currentJabatanPage+=dir;renderTarifJabatan();}
-        function renderTarifJabatan(){const c=document.getElementById('jabatanTableBody'),s=document.getElementById('addJabatan'),pag=document.getElementById('jabatanPagination');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';const keys=Object.keys(tarifJabatanData);let totalPages=Math.ceil(keys.length/jabatanPerPage)||1;if(currentJabatanPage>totalPages)currentJabatanPage=totalPages;if(currentJabatanPage<1)currentJabatanPage=1;const start=(currentJabatanPage-1)*jabatanPerPage;const paginatedKeys=keys.slice(start,start+jabatanPerPage);keys.forEach(n=>s.innerHTML+=`<option value="${n}">${n}</option>`);paginatedKeys.forEach(n=>{let o=tarifJabatanData[n],t=0,j=9999;if(typeof o==='object'){t=o.tarif;j=o.jamEfektif||9999}else{t=o}let jt=j===9999?'-':j;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3 text-right font-mono text-green-600 font-bold">${formatRupiah(t)}</td><td class="p-3 text-center">${jt}</td><td class="p-3 text-center"><button type="button" onclick="editTarifJabatan('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusTarifJabatan('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`});if(pag){pag.innerHTML=`<button type="button" onclick="changeJabatanPage(-1)" ${currentJabatanPage===1?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>&laquo; Prev</button><span class="font-medium text-gray-500">Hal ${currentJabatanPage} / ${totalPages}</span><button type="button" onclick="changeJabatanPage(1)" ${currentJabatanPage===totalPages?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>Next &raquo;</button>`}document.getElementById('setTarifJabatan').value=JSON.stringify(tarifJabatanData)}
-        function editTarifJabatan(n){editingJabatanOldName=n;let o=tarifJabatanData[n];document.getElementById('newJabatanNama').value=n;document.getElementById('newJabatanTarif').value=typeof o==='object'?o.tarif.toLocaleString('id-ID'):o.toLocaleString('id-ID');document.getElementById('newJabatanJam').value=typeof o==='object'?(o.jamEfektif===9999?'':o.jamEfektif):'';let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-pen"></i> Update';b.className='w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm transition';}}
-        function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderTarifJabatan();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value=''}
-        function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan()}
+function saveSettings(params) {
+  let sheet = getDatabase().getSheetByName('Settings');
+  let data = sheet.getDataRange().getValues();
+  let foundJadwal = false, foundTarif = false;
+  
+  for(let i = 1; i < data.length; i++) {
+    if(data[i][0] === 'Lattitude_Kantor') sheet.getRange(i+1, 2).setValue("'" + params.lat.toString().replace(',', '.'));
+    if(data[i][0] === 'Longitude_Kantor') sheet.getRange(i+1, 2).setValue("'" + params.lng.toString().replace(',', '.'));
+    if(data[i][0] === 'Radius_Max_Meter') sheet.getRange(i+1, 2).setValue(params.radius);
+    
+    if(data[i][0] === 'Tarif_Jabatan') { 
+        sheet.getRange(i+1, 2).setValue("'" + params.tarifJabatan); 
+        foundTarif = true; 
+    }
+    if(data[i][0] === 'Jadwal_Lembaga') { 
+        sheet.getRange(i+1, 2).setValue("'" + params.jadwalLembaga); 
+        foundJadwal = true; 
+    }
+  }
+  
+  if(!foundJadwal) sheet.appendRow(['Jadwal_Lembaga', "'" + params.jadwalLembaga]);
+  if(!foundTarif) sheet.appendRow(['Tarif_Jabatan', "'" + params.tarifJabatan]);
+  
+  return { success: true, message: 'Pengaturan berhasil disimpan!' };
+}
 
-        function initGeofenceMap(lat,lng,rad){if(mapInstance)return;mapInstance=L.map('mapGeofence').setView([lat,lng],17);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);const pin=L.divIcon({className:'custom-pin',html:'<i class="fa-solid fa-location-dot text-4xl text-red-500"></i>',iconSize:[30,42],iconAnchor:[15,42]});mapMarker=L.marker([lat,lng],{icon:pin}).addTo(mapInstance);mapCircle=L.circle([lat,lng],{color:'#D4AF37',fillColor:'#D4AF37',fillOpacity:0.25,radius:rad}).addTo(mapInstance);['setLat','setLng','setRadius'].forEach(id=>document.getElementById(id).addEventListener('input',syncMapFromInputs));new ResizeObserver(()=>{if(mapInstance)mapInstance.invalidateSize()}).observe(document.getElementById('mapGeofence'))}
-        function syncMapFromInputs(){if(!mapInstance)return;let lat=parseFloat(document.getElementById('setLat').value)||0,lng=parseFloat(document.getElementById('setLng').value)||0,rad=parseFloat(document.getElementById('setRadius').value)||100;if(lat&&lng){mapMarker.setLatLng([lat,lng]);mapCircle.setLatLng([lat,lng]);mapInstance.panTo([lat,lng])}mapCircle.setRadius(rad)}
-        
-        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();initGeofenceMap(parseFloat(document.getElementById('setLat').value),parseFloat(document.getElementById('setLng').value),parseFloat(document.getElementById('setRadius').value));syncMapFromInputs()}}
-        async function handleSaveSettings(e){e.preventDefault();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
+function getSettings() {
+  let sheet = getDatabase().getSheetByName('Settings');
+  let data = sheet.getDataRange().getValues();
+  let set = {};
+  for(let i=1; i<data.length; i++) { 
+    let key = data[i][0];
+    let val = data[i][1];
+    // FIX: Membuang tanda petik tunggal di awal teks jika dihasilkan oleh format Google Sheets
+    if (typeof val === 'string' && val.startsWith("'")) {
+        val = val.substring(1);
+    }
+    set[key] = val; 
+  }
+  return { success: true, data: set };
+}
 
-        function renderChart(cd){const tc=document.documentElement.classList.contains('dark')?'#9ca3af':'#4b5563';if(!cd)return;const gc=(l,op)=>Array.from({length:l},(_,i)=>['rgba(59,130,246,0.8)','rgba(239,68,68,0.8)','rgba(16,185,129,0.8)','rgba(245,158,11,0.8)','rgba(139,92,246,0.8)'][i%5].replace('0.8)',op+')'));if(weeklyChart)weeklyChart.destroy();weeklyChart=new Chart(document.getElementById('attendanceChart').getContext('2d'),{type:'bar',data:{labels:cd.weekly.labels,datasets:[{data:cd.weekly.data,backgroundColor:gc(cd.weekly.data.length,0.8),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{display:false}},y:{ticks:{color:tc,beginAtZero:true,stepSize:1}}}}});if(yearlyChart)yearlyChart.destroy();yearlyChart=new Chart(document.getElementById('yearlyChart').getContext('2d'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'],datasets:[{data:cd.yearly.data,borderColor:'#3B82F6',fill:true,backgroundColor:'rgba(59,130,246,0.15)',tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{display:false}},y:{ticks:{color:tc,beginAtZero:true,stepSize:1}}}}});if(lembagaChart)lembagaChart.destroy();lembagaChart=new Chart(document.getElementById('lembagaChart').getContext('2d'),{type:'doughnut',data:{labels:cd.lembaga.labels.length?cd.lembaga.labels:['Kosong'],datasets:[{data:cd.lembaga.data.length?cd.lembaga.data:[1],backgroundColor:cd.lembaga.data.length?gc(cd.lembaga.data.length,0.8):['#ccc'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,boxWidth:12}}},cutout:'70%'}})}
+function getPersonalLog(niy) {
+  let attData = getDatabase().getSheetByName('Attendance').getDataRange().getValues();
+  attData.shift(); 
+  let personalHistory = [];
+  for (let i = attData.length - 1; i >= 0; i--) {
+    if (attData[i][2].toString() === niy.toString()) {
+      personalHistory.push({ timestamp: attData[i][0], tipe: attData[i][4], status: attData[i][8] });
+      if (personalHistory.length >= 20) break;
+    }
+  }
+  return { success: true, data: personalHistory };
+}
 
-        function closeModal(){document.getElementById('modalAddUser').classList.add('hidden')}
-        function showAddUserModal(){isEditMode=false;document.getElementById('modalTitle').innerText='Tambah Pimpinan';document.getElementById('formAddUser').reset();document.getElementById('addNiy').readOnly=false;document.getElementById('addNiy').classList.remove('bg-gray-200');document.getElementById('addPassword').required=true;document.getElementById('modalAddUser').classList.remove('hidden')}
-        function openEditModal(niy){let u=userMap[niy];if(!u)return;isEditMode=true;currentEditNiy=niy;document.getElementById('modalTitle').innerText='Edit Data';document.getElementById('addNiy').value=u.niy;document.getElementById('addNiy').readOnly=true;document.getElementById('addNiy').classList.add('bg-gray-200');document.getElementById('addNama').value=u.nama;document.getElementById('addTglLahir').value=u.tglLahir;document.getElementById('addJk').value=u.jk;document.getElementById('addLembaga').value=u.lembaga;document.getElementById('addJabatan').value=u.jabatan;document.getElementById('addPassword').value='';document.getElementById('addPassword').required=false;document.getElementById('modalAddUser').classList.remove('hidden')}
-        function confirmDelete(niy){Swal.fire({title:'Hapus?',text:"Data tidak bisa dikembalikan.",icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus!',confirmButtonColor:'#d33'}).then(async(r)=>{if(r.isConfirmed){showLoading();const res=await callAPI({action:'deleteUser',niy:niy});hideLoading();if(res.success){Swal.fire('Terhapus!','','success');loadAdminData()}}})}
-        function compressAvatar(f){return new Promise((r)=>{const reader=new FileReader();reader.readAsDataURL(f);reader.onload=(e)=>{const img=new Image();img.src=e.target.result;img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>200){h*=200/w;w=200}}else{if(h>200){w*=200/h;h=200}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',0.6))}}})}
-        async function handleAddUser(e){e.preventDefault();let f='';if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);showLoading();const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,password:document.getElementById('addPassword').value,foto:f});hideLoading();if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData()}else{Swal.fire('Error',res.message,'error')}}
+function getPublicLogs() {
+  let sheetAtt = getDatabase().getSheetByName('Attendance');
+  if (sheetAtt.getLastRow() <= 1) return { success: true, data: [] };
+  let attData = sheetAtt.getDataRange().getValues();
+  attData.shift(); 
+  let todayStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd");
+  let todayLogs = [];
+  for (let i = attData.length - 1; i >= 0; i--) {
+    // FIX: Gunakan Timestamp untuk mendapatkan format tanggal yang pasti dan trim string status
+    let rowDateStr = Utilities.formatDate(new Date(attData[i][0]), "GMT+7", "yyyy-MM-dd");
+    let statusGeo = attData[i][8] ? attData[i][8].toString().trim() : '';
+    
+    if (rowDateStr === todayStr && (statusGeo === 'Di Dalam Area' || statusGeo === 'Izin Terdata')) {
+        todayLogs.push({ timestamp: attData[i][0], nama: attData[i][3], tipe: attData[i][4] });
+    }
+    if (todayLogs.length >= 50) break;
+  }
+  return { success: true, data: todayLogs };
+}
 
-        // Setup PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const sw = "self.addEventListener('fetch', (e) => {});";
-                const blob = new Blob([sw], { type: 'text/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(()=>{});
-            });
-        }
-    </script>
-</body>
-</html>
+function getRekapKehadiran(bulanTahun) {
+  let db = getDatabase();
+  let attData = db.getSheetByName('Attendance').getDataRange().getValues();
+  let userData = db.getSheetByName('Users').getDataRange().getValues();
+  let settings = getSettings().data;
+  
+  attData.shift(); userData.shift();
+
+  let jadwalLembaga = {};
+  try { 
+      let jdw = settings['Jadwal_Lembaga']; 
+      jadwalLembaga = typeof jdw === 'object' ? jdw : JSON.parse(jdw || '{}'); 
+  } catch(e) {}
+  
+  let tarifJabatan = {};
+  try { 
+      let trf = settings['Tarif_Jabatan']; 
+      tarifJabatan = typeof trf === 'object' ? trf : JSON.parse(trf || '{}'); 
+  } catch(e) {}
+  
+  let userProfile = {};
+  userData.forEach(r => {
+    if(r[4] === 'pimpinan') userProfile[r[0]] = { nama: r[1], jabatan: r[3], lembaga: r[7] };
+  });
+
+  // FIX: Format dari timestamp ke string memastikan filter startsWith selalu berjalan baik
+  let filteredAtt = attData.filter(r => {
+    let rowDateStr = Utilities.formatDate(new Date(r[0]), "GMT+7", "yyyy-MM-dd");
+    let statusGeo = r[8] ? r[8].toString().trim() : '';
+    return rowDateStr.startsWith(bulanTahun) && statusGeo === 'Di Dalam Area';
+  });
+  
+  let dailyLogs = {};
+  filteredAtt.forEach(row => {
+    let ts = new Date(row[0]);
+    let dateStr = Utilities.formatDate(ts, "GMT+7", "yyyy-MM-dd"); 
+    let niy = row[2], tipe = row[4];
+    let key = niy + "_" + dateStr;
+    
+    if(!dailyLogs[key]) dailyLogs[key] = { masuk: null, pulang: null, niy: niy };
+    if(tipe === 'Masuk') { if(!dailyLogs[key].masuk || ts < dailyLogs[key].masuk) dailyLogs[key].masuk = ts; } 
+    else if(tipe === 'Pulang') { if(!dailyLogs[key].pulang || ts > dailyLogs[key].pulang) dailyLogs[key].pulang = ts; }
+  });
+
+  const timeToDecimal = (timeStr) => { let p = timeStr.split(':'); return parseInt(p[0]) + (parseInt(p[1]) / 60); };
+
+  let rekapUser = {};
+  
+  for(let key in dailyLogs) {
+      let log = dailyLogs[key]; let niy = log.niy;
+      if(!userProfile[niy]) continue; 
+      
+      if(!rekapUser[niy]) rekapUser[niy] = { niy: niy, nama: userProfile[niy].nama, jabatan: userProfile[niy].jabatan, lembaga: userProfile[niy].lembaga, totalHari: 0, totalJam: 0 };
+      
+      let profil = userProfile[niy];
+      let jamKerjaStandar = 0;
+      let jdw = null; // Menyimpan objek jadwal untuk digunakan di pembatasan jam
+
+      if(profil.lembaga && jadwalLembaga[profil.lembaga]) {
+          jdw = jadwalLembaga[profil.lembaga];
+          if(jdw.masuk && jdw.pulang) jamKerjaStandar = timeToDecimal(jdw.pulang) - timeToDecimal(jdw.masuk);
+      }
+      if(jamKerjaStandar <= 0) jamKerjaStandar = 6; 
+
+      let jamHarian = 0;
+      if(log.masuk && log.pulang) {
+          let effectivePulang = log.pulang;
+
+          // --- LOGIKA BARU: Batasi jam kerja sesuai jadwal pulang lembaga ---
+          if (jdw && jdw.pulang) {
+              let pParts = jdw.pulang.split(':');
+              let schedPulang = new Date(log.pulang.getTime());
+              schedPulang.setHours(parseInt(pParts[0]), parseInt(pParts[1]), 0, 0);
+
+              // Jika waktu aktual pulang melewati jadwal pulang, hitungan stop pada jam jadwal
+              if (log.pulang > schedPulang) {
+                  effectivePulang = schedPulang; 
+              }
+          }
+          // ------------------------------------------------------------------
+
+          let msDiff = effectivePulang.getTime() - log.masuk.getTime();
+          jamHarian = msDiff / (1000 * 60 * 60);
+          if(jamHarian < 0) jamHarian = 0;
+      } else if (log.masuk && !log.pulang) {
+          // --- LOGIKA LUPA ABSEN PULANG: Dipotong 50% dari total jam standar lembaga ---
+          jamHarian = jamKerjaStandar * 0.5; 
+      }
+      
+      // --- LOGIKA KHUSUS WALI KELAS (HARIAN) ---
+      // FIX: Menggunakan .includes() agar mendeteksi jabatan seperti "Wali Kelas MA", dll
+      if (profil.jabatan && profil.jabatan.toString().toLowerCase().includes('wali kelas')) {
+          if (jamHarian > 1) {
+              jamHarian = 1; // Jika lebih dari 1 jam, potong/dihitung jadi 1 jam saja
+          }
+      }
+      // -----------------------------------------
+      
+      rekapUser[niy].totalHari += 1;
+      rekapUser[niy].totalJam += jamHarian;
+  }
+
+  for(let niy in rekapUser) {
+      let profil = userProfile[niy];
+      let trfObj = tarifJabatan[profil.jabatan];
+      
+      let tarifPerJam = 0; let maxJamEfektif = 9999; 
+      if(trfObj) {
+         if(typeof trfObj === 'object') { tarifPerJam = trfObj.tarif || 0; maxJamEfektif = trfObj.jamEfektif || 9999; } 
+         else { tarifPerJam = trfObj; }
+      }
+      
+      // --- LOGIKA KHUSUS WALI KELAS (BULANAN) ---
+      // FIX: Menggunakan .includes() agar mendeteksi jabatan seperti "Wali Kelas MA", dll
+      if (profil.jabatan && profil.jabatan.toString().toLowerCase().includes('wali kelas')) {
+          maxJamEfektif = 24; // Paksa maksimal 24 jam dalam sebulan
+      }
+      // ------------------------------------------
+      
+      let jamAktual = rekapUser[niy].totalJam;
+      let jamDiakui = Math.min(jamAktual, maxJamEfektif);
+      
+      rekapUser[niy].maxJam = maxJamEfektif === 9999 ? '-' : maxJamEfektif;
+      rekapUser[niy].totalJamDiakui = jamDiakui;
+      rekapUser[niy].totalHonor = jamDiakui * tarifPerJam;
+  }
+
+  return { success: true, data: Object.values(rekapUser) };
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))); 
+}
