@@ -579,11 +579,11 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Kelas</label>
-                            <input type="text" id="teachKelas" required placeholder="VII A" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
+                            <select id="teachKelas" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Mapel</label>
-                            <input type="text" id="teachMapel" required placeholder="Fiqih" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
+                            <select id="teachMapel" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Hari</label>
@@ -731,6 +731,21 @@
                                 </button>
                             </div>
                             <input type="hidden" id="setJadwalLembaga">
+                        </div>
+                        <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
+                            <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-list-check text-[#A88C61] mr-2"></i>Daftar Kelas & Mata Pelajaran</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">Daftar Kelas</label>
+                                    <textarea id="setDaftarKelas" rows="5" oninput="syncKelasMapelFromTextarea()" placeholder="VII A&#10;VII B&#10;VIII A" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
+                                    <p class="text-[10px] text-gray-400 mt-1">Pisahkan dengan baris baru atau koma.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">Daftar Mapel</label>
+                                    <textarea id="setDaftarMapel" rows="5" oninput="syncKelasMapelFromTextarea()" placeholder="Fiqih&#10;Bahasa Arab&#10;Matematika" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
+                                    <p class="text-[10px] text-gray-400 mt-1">Opsi ini akan muncul di dropdown Jadwal Guru.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
                             <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-user-tie text-[#A88C61] mr-2"></i>Daftar Jabatan & Tarif Bisyaroh</label>
@@ -945,6 +960,7 @@
         let mapInstance=null,mapMarker=null,mapCircle=null,userMap={},isEditMode=false,currentEditNiy='';
         let todayDataLists={hadir:[],izin:[],sakit:[]},currentRekapData=[],filteredRekapData=[],currentRekapBulan="";
         let jadwalLembagaData={},tarifJabatanData={},editingLembagaOldName=null,editingJabatanOldName=null;
+        let kelasListData=[],mapelListData=[];
         let btnInterval=null;
         let currentRekapDays = 31, currentRekapView = 'bisyaroh';
         let currentMonitorLogs = []; // Tambahan variabel untuk menyimpan data monitor harian
@@ -1384,7 +1400,7 @@
             }
             if(t==='rekap')loadRekapData();
             if(t==='monitor')loadMonitorData();
-            if(t==='mengajar'){loadTeachingAdminData();loadTeachingRekap();}
+            if(t==='mengajar'){loadSettings();loadTeachingAdminData();loadTeachingRekap();}
         }
 
         function showTodayList(t){let ti='',ls=[],ht='<div class="text-left text-sm max-h-64 overflow-y-auto custom-scrollbar">';if(t==='hadir'){ti='Pimpinan Hadir';ls=todayDataLists.hadir.list}else if(t==='izin'){ti='Pimpinan Izin/Dinas';ls=todayDataLists.izin.list}else{ti='Pimpinan Sakit';ls=todayDataLists.sakit.list}if(ls.length===0){ht+='<p class="text-center text-gray-500 py-6">Tidak ada data hari ini.</p>'}else{ls.forEach(i=>{ht+=`<div class="border-b dark:border-gray-700 py-3 flex flex-col"><span class="font-bold">${i.nama}</span><span class="text-[11px] text-gray-500"><i class="fa-solid fa-building text-[#D4AF37] mr-1"></i> ${i.lembaga||'-'} <i class="fa-regular fa-clock text-[#A88C61] ml-1 mr-1"></i> <span class="italic text-gray-400">${i.detail}</span></span></div>`})}ht+='</div>';Swal.fire({title:ti,html:ht,confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
@@ -1762,6 +1778,26 @@
         function tambahJadwalLembaga(){const n=document.getElementById('newLembagaNama').value.trim(),m=document.getElementById('newLembagaMasuk').value,p=document.getElementById('newLembagaPulang').value;if(!n||!m||!p){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingLembagaOldName&&editingLembagaOldName!==n)delete jadwalLembagaData[editingLembagaOldName];jadwalLembagaData[n]={masuk:m,pulang:p};editingLembagaOldName=null;let b=document.getElementById('btnTambahLembaga');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderJadwalLembaga();document.getElementById('newLembagaNama').value='';document.getElementById('newLembagaMasuk').value='';document.getElementById('newLembagaPulang').value=''}
         function hapusJadwalLembaga(n){delete jadwalLembagaData[n];renderJadwalLembaga()}
 
+        const defaultKelasList=['VII A','VII B','VIII A','VIII B','IX A','IX B','X','XI','XII'];
+        const defaultMapelList=['Fiqih','Aqidah Akhlak','Al-Qur’an Hadits','Bahasa Arab','Bahasa Indonesia','Matematika','IPA','IPS'];
+        function parseListValue(v, fallback=[]){
+            if(!v)return fallback.slice();
+            try{let arr=JSON.parse(v);if(Array.isArray(arr))return [...new Set(arr.map(x=>x.toString().trim()).filter(Boolean))]}catch(e){}
+            return [...new Set(v.toString().split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean))];
+        }
+        function listToTextarea(arr){return (arr&&arr.length?arr:[]).join('\n')}
+        function syncKelasMapelFromTextarea(){
+            const k=document.getElementById('setDaftarKelas'),m=document.getElementById('setDaftarMapel');
+            if(k)kelasListData=parseListValue(k.value,defaultKelasList);
+            if(m)mapelListData=parseListValue(m.value,defaultMapelList);
+            renderKelasMapelDropdowns();
+        }
+        function renderKelasMapelDropdowns(){
+            const sk=document.getElementById('teachKelas'),sm=document.getElementById('teachMapel');
+            if(sk){let old=sk.value;sk.innerHTML='<option value="">-- Pilih Kelas --</option>';kelasListData.forEach(x=>sk.innerHTML+=`<option value="${x}">${x}</option>`);if(old&&kelasListData.includes(old))sk.value=old;}
+            if(sm){let old=sm.value;sm.innerHTML='<option value="">-- Pilih Mapel --</option>';mapelListData.forEach(x=>sm.innerHTML+=`<option value="${x}">${x}</option>`);if(old&&mapelListData.includes(old))sm.value=old;}
+        }
+
         let currentJabatanPage=1;const jabatanPerPage=5;
         function changeJabatanPage(dir){currentJabatanPage+=dir;renderTarifJabatan();}
         function renderTarifJabatan(){const c=document.getElementById('jabatanTableBody'),s=document.getElementById('addJabatan'),pag=document.getElementById('jabatanPagination'),aj=document.getElementById('assignmentJabatan');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';if(aj)aj.innerHTML='<option value="">-- Pilih --</option>';const keys=Object.keys(tarifJabatanData);let totalPages=Math.ceil(keys.length/jabatanPerPage)||1;if(currentJabatanPage>totalPages)currentJabatanPage=totalPages;if(currentJabatanPage<1)currentJabatanPage=1;const start=(currentJabatanPage-1)*jabatanPerPage;const paginatedKeys=keys.slice(start,start+jabatanPerPage);keys.forEach(n=>{s.innerHTML+=`<option value="${n}">${n}</option>`;if(aj)aj.innerHTML+=`<option value="${n}">${n}</option>`});paginatedKeys.forEach(n=>{let o=tarifJabatanData[n],t=0,j=9999;if(typeof o==='object'){t=o.tarif;j=o.jamEfektif||9999}else{t=o}let jt=j===9999?'-':j;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3 text-right font-mono text-green-600 font-bold">${formatRupiah(t)}</td><td class="p-3 text-center">${jt}</td><td class="p-3 text-center"><button type="button" onclick="editTarifJabatan('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusTarifJabatan('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`});if(pag){pag.innerHTML=`<button type="button" onclick="changeJabatanPage(-1)" ${currentJabatanPage===1?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>&laquo; Prev</button><span class="font-medium text-gray-500">Hal ${currentJabatanPage} / ${totalPages}</span><button type="button" onclick="changeJabatanPage(1)" ${currentJabatanPage===totalPages?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>Next &raquo;</button>`}document.getElementById('setTarifJabatan').value=JSON.stringify(tarifJabatanData)}
@@ -1769,7 +1805,8 @@
         async function autoSaveSettingsSilent(){
             const lat=document.getElementById('setLat'),lng=document.getElementById('setLng'),rad=document.getElementById('setRadius'),jl=document.getElementById('setJadwalLembaga'),tj=document.getElementById('setTarifJabatan');
             if(!lat||!lng||!rad||!jl||!tj)return;
-            await callAPI({action:'saveSettings',lat:lat.value,lng:lng.value,radius:rad.value,jadwalLembaga:jl.value,tarifJabatan:tj.value});
+            syncKelasMapelFromTextarea();
+            await callAPI({action:'saveSettings',lat:lat.value,lng:lng.value,radius:rad.value,jadwalLembaga:jl.value,tarifJabatan:tj.value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData)});
         }
         async function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;currentJabatanPage=Math.ceil(Object.keys(tarifJabatanData).length/jabatanPerPage)||1;let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderTarifJabatan();await autoSaveSettingsSilent();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value='';Swal.fire({icon:'success',title:'Jabatan Tersimpan',text:`${n} sudah masuk daftar jabatan.`,timer:1500,showConfirmButton:false})}
         async function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan();await autoSaveSettingsSilent()}
@@ -1857,13 +1894,13 @@
             }, 500);
         }
         
-        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();
+        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();kelasListData=parseListValue(res.data['Daftar_Kelas'],defaultKelasList);mapelListData=parseListValue(res.data['Daftar_Mapel'],defaultMapelList);let dk=document.getElementById('setDaftarKelas'),dm=document.getElementById('setDaftarMapel');if(dk)dk.value=listToTextarea(kelasListData);if(dm)dm.value=listToTextarea(mapelListData);renderKelasMapelDropdowns();
         // inisiasi peta awal jika sedang berada di tab pengaturan
         if(!document.getElementById('adminTabSettings').classList.contains('hidden')){
             initGeofenceMap(parseFloat(document.getElementById('setLat').value),parseFloat(document.getElementById('setLng').value),parseFloat(document.getElementById('setRadius').value));
         }}}
         
-        async function handleSaveSettings(e){e.preventDefault();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
+        async function handleSaveSettings(e){e.preventDefault();syncKelasMapelFromTextarea();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData)};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
 
         function renderChart(cd) {
             const tc = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#4b5563';
@@ -2099,11 +2136,14 @@
             }
         }
         function resetTeachingForm(){document.getElementById('formTeachingSchedule').reset();document.getElementById('teachIdJadwal').value='';}
+        function ensureSelectOption(selectId,value){const s=document.getElementById(selectId);if(!s||!value)return;if(!Array.from(s.options).some(o=>o.value===value)){s.innerHTML+=`<option value="${value}">${value}</option>`;}}
         function editTeachingSchedule(id){
             let j=teachingScheduleAdminData.find(x=>x.idJadwal===id);if(!j)return;
             document.getElementById('teachIdJadwal').value=j.idJadwal;
             document.getElementById('teachNiy').value=j.niy;
             document.getElementById('teachLembaga').value=j.lembaga;
+            ensureSelectOption('teachKelas',j.kelas);
+            ensureSelectOption('teachMapel',j.mapel);
             document.getElementById('teachKelas').value=j.kelas;
             document.getElementById('teachMapel').value=j.mapel;
             document.getElementById('teachHari').value=j.hari;
