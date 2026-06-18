@@ -331,7 +331,7 @@
 
             <div class="mt-6 glass rounded-2xl p-5 shadow-md">
                 <h3 class="font-bold mb-3"><i class="fa-solid fa-circle-info text-[#D4AF37] mr-2"></i>Aturan Hitung Jam Mengajar</h3>
-                <p class="text-sm text-gray-500">Guru dapat absen setelah jam mulai jadwal. Jika terlambat, sistem mencatat menit keterlambatan dan jam diakui dihitung dari jam absen aktual sampai jam selesai jadwal.</p>
+                <p class="text-sm text-gray-500">Guru dapat check-in lebih awal atau setelah jam mulai. Menit diakui dihitung dari jam mulai/absen aktual sampai checkout, maksimal sampai jam selesai jadwal. Jika tidak checkout atau checkout lewat batas toleransi admin, menit diakui mengikuti persentase flexible di menu Setting.</p>
             </div>
         </div>
 
@@ -664,6 +664,16 @@
                         </table>
                     </div>
                     <div id="teachingGridContainer" class="hidden overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar rounded-lg border dark:border-gray-700">
+                        <div class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-[10px] text-gray-500 border-b dark:border-gray-700">
+                            <span class="font-bold">Kode:</span>
+                            <span class="mx-1 text-green-600 font-bold">H</span> Hadir,
+                            <span class="mx-1 text-orange-600 font-bold">T</span> Terlambat,
+                            <span class="mx-1 text-blue-600 font-bold">C</span> Belum checkout,
+                            <span class="mx-1 text-purple-600 font-bold">N</span> Tidak checkout,
+                            <span class="mx-1 text-red-600 font-bold">L</span> Lewat toleransi,
+                            <span class="mx-1 text-sky-600 font-bold">P</span> Pulang cepat,
+                            <span class="mx-1 text-gray-500 font-bold">J</span> Jadwal belum absen
+                        </div>
                         <table class="w-full text-sm text-left border-collapse">
                             <thead id="teachingGridHead" class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0 z-20">
                                 <tr><th class="px-4 py-3">Guru</th></tr>
@@ -726,6 +736,21 @@
                         <div class="md:col-span-2">
                             <label class="block text-xs font-medium mb-1">Radius (Meter)</label>
                             <input type="number" id="setRadius" required class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
+                        </div>
+                        <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
+                            <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-person-chalkboard text-[#A88C61] mr-2"></i>Aturan Checkout Guru</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">Batas Toleransi Checkout (Menit)</label>
+                                    <input type="number" id="setCheckoutTolerance" min="0" value="15" class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
+                                    <p class="text-[10px] text-gray-400 mt-1">Contoh: jadwal selesai 10:00, toleransi 15 berarti checkout sampai 10:15 tetap dihitung penuh.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium mb-1">Persentase Jika Tidak/Lewat Checkout (%)</label>
+                                    <input type="number" id="setNoCheckoutPercent" min="0" max="100" value="50" class="w-full px-4 py-2 border rounded-lg outline-none dark:bg-gray-700 dark:border-gray-600 font-bold text-[#A88C61] focus:border-[#D4AF37]">
+                                    <p class="text-[10px] text-gray-400 mt-1">Default 50%. Dipakai jika guru tidak checkout atau checkout lewat batas toleransi.</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="md:col-span-2 border-t dark:border-gray-700 pt-5">
                             <label class="block text-sm font-bold mb-3"><i class="fa-solid fa-building text-[#A88C61] mr-2"></i>Daftar Lembaga & Jam Kerja</label>
@@ -985,7 +1010,7 @@
         let btnInterval=null;
         let currentRekapDays = 31, currentRekapView = 'bisyaroh';
         let currentMonitorLogs = []; // Tambahan variabel untuk menyimpan data monitor harian
-        let currentMode='', teacherStream=null, teacherLocation={lat:0,lng:0}, selectedTeachingSchedule=null, teachingScheduleAdminData=[], currentTeachingRekapData=[], currentTeachingDays=31, currentTeachingView='rekap';
+        let currentMode='', teacherStream=null, teacherLocation={lat:0,lng:0}, selectedTeachingSchedule=null, selectedTeachingMode='checkin', teachingScheduleAdminData=[], currentTeachingRekapData=[], currentTeachingDays=31, currentTeachingView='rekap';
         let currentPimpinanAssignments=[], selectedPimpinanAssignment=null, currentAssignmentAdminNiy='';
 
         function formatRupiah(num){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num);}
@@ -1280,16 +1305,21 @@
             res.data.forEach(j=>{
                 let badge='',btn='';
                 if(j.sudahAbsen){
-                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Sudah Absen</span>';
-                    btn=`<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Selesai</button>`;
+                    if(j.attendance&&j.attendance.sudahCheckout){
+                        badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Selesai</span>';
+                        btn=`<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Sudah Checkout</button>`;
+                    }else{
+                        badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Sudah Check-in</span>';
+                        btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkout')" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-right-from-bracket mr-1"></i>Checkout / Selesai Mengajar</button><p class="text-[10px] text-gray-400 mt-2">Checkout maksimal ${j.checkoutTolerance||15} menit setelah jam selesai agar dihitung penuh.</p>`;
+                    }
                 }else if(!j.sudahMulai){
                     badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">Bisa Absen Lebih Awal</span>';
                     let info=j.durasiPotensial>0?`Jika absen sekarang, menit diakui tetap dihitung mulai ${j.jamMulai} sampai ${j.jamSelesai}. Potensi: ${Number(j.durasiPotensial).toFixed(2)} jam`:'Jadwal sudah lewat, jam diakui 0 jika tetap absen';
-                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>Absen Lebih Awal</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
+                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkin')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>Check-in Lebih Awal</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
                 }else{
                     let info=j.durasiPotensial>0?`Potensi jam diakui: ${Number(j.durasiPotensial).toFixed(2)} jam`:'Jadwal sudah lewat, jam diakui 0 jika tetap absen';
-                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Bisa Absen</span>';
-                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>Absen Mengajar</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
+                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Bisa Check-in</span>';
+                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkin')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>Check-in Mengajar</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
                 }
                 c.innerHTML+=`<div class="glass rounded-2xl p-5 shadow-sm border dark:border-gray-700">
                     <div class="flex justify-between items-start gap-3 mb-3">
@@ -1303,18 +1333,25 @@
                         <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-3"><p class="text-[10px] text-gray-400 uppercase font-bold">Mulai</p><p class="font-bold">${j.jamMulai}</p></div>
                         <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-3"><p class="text-[10px] text-gray-400 uppercase font-bold">Selesai</p><p class="font-bold">${j.jamSelesai}</p></div>
                     </div>
-                    ${j.attendance?`<p class="text-xs text-green-600 font-bold mt-3"><i class="fa-solid fa-check-circle mr-1"></i>${j.attendance.status} | Jam diakui ${j.attendance.durasiDiakui} jam</p>`:''}
+                    ${j.attendance?`<div class="text-xs mt-3 space-y-1">
+                        <p class="text-green-600 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>${j.attendance.status} | Check-in ${j.attendance.jamAbsen||'-'}</p>
+                        <p class="${j.attendance.sudahCheckout?'text-blue-600':'text-orange-500'} font-bold"><i class="fa-solid fa-right-from-bracket mr-1"></i>${j.attendance.checkoutStatus||'Belum Checkout'}${j.attendance.jamCheckout?' | Checkout '+j.attendance.jamCheckout:''} | Menit final ${j.attendance.durasiFinalMenit||0}</p>
+                    </div>`:''}
                     ${btn}
                 </div>`;
             });
         }
 
-        function initTeachingAttendance(idJadwal){
+        function initTeachingAttendance(idJadwal,mode='checkin'){
             selectedTeachingSchedule=idJadwal;
-            let cardText='Jadwal ID: '+idJadwal;
+            selectedTeachingMode=mode;
+            let cardText=(mode==='checkout'?'Checkout / Selesai Mengajar':'Check-in / Mulai Mengajar')+' | Jadwal ID: '+idJadwal;
             document.getElementById('teacherSelectedScheduleText').innerText=cardText;
             document.getElementById('teacherCameraBox').classList.remove('hidden');
-            document.getElementById('btnSubmitTeachingAttendance').disabled=true;
+            const btn=document.getElementById('btnSubmitTeachingAttendance');
+            btn.disabled=true;
+            btn.className=(mode==='checkout'?'w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed':'w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed');
+            btn.innerHTML=mode==='checkout'?'<i class="fa-solid fa-right-from-bracket mr-2"></i>Checkout / Selesai Mengajar':'<i class="fa-solid fa-chalkboard-user mr-2"></i>Check-in Mengajar Sekarang';
             document.getElementById('teacherLocationText').innerHTML='<i class="fa-solid fa-location-crosshairs fa-spin text-[#D4AF37] mr-2 text-lg"></i>Menyelaraskan GPS...';
             startTeacherCamera();
             getTeacherLocation();
@@ -1335,15 +1372,18 @@
             },{enableHighAccuracy:true,maximumAge:0,timeout:15000});
         }
         function takeTeacherSnapshot(){const v=document.getElementById('teacherVideoElement'),c=document.getElementById('teacherCanvasElement');let w=v.videoWidth||320,h=v.videoHeight||240;if(w>h&&w>400){h*=400/w;w=400}else if(h>w&&h>400){w*=400/h;h=400}c.width=w;c.height=h;c.getContext('2d').drawImage(v,0,0,w,h);return c.toDataURL('image/jpeg',0.5)}
-        function cancelTeacherAttendance(){selectedTeachingSchedule=null;stopTeacherCamera();document.getElementById('teacherCameraBox').classList.add('hidden');}
+        function cancelTeacherAttendance(){selectedTeachingSchedule=null;selectedTeachingMode='checkin';stopTeacherCamera();document.getElementById('teacherCameraBox').classList.add('hidden');}
         async function submitTeachingAttendance(){
             if(!selectedTeachingSchedule){Swal.fire('Jadwal belum dipilih','','warning');return}
             if(!teacherLocation.lat||!teacherLocation.lng){Swal.fire({icon:'warning',title:'Lokasi Tidak Valid',text:'Tunggu hingga GPS terbaca.'});return}
             showLoading();
-            const res=await callAPI({action:'attendTeaching',idJadwal:selectedTeachingSchedule,niy:currentUser.niy,nama:currentUser.nama,lat:teacherLocation.lat,lng:teacherLocation.lng,foto:takeTeacherSnapshot()});
+            const action=selectedTeachingMode==='checkout'?'checkoutTeaching':'attendTeaching';
+            const res=await callAPI({action:action,idJadwal:selectedTeachingSchedule,niy:currentUser.niy,nama:currentUser.nama,lat:teacherLocation.lat,lng:teacherLocation.lng,foto:takeTeacherSnapshot()});
             hideLoading();stopTeacherCamera();document.getElementById('teacherCameraBox').classList.add('hidden');
             if(res.success){
-                Swal.fire({icon:'success',title:'Berhasil',html:`${res.message}<br>Status: <b>${res.data.status}</b><br>Jarak: <b>${res.geofence.jarak}</b>`});
+                const statusText=selectedTeachingMode==='checkout'?(res.data.checkoutStatus||'Checkout berhasil'):(res.data.status||'Check-in berhasil');
+                Swal.fire({icon:'success',title:'Berhasil',html:`${res.message}<br>Status: <b>${statusText}</b><br>Jarak: <b>${res.geofence.jarak}</b>`});
+                selectedTeachingMode='checkin';
                 loadTeacherSchedules();
             }else{
                 Swal.fire({icon:'error',title:'Gagal',html:res.geofence?`${res.message}<br><br>Jarak: ${res.geofence.jarak}<br>Status: ${res.geofence.status}`:res.message});
@@ -1825,10 +1865,10 @@
         function renderTarifJabatan(){const c=document.getElementById('jabatanTableBody'),s=document.getElementById('addJabatan'),pag=document.getElementById('jabatanPagination'),aj=document.getElementById('assignmentJabatan');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';if(aj)aj.innerHTML='<option value="">-- Pilih --</option>';const keys=Object.keys(tarifJabatanData);let totalPages=Math.ceil(keys.length/jabatanPerPage)||1;if(currentJabatanPage>totalPages)currentJabatanPage=totalPages;if(currentJabatanPage<1)currentJabatanPage=1;const start=(currentJabatanPage-1)*jabatanPerPage;const paginatedKeys=keys.slice(start,start+jabatanPerPage);keys.forEach(n=>{s.innerHTML+=`<option value="${n}">${n}</option>`;if(aj)aj.innerHTML+=`<option value="${n}">${n}</option>`});paginatedKeys.forEach(n=>{let o=tarifJabatanData[n],t=0,j=9999;if(typeof o==='object'){t=o.tarif;j=o.jamEfektif||9999}else{t=o}let jt=j===9999?'-':j;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3 text-right font-mono text-green-600 font-bold">${formatRupiah(t)}</td><td class="p-3 text-center">${jt}</td><td class="p-3 text-center"><button type="button" onclick="editTarifJabatan('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusTarifJabatan('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`});if(pag){pag.innerHTML=`<button type="button" onclick="changeJabatanPage(-1)" ${currentJabatanPage===1?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>&laquo; Prev</button><span class="font-medium text-gray-500">Hal ${currentJabatanPage} / ${totalPages}</span><button type="button" onclick="changeJabatanPage(1)" ${currentJabatanPage===totalPages?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>Next &raquo;</button>`}document.getElementById('setTarifJabatan').value=JSON.stringify(tarifJabatanData)}
         function editTarifJabatan(n){editingJabatanOldName=n;let o=tarifJabatanData[n];document.getElementById('newJabatanNama').value=n;document.getElementById('newJabatanTarif').value=typeof o==='object'?o.tarif.toLocaleString('id-ID'):o.toLocaleString('id-ID');document.getElementById('newJabatanJam').value=typeof o==='object'?(o.jamEfektif===9999?'':o.jamEfektif):'';let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-pen"></i> Update';b.className='w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm transition';}}
         async function autoSaveSettingsSilent(){
-            const lat=document.getElementById('setLat'),lng=document.getElementById('setLng'),rad=document.getElementById('setRadius'),jl=document.getElementById('setJadwalLembaga'),tj=document.getElementById('setTarifJabatan');
+            const lat=document.getElementById('setLat'),lng=document.getElementById('setLng'),rad=document.getElementById('setRadius'),jl=document.getElementById('setJadwalLembaga'),tj=document.getElementById('setTarifJabatan'),ct=document.getElementById('setCheckoutTolerance'),np=document.getElementById('setNoCheckoutPercent');
             if(!lat||!lng||!rad||!jl||!tj)return;
             syncKelasMapelFromTextarea();
-            await callAPI({action:'saveSettings',lat:lat.value,lng:lng.value,radius:rad.value,jadwalLembaga:jl.value,tarifJabatan:tj.value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData)});
+            await callAPI({action:'saveSettings',lat:lat.value,lng:lng.value,radius:rad.value,jadwalLembaga:jl.value,tarifJabatan:tj.value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData),checkoutTolerance:ct?ct.value:'15',noCheckoutPercent:np?np.value:'50'});
         }
         async function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;currentJabatanPage=Math.ceil(Object.keys(tarifJabatanData).length/jabatanPerPage)||1;let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderTarifJabatan();await autoSaveSettingsSilent();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value='';Swal.fire({icon:'success',title:'Jabatan Tersimpan',text:`${n} sudah masuk daftar jabatan.`,timer:1500,showConfirmButton:false})}
         async function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan();await autoSaveSettingsSilent()}
@@ -1916,13 +1956,13 @@
             }, 500);
         }
         
-        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();kelasListData=parseListValue(res.data['Daftar_Kelas'],defaultKelasList);mapelListData=parseListValue(res.data['Daftar_Mapel'],defaultMapelList);let dk=document.getElementById('setDaftarKelas'),dm=document.getElementById('setDaftarMapel');if(dk)dk.value=listToTextarea(kelasListData);if(dm)dm.value=listToTextarea(mapelListData);renderKelasMapelDropdowns();
+        async function loadSettings(){const res=await callAPI({action:'getSettings'});if(res.success){document.getElementById('setLat').value=res.data['Lattitude_Kantor']||'-8.172533';document.getElementById('setLng').value=res.data['Longitude_Kantor']||'113.702331';document.getElementById('setRadius').value=res.data['Radius_Max_Meter']||'100';let ct=document.getElementById('setCheckoutTolerance'),np=document.getElementById('setNoCheckoutPercent');if(ct)ct.value=res.data['Teaching_Checkout_Tolerance_Minutes']||'15';if(np)np.value=res.data['Teaching_No_Checkout_Percent']||'50';try{tarifJabatanData=JSON.parse(res.data['Tarif_Jabatan']||'{}')}catch(e){tarifJabatanData={}}renderTarifJabatan();try{jadwalLembagaData=JSON.parse(res.data['Jadwal_Lembaga']||'{}')}catch(e){jadwalLembagaData={}}renderJadwalLembaga();kelasListData=parseListValue(res.data['Daftar_Kelas'],defaultKelasList);mapelListData=parseListValue(res.data['Daftar_Mapel'],defaultMapelList);let dk=document.getElementById('setDaftarKelas'),dm=document.getElementById('setDaftarMapel');if(dk)dk.value=listToTextarea(kelasListData);if(dm)dm.value=listToTextarea(mapelListData);renderKelasMapelDropdowns();
         // inisiasi peta awal jika sedang berada di tab pengaturan
         if(!document.getElementById('adminTabSettings').classList.contains('hidden')){
             initGeofenceMap(parseFloat(document.getElementById('setLat').value),parseFloat(document.getElementById('setLng').value),parseFloat(document.getElementById('setRadius').value));
         }}}
         
-        async function handleSaveSettings(e){e.preventDefault();syncKelasMapelFromTextarea();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData)};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
+        async function handleSaveSettings(e){e.preventDefault();syncKelasMapelFromTextarea();showLoading();const p={action:'saveSettings',lat:document.getElementById('setLat').value,lng:document.getElementById('setLng').value,radius:document.getElementById('setRadius').value,jadwalLembaga:document.getElementById('setJadwalLembaga').value,tarifJabatan:document.getElementById('setTarifJabatan').value,daftarKelas:JSON.stringify(kelasListData),daftarMapel:JSON.stringify(mapelListData),checkoutTolerance:document.getElementById('setCheckoutTolerance')?.value||'15',noCheckoutPercent:document.getElementById('setNoCheckoutPercent')?.value||'50'};const res=await callAPI(p);hideLoading();Swal.fire({icon:res.success?'success':'error',title:res.success?'Berhasil':'Error',text:res.message})}
 
         function renderChart(cd) {
             const tc = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#4b5563';
@@ -2229,6 +2269,10 @@
                     let cl='';
                     if(st==='H')cl='text-green-600 font-bold bg-green-50 dark:bg-green-900/20';
                     else if(st==='T')cl='text-orange-600 font-bold bg-orange-50 dark:bg-orange-900/20';
+                    else if(st==='C')cl='text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/20';
+                    else if(st==='N')cl='text-purple-600 font-bold bg-purple-50 dark:bg-purple-900/20';
+                    else if(st==='L')cl='text-red-600 font-bold bg-red-50 dark:bg-red-900/20';
+                    else if(st==='P')cl='text-sky-600 font-bold bg-sky-50 dark:bg-sky-900/20';
                     else if(st==='J')cl='text-gray-500 bg-gray-50 dark:bg-gray-800';
                     cells+=`<td class="px-1.5 py-2 text-center text-[10px] border-r dark:border-gray-700 ${cl}">${st}</td>`;
                 }
