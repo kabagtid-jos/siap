@@ -331,10 +331,10 @@
                             <option>Rapat</option>
                         </select>
                     </div>
-                    <div class="md:col-span-2">
+                    <div id="teacherLeaveProofBox" class="md:col-span-2 hidden">
                         <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Upload Bukti</label>
                         <input type="file" id="teacherLeaveProof" accept="image/*,.pdf" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
-                        <p id="teacherLeaveProofHint" class="text-[10px] text-orange-500 mt-1">Wajib untuk Izin, Dinas Luar, dan Rapat.</p>
+                        <p id="teacherLeaveProofHint" class="text-[10px] text-orange-500 mt-1">Wajib untuk Dinas Luar dan Rapat.</p>
                     </div>
                     <div class="md:col-span-4">
                         <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Alasan/Keterangan</label>
@@ -1447,10 +1447,14 @@
         }
         function updateTeacherLeaveProofHint(){
             const tipe=document.getElementById('teacherLeaveType')?.value||'Izin';
+            const box=document.getElementById('teacherLeaveProofBox');
+            const input=document.getElementById('teacherLeaveProof');
             const hint=document.getElementById('teacherLeaveProofHint');
-            const required=['Izin','Dinas Luar','Rapat'].includes(tipe);
-            if(hint)hint.innerText=required?'Wajib upload bukti surat untuk tipe ini.':'Opsional untuk sakit, boleh upload surat/dokumen jika ada.';
-            if(hint)hint.className=required?'text-[10px] text-orange-500 mt-1':'text-[10px] text-gray-400 mt-1';
+            const required=['Dinas Luar','Rapat'].includes(tipe);
+            if(box)box.classList.toggle('hidden',!required);
+            if(input&&!required)input.value='';
+            if(hint)hint.innerText='Wajib upload bukti surat untuk tipe ini.';
+            if(hint)hint.className='text-[10px] text-orange-500 mt-1';
         }
         function readTeacherProofFile(file){
             return new Promise((resolve,reject)=>{
@@ -1466,7 +1470,7 @@
             e.preventDefault();
             const tipe=document.getElementById('teacherLeaveType').value;
             const file=document.getElementById('teacherLeaveProof').files[0];
-            if(['Izin','Dinas Luar','Rapat'].includes(tipe)&&!file){Swal.fire('Bukti Wajib','Upload surat/bukti untuk tipe ini.','warning');return}
+            if(['Dinas Luar','Rapat'].includes(tipe)&&!file){Swal.fire('Bukti Wajib','Upload surat/bukti untuk tipe ini.','warning');return}
             let proof;
             try{proof=await readTeacherProofFile(file)}catch(err){Swal.fire('File Tidak Valid',err.message,'warning');return}
             showLoading();
