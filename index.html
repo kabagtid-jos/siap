@@ -137,6 +137,13 @@
                     <i class="fa-solid fa-layer-group mr-2"></i>Ganti Mode Akses
                 </button>
             </div>
+            <div id="pimpinanAssignmentBox" class="glass rounded-2xl p-4 mb-5 shadow-sm hidden">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase mb-2">Absen sebagai pimpinan di lembaga</label>
+                <select id="pimpinanAssignmentSelect" onchange="setPimpinanAssignment()" class="w-full px-4 py-3 border rounded-xl dark:bg-gray-700 dark:border-gray-600 outline-none font-bold text-[#A88C61]">
+                    <option value="">Memuat penugasan...</option>
+                </select>
+                <p class="text-[10px] text-gray-400 mt-2">Jika memimpin lebih dari satu lembaga, pilih penugasan yang sesuai sebelum absen.</p>
+            </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="glass rounded-2xl p-6 lg:col-span-2 shadow-md">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-5 border-b dark:border-gray-700 pb-4">
@@ -838,6 +845,57 @@
         </div>
     </div>
 
+    <div id="modalAssignments" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 md:p-6 w-full max-w-2xl shadow-2xl border dark:border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar my-auto">
+            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-3">
+                <div>
+                    <h3 class="font-bold text-lg">Kelola Penugasan</h3>
+                    <p id="assignmentUserInfo" class="text-xs text-gray-500 mt-0.5">-</p>
+                </div>
+                <button onclick="closeAssignmentModal()" class="text-gray-400 hover:text-red-500 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="formAssignment" onsubmit="handleSaveAssignment(event)" class="grid grid-cols-1 md:grid-cols-5 gap-2 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl border dark:border-gray-700 mb-4">
+                <input type="hidden" id="assignmentId">
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase">Role</label>
+                    <select id="assignmentRole" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600">
+                        <option value="pimpinan">Pimpinan</option>
+                        <option value="guru">Guru</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-500 uppercase">Lembaga</label>
+                    <select id="assignmentLembaga" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600"></select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-[10px] font-bold text-gray-500 uppercase">Jabatan</label>
+                    <select id="assignmentJabatan" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600"></select>
+                </div>
+                <div class="flex items-end gap-1">
+                    <button type="submit" class="flex-1 bg-[#D4AF37] text-white font-bold py-2 rounded-lg text-sm">Simpan</button>
+                    <button type="button" onclick="resetAssignmentForm()" class="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-sm font-bold">Reset</button>
+                </div>
+            </form>
+            <div class="overflow-y-auto max-h-80 custom-scrollbar rounded-lg border dark:border-gray-700">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-3">Role</th>
+                            <th class="px-4 py-3">Lembaga</th>
+                            <th class="px-4 py-3">Jabatan</th>
+                            <th class="px-4 py-3 text-center"><i class="fa-solid fa-gear"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentTableBody">
+                        <tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal PDF Preview -->
     <div id="modalPdfPreview" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center fade-in backdrop-blur-sm p-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-5 w-full max-w-5xl shadow-2xl border dark:border-gray-700 h-[90vh] flex flex-col">
@@ -891,6 +949,7 @@
         let currentRekapDays = 31, currentRekapView = 'bisyaroh';
         let currentMonitorLogs = []; // Tambahan variabel untuk menyimpan data monitor harian
         let currentMode='', teacherStream=null, teacherLocation={lat:0,lng:0}, selectedTeachingSchedule=null, teachingScheduleAdminData=[];
+        let currentPimpinanAssignments=[], selectedPimpinanAssignment=null, currentAssignmentAdminNiy='';
 
         function formatRupiah(num){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num);}
         function formatRupiahInput(inp){let val=inp.value.replace(/[^,\d]/g,'');inp.value=val?parseInt(val).toLocaleString('id-ID'):'';}
@@ -987,7 +1046,7 @@
             document.getElementById('videoElement').classList.add('hidden');
             document.getElementById('locationStatus').classList.add('hidden');
             document.getElementById('actionButtons').classList.add('hidden');
-            loadPersonalLog();
+            loadPimpinanAssignments();
         }
         function openGuruMode(){
             currentMode='guru';hideMainSections();stopCamera();
@@ -1023,7 +1082,41 @@
             });
         }
 
+        async function loadPimpinanAssignments(){
+            const box=document.getElementById('pimpinanAssignmentBox'),sel=document.getElementById('pimpinanAssignmentSelect');
+            box.classList.remove('hidden');
+            sel.innerHTML='<option value="">Memuat penugasan...</option>';
+            const res=await callAPI({action:'getMyAssignments',niy:currentUser.niy,role:'pimpinan'});
+            currentPimpinanAssignments=(res.success&&res.data)?res.data:[];
+            if(currentPimpinanAssignments.length===0){
+                selectedPimpinanAssignment=null;
+                sel.innerHTML='<option value="">Belum ada penugasan pimpinan</option>';
+                Swal.fire('Penugasan belum ada','Admin perlu menambahkan penugasan pimpinan untuk akun ini.','warning');
+                loadPersonalLog();
+                return;
+            }
+            sel.innerHTML='';
+            currentPimpinanAssignments.forEach(a=>{sel.innerHTML+=`<option value="${a.idAssignment}">${a.lembaga||'-'} — ${a.jabatan||'Pimpinan'}</option>`});
+            selectedPimpinanAssignment=currentPimpinanAssignments[0];
+            sel.value=selectedPimpinanAssignment.idAssignment;
+            loadPersonalLog();
+        }
+        function setPimpinanAssignment(){
+            const id=document.getElementById('pimpinanAssignmentSelect').value;
+            selectedPimpinanAssignment=currentPimpinanAssignments.find(a=>a.idAssignment===id)||null;
+            document.getElementById('cameraPlaceholder').classList.remove('hidden');
+            document.getElementById('videoElement').classList.add('hidden');
+            document.getElementById('locationStatus').classList.add('hidden');
+            document.getElementById('actionButtons').classList.add('hidden');
+            stopCamera();
+            loadPersonalLog();
+        }
+
         function initAttendance(){
+            if(!selectedPimpinanAssignment){
+                Swal.fire({icon:'warning',title:'Pilih Penugasan',text:'Pilih lembaga/jabatan pimpinan terlebih dahulu.'});
+                return;
+            }
             // Blokir buka kamera jika hari Jumat (5)
             if(new Date().getDay() === 5){
                 Swal.fire({icon:'info',title:'Hari Libur',text:'Hari Jumat adalah hari libur pesantren. Anda tidak perlu melakukan absensi hari ini.', confirmButtonColor: '#D4AF37'});
@@ -1134,7 +1227,7 @@
             }
         }
 
-        async function jalankanAbsen(tipe){if(!currentLocation.lat||!currentLocation.lng){Swal.fire({icon:'warning',title:'Lokasi Tidak Valid',text:'Tunggu hingga proses penyelarasan GPS selesai, atau pastikan Fake GPS mati.'});return}showLoading();const res=await callAPI({action:'attend',niy:currentUser.niy,nama:currentUser.nama,lembaga:currentUser.lembaga,tipe:tipe,lat:currentLocation.lat,lng:currentLocation.lng,foto:takeSnapshot()});hideLoading();stopCamera();document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');if(res.success){Swal.fire({icon:'success',title:res.message,html:`Jarak: <b>${res.geofence.jarak}</b><br>Status: ${res.geofence.status}`});loadPersonalLog()}else{if(res.geofence){Swal.fire({icon:'error',title:'Ditolak',html:`<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: ${res.geofence.jarak}<br>Status: ${res.geofence.status}`})}else{Swal.fire({icon:'error',title:'Gagal',text:res.message})}}}
+        async function jalankanAbsen(tipe){if(!selectedPimpinanAssignment){Swal.fire({icon:'warning',title:'Pilih Penugasan',text:'Pilih lembaga/jabatan pimpinan terlebih dahulu.'});return}if(!currentLocation.lat||!currentLocation.lng){Swal.fire({icon:'warning',title:'Lokasi Tidak Valid',text:'Tunggu hingga proses penyelarasan GPS selesai, atau pastikan Fake GPS mati.'});return}showLoading();const res=await callAPI({action:'attend',niy:currentUser.niy,nama:currentUser.nama,assignmentId:selectedPimpinanAssignment.idAssignment,lembaga:selectedPimpinanAssignment.lembaga,jabatan:selectedPimpinanAssignment.jabatan,tipe:tipe,lat:currentLocation.lat,lng:currentLocation.lng,foto:takeSnapshot()});hideLoading();stopCamera();document.getElementById('cameraPlaceholder').classList.remove('hidden');document.getElementById('videoElement').classList.add('hidden');document.getElementById('locationStatus').classList.add('hidden');document.getElementById('actionButtons').classList.add('hidden');if(res.success){Swal.fire({icon:'success',title:res.message,html:`Jarak: <b>${res.geofence.jarak}</b><br>Status: ${res.geofence.status}`});loadPersonalLog()}else{if(res.geofence){Swal.fire({icon:'error',title:'Ditolak',html:`<span class="text-red-500 font-semibold">${res.message}</span><br><br>Jarak Anda: ${res.geofence.jarak}<br>Status: ${res.geofence.status}`})}else{Swal.fire({icon:'error',title:'Gagal',text:res.message})}}}
 
         async function loadTeacherSchedules(){
             if(!currentUser)return;
@@ -1266,7 +1359,7 @@
             }
         }
 
-        async function loadPersonalLog(){const res=await callAPI({action:'getPersonalLog',niy:currentUser.niy});const c=document.getElementById('personalLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';let st=r.status.startsWith('Alasan:')?`<span class="italic text-xs text-gray-500">${r.status}</span>`:r.status;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3">${new Date(r.timestamp).toLocaleString('id-ID')}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-lg font-bold ${bt}">${r.tipe}</span></td><td class="px-4 py-3">${st}</td></tr>`});updateBtnState(res.data);}else{c.innerHTML='<tr><td colspan="3" class="text-center py-6 text-gray-400">Belum ada riwayat.</td></tr>';updateBtnState([]);}}
+        async function loadPersonalLog(){const res=await callAPI({action:'getPersonalLog',niy:currentUser.niy,assignmentId:selectedPimpinanAssignment?selectedPimpinanAssignment.idAssignment:''});const c=document.getElementById('personalLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';let st=r.status&&r.status.startsWith('Alasan:')?`<span class="italic text-xs text-gray-500">${r.status}</span>`:r.status;let ctx=r.lembaga?`<span class="block text-[10px] text-gray-400 mt-1">${r.lembaga} — ${r.jabatan||''}</span>`:'';c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3">${new Date(r.timestamp).toLocaleString('id-ID')}${ctx}</td><td class="px-4 py-3"><span class="px-2 py-1 text-xs rounded-lg font-bold ${bt}">${r.tipe}</span></td><td class="px-4 py-3">${st}</td></tr>`});updateBtnState(res.data);}else{c.innerHTML='<tr><td colspan="3" class="text-center py-6 text-gray-400">Belum ada riwayat untuk penugasan ini.</td></tr>';updateBtnState([]);}}
         
         async function loadPublicLogs(){const res=await callAPI({action:'getPublicLogs'});const c=document.getElementById('publicLogContainer');if(res.success&&res.data.length>0){c.innerHTML='';res.data.forEach(r=>{let bt='';if(r.tipe==='Masuk')bt='bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300';else if(r.tipe==='Pulang')bt='bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300';else if(r.tipe==='Dinas Luar')bt='bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300';else bt='bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300';c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><td class="px-4 py-3 font-semibold">${r.nama}</td><td class="px-4 py-3">${new Date(r.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</td><td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded-lg font-bold ${bt}">${r.tipe}</span></td></tr>`})}else{c.innerHTML='<tr><td colspan="3" class="text-center py-8 text-gray-500">Belum ada kehadiran/izin hari ini.</td></tr>'}}
 
@@ -1334,13 +1427,13 @@
             // Filter log berdasarkan lembaga pimpinan dari userMap
             let filteredLogs = currentMonitorLogs.filter(log => {
                 if (filterLembaga === 'Semua') return true;
-                let userLembaga = (userMap[log.niy] && userMap[log.niy].lembaga) ? userMap[log.niy].lembaga : '';
+                let userLembaga = log.lembaga || ((userMap[log.niy] && userMap[log.niy].lembaga) ? userMap[log.niy].lembaga : '');
                 return userLembaga === filterLembaga;
             });
 
             if (filteredLogs.length > 0) {
                 filteredLogs.forEach(log => {
-                    let userLembaga = (userMap[log.niy] && userMap[log.niy].lembaga) ? userMap[log.niy].lembaga : '-';
+                    let userLembaga = log.lembaga || ((userMap[log.niy] && userMap[log.niy].lembaga) ? userMap[log.niy].lembaga : '-');
                     let fotoHtml = log.foto ? `<img src="${log.foto}" class="w-full h-full object-cover rounded-lg cursor-pointer" onclick="showFullImage('${log.foto}')">` : `<div class="w-full h-full bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400"><i class="fa-solid fa-image text-3xl"></i></div>`;
                     
                     let bt='';if(log.tipe==='Masuk')bt='text-blue-600 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300';else if(log.tipe==='Pulang')bt='text-orange-600 bg-orange-100 dark:bg-orange-900/50 dark:text-orange-300';else bt='text-purple-600 bg-purple-100 dark:bg-purple-900/50 dark:text-purple-300';
@@ -1400,7 +1493,7 @@
             });
         }
 
-        async function loadAdminData(){const f=document.getElementById('filterTahunDashboard'),y=f.value||'';if(!y){['statTotal','statHadir','statIzin','statSakit'].forEach(i=>document.getElementById(i).innerHTML='<i class="fa-solid fa-spinner fa-spin text-lg"></i>')}const res=await callAPI({action:'getAdminData',tahun:y});if(res.success){if(f.options.length===0){f.innerHTML='';res.data.availableYears.forEach(yr=>{f.innerHTML+=`<option value="${yr}" ${yr==res.data.selectedYear?'selected':''}>${yr}</option>`})}document.getElementById('statTotal').innerText=res.data.totalPimpinan;document.getElementById('statHadir').innerText=res.data.todayStats.hadir.count;document.getElementById('statIzin').innerText=res.data.todayStats.izin.count;document.getElementById('statSakit').innerText=res.data.todayStats.sakit.count;todayDataLists.hadir.list=res.data.todayStats.hadir.list;todayDataLists.izin.list=res.data.todayStats.izin.list;todayDataLists.sakit.list=res.data.todayStats.sakit.list;const uc=document.getElementById('adminUserList');uc.innerHTML='';userMap={};if(res.data.userList&&res.data.userList.length>0){res.data.userList.forEach(u=>{userMap[u.niy]=u;let roleBadge=(u.role||'pimpinan').split(',').map(r=>`<span class="inline-block px-1.5 py-0.5 rounded bg-[#FDF8E7] dark:bg-gray-700 text-[#A88C61] text-[9px] font-bold mr-1 uppercase">${r}</span>`).join('');uc.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3 font-semibold">${u.niy}</td><td class="px-4 py-3"><p>${u.nama}</p><p class="mt-1">${roleBadge}</p></td><td class="px-4 py-3">${u.lembaga||'-'}</td><td class="px-4 py-3">${u.jabatan}</td><td class="px-4 py-3 text-center whitespace-nowrap"><button onclick="openEditModal('${u.niy}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelete('${u.niy}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash-can"></i></button></td></tr>`})}else{uc.innerHTML='<tr><td colspan="5" class="text-center py-6">Belum ada data user.</td></tr>'}renderChart(res.data.charts);filterPimpinan();populateTeacherSelect()}}
+        async function loadAdminData(){const f=document.getElementById('filterTahunDashboard'),y=f.value||'';if(!y){['statTotal','statHadir','statIzin','statSakit'].forEach(i=>document.getElementById(i).innerHTML='<i class="fa-solid fa-spinner fa-spin text-lg"></i>')}const res=await callAPI({action:'getAdminData',tahun:y});if(res.success){if(f.options.length===0){f.innerHTML='';res.data.availableYears.forEach(yr=>{f.innerHTML+=`<option value="${yr}" ${yr==res.data.selectedYear?'selected':''}>${yr}</option>`})}document.getElementById('statTotal').innerText=res.data.totalPimpinan;document.getElementById('statHadir').innerText=res.data.todayStats.hadir.count;document.getElementById('statIzin').innerText=res.data.todayStats.izin.count;document.getElementById('statSakit').innerText=res.data.todayStats.sakit.count;todayDataLists.hadir.list=res.data.todayStats.hadir.list;todayDataLists.izin.list=res.data.todayStats.izin.list;todayDataLists.sakit.list=res.data.todayStats.sakit.list;const uc=document.getElementById('adminUserList');uc.innerHTML='';userMap={};if(res.data.userList&&res.data.userList.length>0){res.data.userList.forEach(u=>{userMap[u.niy]=u;let roleBadge=(u.role||'pimpinan').split(',').map(r=>`<span class="inline-block px-1.5 py-0.5 rounded bg-[#FDF8E7] dark:bg-gray-700 text-[#A88C61] text-[9px] font-bold mr-1 uppercase">${r}</span>`).join('');let asgCount=(u.assignments||[]).length;uc.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3 font-semibold">${u.niy}</td><td class="px-4 py-3"><p>${u.nama}</p><p class="mt-1">${roleBadge}</p><p class="text-[10px] text-gray-400 mt-1">${asgCount} penugasan</p></td><td class="px-4 py-3">${u.lembaga||'-'}</td><td class="px-4 py-3">${u.jabatan}</td><td class="px-4 py-3 text-center whitespace-nowrap"><button onclick="openAssignmentModal('${u.niy}')" title="Kelola Penugasan" class="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-sitemap"></i></button><button onclick="openEditModal('${u.niy}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="confirmDelete('${u.niy}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash-can"></i></button></td></tr>`})}else{uc.innerHTML='<tr><td colspan="5" class="text-center py-6">Belum ada data user.</td></tr>'}renderChart(res.data.charts);filterPimpinan();populateTeacherSelect()}}
 
         function setViewRekap(view) {
             currentRekapView = view;
@@ -1664,14 +1757,14 @@
             document.getElementById('pdfPreviewFrame').src = ''; // Bersihkan memori IFrame
         }
 
-        function renderJadwalLembaga(){const c=document.getElementById('lembagaTableBody'),s=document.getElementById('addLembaga'), fl=document.getElementById('filterLembagaRekap'), fm=document.getElementById('filterLembagaMonitor'), tg=document.getElementById('teachLembaga');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';if(tg)tg.innerHTML='<option value="">-- Pilih --</option>';let flVal = fl ? fl.value : 'Semua'; let fmVal = fm ? fm.value : 'Semua'; if(fl) fl.innerHTML = '<option value="Semua">Semua Lembaga</option>'; if(fm) fm.innerHTML = '<option value="Semua">Semua Lembaga</option>';for(let n in jadwalLembagaData){let j=jadwalLembagaData[n];c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3">${j.masuk}</td><td class="p-3">${j.pulang}</td><td class="p-3 text-center"><button type="button" onclick="editJadwalLembaga('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusJadwalLembaga('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`;s.innerHTML+=`<option value="${n}">${n}</option>`;if(tg)tg.innerHTML+=`<option value="${n}">${n}</option>`;if(fl) fl.innerHTML+=`<option value="${n}">${n}</option>`;if(fm) fm.innerHTML+=`<option value="${n}">${n}</option>`;}if(fl) fl.value = flVal; if(fm) fm.value = fmVal;document.getElementById('setJadwalLembaga').value=JSON.stringify(jadwalLembagaData)}
+        function renderJadwalLembaga(){const c=document.getElementById('lembagaTableBody'),s=document.getElementById('addLembaga'), fl=document.getElementById('filterLembagaRekap'), fm=document.getElementById('filterLembagaMonitor'), tg=document.getElementById('teachLembaga'), al=document.getElementById('assignmentLembaga');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';if(tg)tg.innerHTML='<option value="">-- Pilih --</option>';if(al)al.innerHTML='<option value="">-- Pilih --</option>';let flVal = fl ? fl.value : 'Semua'; let fmVal = fm ? fm.value : 'Semua'; if(fl) fl.innerHTML = '<option value="Semua">Semua Lembaga</option>'; if(fm) fm.innerHTML = '<option value="Semua">Semua Lembaga</option>';for(let n in jadwalLembagaData){let j=jadwalLembagaData[n];c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3">${j.masuk}</td><td class="p-3">${j.pulang}</td><td class="p-3 text-center"><button type="button" onclick="editJadwalLembaga('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusJadwalLembaga('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`;s.innerHTML+=`<option value="${n}">${n}</option>`;if(tg)tg.innerHTML+=`<option value="${n}">${n}</option>`;if(al)al.innerHTML+=`<option value="${n}">${n}</option>`;if(fl) fl.innerHTML+=`<option value="${n}">${n}</option>`;if(fm) fm.innerHTML+=`<option value="${n}">${n}</option>`;}if(fl) fl.value = flVal; if(fm) fm.value = fmVal;document.getElementById('setJadwalLembaga').value=JSON.stringify(jadwalLembagaData)}
         function editJadwalLembaga(n){editingLembagaOldName=n;document.getElementById('newLembagaNama').value=n;document.getElementById('newLembagaMasuk').value=jadwalLembagaData[n].masuk;document.getElementById('newLembagaPulang').value=jadwalLembagaData[n].pulang;let b=document.getElementById('btnTambahLembaga');if(b){b.innerHTML='<i class="fa-solid fa-pen"></i> Update';b.className='w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm transition';}}
         function tambahJadwalLembaga(){const n=document.getElementById('newLembagaNama').value.trim(),m=document.getElementById('newLembagaMasuk').value,p=document.getElementById('newLembagaPulang').value;if(!n||!m||!p){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingLembagaOldName&&editingLembagaOldName!==n)delete jadwalLembagaData[editingLembagaOldName];jadwalLembagaData[n]={masuk:m,pulang:p};editingLembagaOldName=null;let b=document.getElementById('btnTambahLembaga');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderJadwalLembaga();document.getElementById('newLembagaNama').value='';document.getElementById('newLembagaMasuk').value='';document.getElementById('newLembagaPulang').value=''}
         function hapusJadwalLembaga(n){delete jadwalLembagaData[n];renderJadwalLembaga()}
 
         let currentJabatanPage=1;const jabatanPerPage=5;
         function changeJabatanPage(dir){currentJabatanPage+=dir;renderTarifJabatan();}
-        function renderTarifJabatan(){const c=document.getElementById('jabatanTableBody'),s=document.getElementById('addJabatan'),pag=document.getElementById('jabatanPagination');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';const keys=Object.keys(tarifJabatanData);let totalPages=Math.ceil(keys.length/jabatanPerPage)||1;if(currentJabatanPage>totalPages)currentJabatanPage=totalPages;if(currentJabatanPage<1)currentJabatanPage=1;const start=(currentJabatanPage-1)*jabatanPerPage;const paginatedKeys=keys.slice(start,start+jabatanPerPage);keys.forEach(n=>s.innerHTML+=`<option value="${n}">${n}</option>`);paginatedKeys.forEach(n=>{let o=tarifJabatanData[n],t=0,j=9999;if(typeof o==='object'){t=o.tarif;j=o.jamEfektif||9999}else{t=o}let jt=j===9999?'-':j;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3 text-right font-mono text-green-600 font-bold">${formatRupiah(t)}</td><td class="p-3 text-center">${jt}</td><td class="p-3 text-center"><button type="button" onclick="editTarifJabatan('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusTarifJabatan('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`});if(pag){pag.innerHTML=`<button type="button" onclick="changeJabatanPage(-1)" ${currentJabatanPage===1?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>&laquo; Prev</button><span class="font-medium text-gray-500">Hal ${currentJabatanPage} / ${totalPages}</span><button type="button" onclick="changeJabatanPage(1)" ${currentJabatanPage===totalPages?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>Next &raquo;</button>`}document.getElementById('setTarifJabatan').value=JSON.stringify(tarifJabatanData)}
+        function renderTarifJabatan(){const c=document.getElementById('jabatanTableBody'),s=document.getElementById('addJabatan'),pag=document.getElementById('jabatanPagination'),aj=document.getElementById('assignmentJabatan');c.innerHTML='';s.innerHTML='<option value="">-- Pilih --</option>';if(aj)aj.innerHTML='<option value="">-- Pilih --</option>';const keys=Object.keys(tarifJabatanData);let totalPages=Math.ceil(keys.length/jabatanPerPage)||1;if(currentJabatanPage>totalPages)currentJabatanPage=totalPages;if(currentJabatanPage<1)currentJabatanPage=1;const start=(currentJabatanPage-1)*jabatanPerPage;const paginatedKeys=keys.slice(start,start+jabatanPerPage);keys.forEach(n=>{s.innerHTML+=`<option value="${n}">${n}</option>`;if(aj)aj.innerHTML+=`<option value="${n}">${n}</option>`});paginatedKeys.forEach(n=>{let o=tarifJabatanData[n],t=0,j=9999;if(typeof o==='object'){t=o.tarif;j=o.jamEfektif||9999}else{t=o}let jt=j===9999?'-':j;c.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50"><td class="p-3">${n}</td><td class="p-3 text-right font-mono text-green-600 font-bold">${formatRupiah(t)}</td><td class="p-3 text-center">${jt}</td><td class="p-3 text-center"><button type="button" onclick="editTarifJabatan('${n}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="hapusTarifJabatan('${n}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`});if(pag){pag.innerHTML=`<button type="button" onclick="changeJabatanPage(-1)" ${currentJabatanPage===1?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>&laquo; Prev</button><span class="font-medium text-gray-500">Hal ${currentJabatanPage} / ${totalPages}</span><button type="button" onclick="changeJabatanPage(1)" ${currentJabatanPage===totalPages?'disabled class="text-gray-400 cursor-not-allowed"':'class="text-blue-500 hover:text-blue-700 font-bold"'}>Next &raquo;</button>`}document.getElementById('setTarifJabatan').value=JSON.stringify(tarifJabatanData)}
         function editTarifJabatan(n){editingJabatanOldName=n;let o=tarifJabatanData[n];document.getElementById('newJabatanNama').value=n;document.getElementById('newJabatanTarif').value=typeof o==='object'?o.tarif.toLocaleString('id-ID'):o.toLocaleString('id-ID');document.getElementById('newJabatanJam').value=typeof o==='object'?(o.jamEfektif===9999?'':o.jamEfektif):'';let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-pen"></i> Update';b.className='w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-sm transition';}}
         function tambahTarifJabatan(){const n=document.getElementById('newJabatanNama').value.trim(),t=parseRupiahInput(document.getElementById('newJabatanTarif').value);let j=parseInt(document.getElementById('newJabatanJam').value);if(isNaN(j)||j<=0)j=9999;if(!n||t<=0){Swal.fire({icon:'warning',title:'Form Kosong',timer:2000,showConfirmButton:false});return}if(editingJabatanOldName&&editingJabatanOldName!==n)delete tarifJabatanData[editingJabatanOldName];tarifJabatanData[n]={tarif:t,jamEfektif:j};editingJabatanOldName=null;let b=document.getElementById('btnTambahJabatan');if(b){b.innerHTML='<i class="fa-solid fa-plus"></i> Tambah';b.className='w-full bg-gray-200 dark:bg-gray-600 font-bold py-2 rounded-lg text-sm transition';}renderTarifJabatan();document.getElementById('newJabatanNama').value='';document.getElementById('newJabatanTarif').value='';document.getElementById('newJabatanJam').value=''}
         function hapusTarifJabatan(n){delete tarifJabatanData[n];renderTarifJabatan()}
@@ -2037,6 +2130,39 @@
         }
 
         function closeModal(){document.getElementById('modalAddUser').classList.add('hidden')}
+        function closeAssignmentModal(){document.getElementById('modalAssignments').classList.add('hidden')}
+        function resetAssignmentForm(){document.getElementById('formAssignment').reset();document.getElementById('assignmentId').value=''}
+        async function openAssignmentModal(niy){
+            currentAssignmentAdminNiy=niy;
+            let u=userMap[niy];
+            document.getElementById('assignmentUserInfo').innerText=u?`${u.nama} (${u.niy})`:`NIY ${niy}`;
+            resetAssignmentForm();
+            document.getElementById('modalAssignments').classList.remove('hidden');
+            await loadSettings();
+            loadAssignmentList();
+        }
+        async function loadAssignmentList(){
+            const body=document.getElementById('assignmentTableBody');
+            body.innerHTML='<tr><td colspan="4" class="text-center py-8 text-gray-400">Memuat...</td></tr>';
+            const res=await callAPI({action:'getUserAssignments',niy:currentAssignmentAdminNiy});
+            if(res.success&&res.data&&res.data.length>0){
+                body.innerHTML='';
+                res.data.forEach(a=>{
+                    body.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3"><span class="px-2 py-1 rounded bg-[#FDF8E7] dark:bg-gray-700 text-[#A88C61] text-[10px] font-bold uppercase">${a.role}</span></td><td class="px-4 py-3">${a.lembaga||'-'}</td><td class="px-4 py-3">${a.jabatan||'-'}</td><td class="px-4 py-3 text-center whitespace-nowrap"><button onclick="editAssignment('${a.idAssignment}','${a.role}','${a.lembaga}','${a.jabatan}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button onclick="deleteAssignment('${a.idAssignment}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                });
+            }else{
+                body.innerHTML='<tr><td colspan="4" class="text-center py-8 text-gray-400">Belum ada penugasan.</td></tr>';
+            }
+        }
+        function editAssignment(id,role,lembaga,jabatan){document.getElementById('assignmentId').value=id;document.getElementById('assignmentRole').value=role;document.getElementById('assignmentLembaga').value=lembaga;document.getElementById('assignmentJabatan').value=jabatan}
+        async function handleSaveAssignment(e){
+            e.preventDefault();
+            showLoading();
+            const res=await callAPI({action:'saveUserAssignment',idAssignment:document.getElementById('assignmentId').value,niy:currentAssignmentAdminNiy,role:document.getElementById('assignmentRole').value,lembaga:document.getElementById('assignmentLembaga').value,jabatan:document.getElementById('assignmentJabatan').value});
+            hideLoading();
+            if(res.success){Swal.fire('Berhasil',res.message,'success');resetAssignmentForm();loadAssignmentList();loadAdminData()}else{Swal.fire('Gagal',res.message,'error')}
+        }
+        function deleteAssignment(id){Swal.fire({title:'Hapus Penugasan?',icon:'warning',showCancelButton:true,confirmButtonText:'Hapus',confirmButtonColor:'#d33'}).then(async(r)=>{if(r.isConfirmed){showLoading();const res=await callAPI({action:'deleteUserAssignment',idAssignment:id});hideLoading();if(res.success){Swal.fire('Terhapus',res.message,'success');loadAssignmentList();loadAdminData()}else{Swal.fire('Gagal',res.message,'error')}}})}
         function showAddUserModal(){isEditMode=false;document.getElementById('modalTitle').innerText='Tambah User';document.getElementById('formAddUser').reset();document.getElementById('rolePimpinan').checked=true;document.getElementById('roleGuru').checked=false;document.getElementById('addNiy').readOnly=false;document.getElementById('addNiy').classList.remove('bg-gray-200');document.getElementById('modalAddUser').classList.remove('hidden')}
         function openEditModal(niy){let u=userMap[niy];if(!u)return;isEditMode=true;currentEditNiy=niy;document.getElementById('modalTitle').innerText='Edit Data';document.getElementById('addNiy').value=u.niy;document.getElementById('addNiy').readOnly=true;document.getElementById('addNiy').classList.add('bg-gray-200');document.getElementById('addNama').value=u.nama;document.getElementById('addTglLahir').value=u.tglLahir;document.getElementById('addJk').value=u.jk;document.getElementById('addLembaga').value=u.lembaga;document.getElementById('addJabatan').value=u.jabatan;let roles=(u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase())));document.getElementById('rolePimpinan').checked=roles.includes('pimpinan');document.getElementById('roleGuru').checked=roles.includes('guru');document.getElementById('modalAddUser').classList.remove('hidden')}
         function confirmDelete(niy){Swal.fire({title:'Hapus?',text:"Data tidak bisa dikembalikan.",icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus!',confirmButtonColor:'#d33'}).then(async(r)=>{if(r.isConfirmed){showLoading();const res=await callAPI({action:'deleteUser',niy:niy});hideLoading();if(res.success){Swal.fire('Terhapus!','','success');loadAdminData()}}})}
