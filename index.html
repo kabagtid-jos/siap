@@ -791,7 +791,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="text-[11px] font-bold text-gray-500 uppercase">Tgl Lahir</label>
-                        <input type="date" id="addTglLahir" class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        <input type="date" id="addTglLahir" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-gray-500 uppercase">Kelamin</label>
@@ -826,15 +826,10 @@
                     </div>
                     <p class="text-[10px] text-gray-400 mt-1">Centang dua-duanya jika pimpinan juga mengajar.</p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Password</label>
-                        <input type="password" id="addPassword" required class="w-full px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-gray-500 uppercase">Foto Profil</label>
-                        <input type="file" id="addFoto" accept="image/*" class="w-full px-2 py-1.5 text-xs border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                    </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">Foto Profil</label>
+                    <input type="file" id="addFoto" accept="image/*" class="w-full px-2 py-1.5 text-xs border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                    <p class="text-[10px] text-gray-400 mt-1">Password otomatis mengikuti tanggal lahir dengan format ddmmyyyy.</p>
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-[#A88C61] to-[#D4AF37] text-white font-bold py-3 rounded-xl mt-5 shadow-md">
                     <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Data
@@ -2042,11 +2037,11 @@
         }
 
         function closeModal(){document.getElementById('modalAddUser').classList.add('hidden')}
-        function showAddUserModal(){isEditMode=false;document.getElementById('modalTitle').innerText='Tambah User';document.getElementById('formAddUser').reset();document.getElementById('rolePimpinan').checked=true;document.getElementById('roleGuru').checked=false;document.getElementById('addNiy').readOnly=false;document.getElementById('addNiy').classList.remove('bg-gray-200');document.getElementById('addPassword').required=true;document.getElementById('modalAddUser').classList.remove('hidden')}
-        function openEditModal(niy){let u=userMap[niy];if(!u)return;isEditMode=true;currentEditNiy=niy;document.getElementById('modalTitle').innerText='Edit Data';document.getElementById('addNiy').value=u.niy;document.getElementById('addNiy').readOnly=true;document.getElementById('addNiy').classList.add('bg-gray-200');document.getElementById('addNama').value=u.nama;document.getElementById('addTglLahir').value=u.tglLahir;document.getElementById('addJk').value=u.jk;document.getElementById('addLembaga').value=u.lembaga;document.getElementById('addJabatan').value=u.jabatan;let roles=(u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase())));document.getElementById('rolePimpinan').checked=roles.includes('pimpinan');document.getElementById('roleGuru').checked=roles.includes('guru');document.getElementById('addPassword').value='';document.getElementById('addPassword').required=false;document.getElementById('modalAddUser').classList.remove('hidden')}
+        function showAddUserModal(){isEditMode=false;document.getElementById('modalTitle').innerText='Tambah User';document.getElementById('formAddUser').reset();document.getElementById('rolePimpinan').checked=true;document.getElementById('roleGuru').checked=false;document.getElementById('addNiy').readOnly=false;document.getElementById('addNiy').classList.remove('bg-gray-200');document.getElementById('modalAddUser').classList.remove('hidden')}
+        function openEditModal(niy){let u=userMap[niy];if(!u)return;isEditMode=true;currentEditNiy=niy;document.getElementById('modalTitle').innerText='Edit Data';document.getElementById('addNiy').value=u.niy;document.getElementById('addNiy').readOnly=true;document.getElementById('addNiy').classList.add('bg-gray-200');document.getElementById('addNama').value=u.nama;document.getElementById('addTglLahir').value=u.tglLahir;document.getElementById('addJk').value=u.jk;document.getElementById('addLembaga').value=u.lembaga;document.getElementById('addJabatan').value=u.jabatan;let roles=(u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase())));document.getElementById('rolePimpinan').checked=roles.includes('pimpinan');document.getElementById('roleGuru').checked=roles.includes('guru');document.getElementById('modalAddUser').classList.remove('hidden')}
         function confirmDelete(niy){Swal.fire({title:'Hapus?',text:"Data tidak bisa dikembalikan.",icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus!',confirmButtonColor:'#d33'}).then(async(r)=>{if(r.isConfirmed){showLoading();const res=await callAPI({action:'deleteUser',niy:niy});hideLoading();if(res.success){Swal.fire('Terhapus!','','success');loadAdminData()}}})}
         function compressAvatar(f){return new Promise((r)=>{const reader=new FileReader();reader.readAsDataURL(f);reader.onload=(e)=>{const img=new Image();img.src=e.target.result;img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>h){if(w>200){h*=200/w;w=200}}else{if(h>200){w*=200/h;h=200}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',0.6))}}})}
-        async function handleAddUser(e){e.preventDefault();let roles=[];if(document.getElementById('rolePimpinan').checked)roles.push('pimpinan');if(document.getElementById('roleGuru').checked)roles.push('guru');if(roles.length===0){Swal.fire('Pilih Hak Akses','Minimal centang satu role.','warning');return}let f='';if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);showLoading();const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,password:document.getElementById('addPassword').value,roles:roles.join(','),foto:f});hideLoading();if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData()}else{Swal.fire('Error',res.message,'error')}}
+        async function handleAddUser(e){e.preventDefault();let roles=[];if(document.getElementById('rolePimpinan').checked)roles.push('pimpinan');if(document.getElementById('roleGuru').checked)roles.push('guru');if(roles.length===0){Swal.fire('Pilih Hak Akses','Minimal centang satu role.','warning');return}let f='';if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);showLoading();const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,roles:roles.join(','),foto:f});hideLoading();if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData()}else{Swal.fire('Error',res.message,'error')}}
 
         // Setup PWA
         if ('serviceWorker' in navigator) {
