@@ -1349,4 +1349,206 @@ async function rejectTeachingSubstitution(idSubstitution){
     hideLoading();
     if(res.success){Swal.fire('Ditolak',res.message,'success');loadTeachingSubstitutionAdminData();}else{Swal.fire('Gagal',res.message,'error');}
 }
+</script><script>
+function isSuperAdminUser(){return currentUser&&getUserRoles(currentUser).includes('super admin');}
+function isAdminUser(){return currentUser&&(getUserRoles(currentUser).includes('admin')||isSuperAdminUser());}
+function getAdminLembaga(){return currentUser?(currentUser.lembaga||''):'';}
+async function callAPI(p){
+    try{
+        if(currentUser&&p.action!=='login'&&!p.adminNiy)p.adminNiy=currentUser.niy;
+        p._ts=new Date().getTime();
+        const payloadStr=JSON.stringify(p);
+        const signature=await generateHash(payloadStr+p._ts+SECRET_KEY);
+        const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({payload:payloadStr,signature:signature})});
+        return await r.json();
+    }catch(e){return{success:false,message:'Gagal terhubung ke server.'};}
+}
+function lockSelectToAdminLembaga(id){
+    const el=document.getElementById(id);
+    if(!el||isSuperAdminUser())return;
+    const lembaga=getAdminLembaga();
+    if(!lembaga)return;
+    let found=[...el.options].some(o=>o.value===lembaga);
+    if(!found)el.innerHTML+=`<option value="${lembaga}">${lembaga}</option>`;
+    el.value=lembaga;
+    el.disabled=true;
+    el.classList.add('opacity-70','cursor-not-allowed');
+}
+function unlockSelectIfSuper(id){
+    const el=document.getElementById(id);
+    if(el&&isSuperAdminUser()){el.disabled=false;el.classList.remove('opacity-70','cursor-not-allowed');}
+}
+function applyAdminRoleRestrictions(){
+    if(!currentUser||!isAdminUser())return;
+    const superMode=isSuperAdminUser();
+    ['btnTabSettings','btnTabPimpinan','btnTabRekap'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el)el.classList.toggle('hidden',!superMode);
+    });
+    ['adminTabSettings','adminTabPimpinan','adminTabRekap'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el&&!superMode)el.classList.add('hidden');
+    });
+    ['filterLembagaMengajar','filterLembagaMonitor','teachLembaga'].forEach(id=>superMode?unlockSelectIfSuper(id):lockSelectToAdminLembaga(id));
+    const label=document.getElementById('adminScopeLabel')||document.createElement('div');
+    if(!document.getElementById('adminScopeLabel')){
+        label.id='adminScopeLabel';
+        label.className='mb-4 px-4 py-2 rounded-xl text-xs font-bold bg-[#FDF8E7] dark:bg-gray-800 text-[#A88C61] border border-[#D4AF37]/30';
+        const admin=document.getElementById('adminSection');
+        if(admin)admin.prepend(label);
+    }
+    label.innerHTML=superMode?'Mode: Super Admin — semua lembaga dan semua menu':'Mode: Admin Lembaga — '+(getAdminLembaga()||'-');
+}
+function switchAdminTab(t){
+    if(!isSuperAdminUser()&&['settings','pimpinan','rekap'].includes(t)){
+        Swal.fire('Akses dibatasi','Menu ini hanya tersedia untuk Super Admin.','warning');
+        t='dashboard';
+    }
+    document.querySelectorAll('.admin-content').forEach(el=>el.classList.add('hidden'));
+    document.querySelectorAll('.admin-tab').forEach(el=>{el.classList.remove('md:border-[#D4AF37]','text-[#A88C61]');el.classList.add('md:border-transparent','text-gray-500')});
+    const tab=document.getElementById('adminTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    const btn=document.getElementById('btnTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(tab)tab.classList.remove('hidden');
+    if(btn)btn.classList.add('md:border-[#D4AF37]','text-[#A88C61]');
+    applyAdminRoleRestrictions();
+    if(t==='settings'&&isSuperAdminUser()){
+        setTimeout(()=>{
+            if(mapInstance){mapInstance.invalidateSize();syncMapFromInputs();}
+            else{let lat=parseFloat(document.getElementById('setLat').value)||-8.172533;let lng=parseFloat(document.getElementById('setLng').value)||113.702331;let rad=parseFloat(document.getElementById('setRadius').value)||100;initGeofenceMap(lat,lng,rad);}
+        },300);
+    }
+    if(t==='rekap'&&isSuperAdminUser())loadRekapData();
+    if(t==='monitor')loadMonitorData();
+    if(t==='mengajar'){
+        loadSettings().then(()=>{applyAdminRoleRestrictions();});
+        loadTeachingAdminData();
+        loadTeachingRollingAdminData();
+        loadTeachingSubstitutionAdminData();
+        loadTeachingRekap();
+    }
+}
+function loginSuccess(u,birthdays=[]){
+    currentUser=u;
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('profileHeader').classList.remove('hidden');
+    document.getElementById('headerNama').innerText=u.nama;
+    document.getElementById('headerNiy').innerText=u.niy;
+    document.getElementById('headerJabatan').innerText=u.jabatan||u.role;
+    let inisial=u.nama.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    const hab=document.getElementById('headerInitials').parentElement;
+    if(u.foto&&u.foto.startsWith('data:image')){hab.innerHTML=`<img src="${u.foto}" class="w-full h-full rounded-full object-cover">`;hab.classList.remove('bg-gradient-to-tr');}
+    else{hab.innerHTML=`<span id="headerInitials">${inisial}</span>`;hab.classList.add('bg-gradient-to-tr');}
+    const roles=getUserRoles(u);
+    const isMulti=roles.filter(r=>['pimpinan','guru'].includes(r)).length>1;
+    document.getElementById('modeSwitchPimpinan').classList.toggle('hidden',!isMulti);
+    document.getElementById('modeSwitchGuru').classList.toggle('hidden',!isMulti);
+    if(roles.includes('admin')||roles.includes('super admin')){
+        hideMainSections();
+        document.getElementById('adminSection').classList.remove('hidden');
+        applyAdminRoleRestrictions();
+        switchAdminTab('dashboard');
+        loadAdminData().then(()=>{applyAdminRoleRestrictions();populateTeacherSelect();});
+        if(isSuperAdminUser())loadSettings();
+        else loadSettings().then(()=>applyAdminRoleRestrictions());
+    }else if(isMulti){showRoleChoice();}
+    else if(roles.includes('guru')){openGuruMode();}
+    else{openPimpinanMode();}
+    if(birthdays&&birthdays.length>0)showBirthdayAlert(birthdays);
+}
+function populateTeacherSelect(){
+    const sel=document.getElementById('teachNiy');if(!sel)return;
+    let old=sel.value;sel.innerHTML='<option value="">-- Pilih Guru --</option>';
+    const adminLembaga=getAdminLembaga();
+    Object.values(userMap).forEach(u=>{
+        let roles=u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase()));
+        if(!roles.includes('guru'))return;
+        const userLembaga=u.lembaga||'';
+        const hasAssignment=(u.assignments||[]).some(a=>(a.role||'').toLowerCase()==='guru'&&(!adminLembaga||a.lembaga===adminLembaga));
+        if(!isSuperAdminUser()&&adminLembaga&&userLembaga!==adminLembaga&&!hasAssignment)return;
+        sel.innerHTML+=`<option value="${u.niy}">${u.nama} (${u.niy})</option>`;
+    });
+    if(old)sel.value=old;
+}
+async function loadTeachingAdminData(){
+    if(Object.keys(userMap).length===0)await loadAdminData();
+    populateTeacherSelect();
+    const res=await callAPI({action:'getTeachingScheduleAdmin'});
+    const body=document.getElementById('teachingScheduleBody');
+    if(!body)return;
+    if(res.success&&res.data&&res.data.length>0){
+        teachingScheduleAdminData=res.data;
+        body.innerHTML='';
+        res.data.forEach(j=>{
+            body.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <td class="px-4 py-3"><p class="font-bold">${j.nama}</p><p class="text-[10px] font-mono text-gray-500">${j.niy}</p></td>
+                <td class="px-4 py-3"><p class="font-bold">${j.hari}</p><p class="text-xs text-gray-500">${j.jamMulai} - ${j.jamSelesai}</p></td>
+                <td class="px-4 py-3"><p>${j.kelas}</p><p class="text-xs text-gray-500">${j.mapel}</p></td>
+                <td class="px-4 py-3">${j.lembaga||'-'}</td>
+                <td class="px-4 py-3 text-center whitespace-nowrap"><button onclick="editTeachingSchedule('${j.idJadwal}')" class="text-blue-500 bg-blue-50 dark:bg-blue-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-pen"></i></button><button onclick="confirmDeleteTeachingSchedule('${j.idJadwal}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>`;
+        });
+    }else{
+        teachingScheduleAdminData=[];
+        body.innerHTML='<tr><td colspan="5" class="text-center py-8 text-gray-400">Belum ada jadwal untuk lembaga ini.</td></tr>';
+    }
+    applyAdminRoleRestrictions();
+}
+function ensureAdminRoleCheckboxes(){
+    const rg=document.getElementById('roleGuru');if(!rg)return;
+    const wrap=rg.closest('div')||rg.parentElement;
+    if(!document.getElementById('roleAdmin')){
+        wrap.insertAdjacentHTML('beforeend',`<label class="inline-flex items-center gap-2 text-sm ml-3"><input type="checkbox" id="roleAdmin" class="rounded border-gray-300"> Admin</label><label class="inline-flex items-center gap-2 text-sm ml-3"><input type="checkbox" id="roleSuperAdmin" class="rounded border-gray-300"> Super Admin</label>`);
+    }
+    document.getElementById('roleAdmin').closest('label').classList.toggle('hidden',!isSuperAdminUser());
+    document.getElementById('roleSuperAdmin').closest('label').classList.toggle('hidden',!isSuperAdminUser());
+}
+function showAddUserModal(){
+    ensureAdminRoleCheckboxes();
+    isEditMode=false;
+    document.getElementById('modalTitle').innerText='Tambah User';
+    document.getElementById('formAddUser').reset();
+    document.getElementById('rolePimpinan').checked=true;
+    document.getElementById('roleGuru').checked=false;
+    if(document.getElementById('roleAdmin'))document.getElementById('roleAdmin').checked=false;
+    if(document.getElementById('roleSuperAdmin'))document.getElementById('roleSuperAdmin').checked=false;
+    document.getElementById('addNiy').readOnly=false;
+    document.getElementById('addNiy').classList.remove('bg-gray-200');
+    document.getElementById('modalAddUser').classList.remove('hidden');
+}
+function openEditModal(niy){
+    ensureAdminRoleCheckboxes();
+    let u=userMap[niy];if(!u)return;
+    isEditMode=true;currentEditNiy=niy;
+    document.getElementById('modalTitle').innerText='Edit Data';
+    document.getElementById('addNiy').value=u.niy;
+    document.getElementById('addNiy').readOnly=true;
+    document.getElementById('addNiy').classList.add('bg-gray-200');
+    document.getElementById('addNama').value=u.nama;
+    document.getElementById('addTglLahir').value=u.tglLahir;
+    document.getElementById('addJk').value=u.jk;
+    document.getElementById('addLembaga').value=u.lembaga;
+    document.getElementById('addJabatan').value=u.jabatan;
+    let roles=(u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase())));
+    document.getElementById('rolePimpinan').checked=roles.includes('pimpinan');
+    document.getElementById('roleGuru').checked=roles.includes('guru');
+    if(document.getElementById('roleAdmin'))document.getElementById('roleAdmin').checked=roles.includes('admin');
+    if(document.getElementById('roleSuperAdmin'))document.getElementById('roleSuperAdmin').checked=roles.includes('super admin');
+    document.getElementById('modalAddUser').classList.remove('hidden');
+}
+async function handleAddUser(e){
+    e.preventDefault();
+    let roles=[];
+    if(document.getElementById('rolePimpinan').checked)roles.push('pimpinan');
+    if(document.getElementById('roleGuru').checked)roles.push('guru');
+    if(document.getElementById('roleAdmin')?.checked)roles.push('admin');
+    if(document.getElementById('roleSuperAdmin')?.checked)roles.push('super admin');
+    if(roles.length===0){Swal.fire('Pilih Hak Akses','Minimal centang satu role.','warning');return;}
+    let f='';
+    if(document.getElementById('addFoto').files.length>0)f=await compressAvatar(document.getElementById('addFoto').files[0]);
+    showLoading();
+    const res=await callAPI({action:isEditMode?'editUser':'addUser',niy:isEditMode?currentEditNiy:document.getElementById('addNiy').value,nama:document.getElementById('addNama').value,lembaga:document.getElementById('addLembaga').value,jabatan:document.getElementById('addJabatan').value,tglLahir:document.getElementById('addTglLahir').value,jk:document.getElementById('addJk').value,roles:roles.join(','),foto:f});
+    hideLoading();
+    if(res.success){Swal.fire('Berhasil',res.message,'success');closeModal();loadAdminData();}
+    else{Swal.fire('Error',res.message,'error');}
+}
 </script></body></html>
