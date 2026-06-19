@@ -144,7 +144,7 @@
             }
             if(t==='rekap')loadRekapData();
             if(t==='monitor')loadMonitorData();
-            if(t==='mengajar'){loadSettings();loadTeachingAdminData();loadTeachingRollingAdminData();loadTeachingRekap();}
+            if(t==='mengajar'){loadSettings();loadTeachingAdminData();loadTeachingRollingAdminData();loadTeachingSubstitutionAdminData();loadTeachingRekap();}
         }
 
         function showTodayList(t){let ti='',ls=[],ht='<div class="text-left text-sm max-h-64 overflow-y-auto custom-scrollbar">';if(t==='hadir'){ti='Pimpinan Hadir';ls=todayDataLists.hadir.list}else if(t==='izin'){ti='Pimpinan Izin/Dinas';ls=todayDataLists.izin.list}else{ti='Pimpinan Sakit';ls=todayDataLists.sakit.list}if(ls.length===0){ht+='<p class="text-center text-gray-500 py-6">Tidak ada data hari ini.</p>'}else{ls.forEach(i=>{ht+=`<div class="border-b dark:border-gray-700 py-3 flex flex-col"><span class="font-bold">${i.nama}</span><span class="text-[11px] text-gray-500"><i class="fa-solid fa-building text-[#D4AF37] mr-1"></i> ${i.lembaga||'-'} <i class="fa-regular fa-clock text-[#A88C61] ml-1 mr-1"></i><span class="italic text-gray-400">${i.detail}</span></span></div>`})}ht+='</div>';Swal.fire({title:ti,html:ht,confirmButtonColor:'#D4AF37',background:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',color:document.documentElement.classList.contains('dark')?'#fff':'#545454'})}
@@ -1211,5 +1211,142 @@ async function rejectTeachingRolling(idRolling){
     const res=await callAPI({action:'updateTeachingRollingRequestStatus',idRolling:idRolling,status:'Ditolak',admin:currentUser?.nama||'Admin',catatanAdmin:ask.value||''});
     hideLoading();
     if(res.success){Swal.fire('Ditolak',res.message,'success');loadTeachingRollingAdminData();}else{Swal.fire('Gagal',res.message,'error');}
+}
+</script><script>
+async function loadTeacherSchedules(){
+    if(!currentUser)return;
+    ensureTeachingVacancyPanel();
+    const c=document.getElementById('teacherScheduleContainer');
+    c.innerHTML='<div class="col-span-full text-center py-10 text-gray-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i>Memuat jadwal mengajar...</div>';
+    const res=await callAPI({action:'getTeacherSchedulesToday',niy:currentUser.niy});
+    window.teacherScheduleTodayData=(res.success&&res.data)?res.data:[];
+    document.getElementById('teacherTodayInfo').innerText=res.success?`${res.hari}, ${res.tanggal}`:'Gagal memuat jadwal';
+    if(!res.success||!res.data||res.data.length===0){
+        c.innerHTML='<div class="col-span-full text-center py-12 text-gray-400"><i class="fa-solid fa-calendar-xmark text-4xl mb-3 block"></i>Tidak ada jadwal mengajar untuk hari ini.</div>';
+    }else{
+        c.innerHTML='';
+        res.data.forEach(j=>{
+            let badge='',btn='';
+            if(j.isLeave){
+                badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">Izin Disetujui</span>';
+                btn='<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Jadwal menjadi jam kosong</button>';
+            }else if(j.isSubstitution){
+                badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Guru Pengganti</span>';
+            }else if(j.isHoliday){
+                badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">Libur</span>';
+                btn=`<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Absensi Dinonaktifkan</button><p class="text-[10px] text-gray-400 mt-2">Kalender Pendidikan: ${(j.holiday&&j.holiday.nama)||'Libur'}</p>`;
+            }else if(j.sudahAbsen){
+                if(j.attendance&&j.attendance.sudahCheckout){
+                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Selesai</span>';
+                    btn='<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Sudah Checkout</button>';
+                }else{
+                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Sudah Check-in</span>';
+                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkout')" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-right-from-bracket mr-1"></i>Checkout / Selesai Mengajar</button><p class="text-[10px] text-gray-400 mt-2">Checkout maksimal ${j.checkoutTolerance||15} menit setelah jam selesai agar dihitung penuh.</p>`;
+                }
+            }else if(!j.sudahMulai){
+                if(!j.bisaCheckin){
+                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">Belum Dibuka</span>';
+                    btn=`<button disabled class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-500 py-2.5 rounded-xl font-bold text-sm cursor-not-allowed"><i class="fa-solid fa-lock mr-1"></i>Check-in Belum Dibuka</button><p class="text-[10px] text-gray-400 mt-2">Check-in dibuka ${j.earlyAttendanceTolerance||15} menit sebelum ${j.jamMulai}. Jam diakui tetap mulai ${j.jamMulai}.</p>`;
+                }else{
+                    badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">Bisa Absen Lebih Awal</span>';
+                    let info=j.durasiPotensial>0?`Jika absen sekarang, menit diakui tetap dihitung mulai ${j.jamMulai} sampai ${j.jamSelesai}. Potensi: ${Number(j.durasiPotensial).toFixed(2)} jam`:'Jadwal sudah lewat, jam diakui 0 jika tetap absen';
+                    btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkin')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>${j.isSubstitution?'Check-in Pengganti':'Check-in Lebih Awal'}</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
+                }
+            }else{
+                let info=j.durasiPotensial>0?`Potensi jam diakui: ${Number(j.durasiPotensial).toFixed(2)} jam`:'Jadwal sudah lewat, jam diakui 0 jika tetap absen';
+                if(!badge)badge='<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Bisa Check-in</span>';
+                btn=`<button onclick="initTeachingAttendance('${j.idJadwal}','checkin')" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-camera mr-1"></i>${j.isSubstitution?'Check-in Guru Pengganti':'Check-in Mengajar'}</button><p class="text-[10px] text-gray-400 mt-2">${info}</p>`;
+            }
+            const rollingInfo=j.statusJadwal==='ROLLING'
+                ? `<div class="mt-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/40 text-xs text-purple-700 dark:text-purple-300"><b>Rolling disetujui</b><br>Jadwal asli ${j.jamAsliMulai}-${j.jamAsliSelesai}, aktif ${j.jamMulai}-${j.jamSelesai}</div>`:'';
+            const substitutionInfo=j.isSubstitution
+                ? `<div class="mt-3 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-700 dark:text-indigo-300"><b>Jadwal pengganti</b><br>Mengisi jam kosong ${j.guruAsli||'-'}. Menit mengajar masuk ke rekap bisyaroh Anda.</div>`:'';
+            const rollingBtn=(!j.isSubstitution&&!j.isLeave&&!j.sudahAbsen&&!j.isHoliday&&j.rollingStatusHariIni!=='Menunggu'&&j.statusJadwal!=='ROLLING')
+                ? `<button onclick="openTeachingRollingModal('${j.idJadwal}')" class="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-right-left mr-1"></i>Ajukan Rolling Jadwal</button>`:'';
+            c.innerHTML+=`<div class="glass rounded-2xl p-5 shadow-sm border dark:border-gray-700">
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div><h4 class="font-bold text-lg">${j.mapel}</h4><p class="text-xs text-gray-500">${j.kelas} &bull; ${j.lembaga||'-'}</p></div>${badge}
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-3"><p class="text-[10px] text-gray-400 uppercase font-bold">Mulai Aktif</p><p class="font-bold">${j.jamMulai}</p></div>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-3"><p class="text-[10px] text-gray-400 uppercase font-bold">Selesai Aktif</p><p class="font-bold">${j.jamSelesai}</p></div>
+                </div>
+                ${rollingInfo}${substitutionInfo}
+                ${j.attendance?`<div class="text-xs mt-3 space-y-1"><p class="text-green-600 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>${j.attendance.status} | Check-in ${j.attendance.jamAbsen||'-'}</p><p class="${j.attendance.sudahCheckout?'text-blue-600':'text-orange-500'} font-bold"><i class="fa-solid fa-right-from-bracket mr-1"></i>${j.attendance.checkoutStatus||'Belum Checkout'}${j.attendance.jamCheckout?' | Checkout '+j.attendance.jamCheckout:''} | Menit final ${j.attendance.durasiFinalMenit||0}</p></div>`:''}
+                ${btn}${rollingBtn}
+            </div>`;
+        });
+    }
+    loadTeachingVacancies();
+}
+function ensureTeachingVacancyPanel(){
+    if(document.getElementById('teacherVacancyPanel'))return;
+    const anchor=document.getElementById('teacherScheduleContainer');
+    if(!anchor)return;
+    const panel=document.createElement('div');
+    panel.id='teacherVacancyPanel';
+    panel.className='glass rounded-2xl p-5 shadow-md mb-6';
+    panel.innerHTML=`<div class="flex flex-col md:flex-row justify-between md:items-center gap-3 mb-4 border-b dark:border-gray-700 pb-3"><div><h3 class="font-bold text-lg"><i class="fa-solid fa-user-plus text-[#D4AF37] mr-2"></i>Jam Kosong Hari Ini</h3><p class="text-xs text-gray-500 mt-1">Ajukan diri untuk mengisi jadwal guru yang izinnya sudah disetujui admin.</p></div><button onclick="loadTeachingVacancies()" class="bg-gray-800 dark:bg-gray-700 hover:bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div><div id="teacherVacancyContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"><div class="col-span-full text-center py-6 text-gray-400">Memuat jam kosong...</div></div>`;
+    anchor.insertAdjacentElement('afterend',panel);
+}
+async function loadTeachingVacancies(){
+    const box=document.getElementById('teacherVacancyContainer');
+    if(!box||!currentUser)return;
+    box.innerHTML='<div class="col-span-full text-center py-6 text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Memuat jam kosong...</div>';
+    const res=await callAPI({action:'getTeachingVacanciesForSubstitution',niy:currentUser.niy,tanggal:todayIsoDate()});
+    if(!res.success||!res.data||res.data.length===0){box.innerHTML='<div class="col-span-full text-center py-6 text-gray-400">Tidak ada jam kosong yang bisa Anda isi hari ini.</div>';return;}
+    box.innerHTML='';
+    res.data.forEach(v=>{
+        box.innerHTML+=`<div class="rounded-xl border dark:border-gray-700 p-4 bg-white/70 dark:bg-gray-800/40"><div class="flex justify-between gap-2"><div><h4 class="font-bold">${v.mapel}</h4><p class="text-xs text-gray-500">${v.kelas} • ${v.lembaga}</p></div><span class="text-[10px] font-bold rounded bg-orange-100 text-orange-700 px-2 py-1 h-max">Kosong</span></div><p class="text-xs mt-2 text-gray-500">Guru asli: <b>${v.namaAsli}</b></p><p class="text-sm font-bold mt-1">${v.jamMulai} - ${v.jamSelesai}</p><button onclick="submitTeachingSubstitution('${v.idJadwal}')" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-sm"><i class="fa-solid fa-hand mr-1"></i>Ajukan Isi Jam Kosong</button></div>`;
+    });
+}
+async function submitTeachingSubstitution(idJadwal){
+    const ask=await Swal.fire({title:'Ajukan Isi Jam Kosong?',html:'Jika disetujui admin, jadwal ini akan muncul sebagai jadwal pengganti dan menit mengajar masuk ke bisyaroh Anda.',input:'textarea',inputPlaceholder:'Catatan/alasan singkat...',showCancelButton:true,confirmButtonText:'Kirim Pengajuan',confirmButtonColor:'#4f46e5'});
+    if(!ask.isConfirmed)return;
+    showLoading();
+    const res=await callAPI({action:'submitTeachingSubstitutionRequest',idJadwal:idJadwal,tanggal:todayIsoDate(),niyPengganti:currentUser.niy,namaPengganti:currentUser.nama,alasan:ask.value||''});
+    hideLoading();
+    if(res.success){Swal.fire('Terkirim',res.message,'success');loadTeachingVacancies();}else{Swal.fire('Gagal',res.message,'error');}
+}
+function ensureTeachingSubstitutionAdminPanel(){
+    if(document.getElementById('teachingSubstitutionBody'))return;
+    const anchor=document.getElementById('teachingRollingBody')||document.getElementById('teachingScheduleBody');
+    if(!anchor)return;
+    const card=anchor.closest('.glass');
+    const panel=document.createElement('div');
+    panel.className='glass rounded-xl p-6 shadow-md mb-6';
+    panel.innerHTML=`<div class="flex flex-col md:flex-row justify-between md:items-center mb-5 border-b dark:border-gray-700 pb-4 gap-3"><div><h3 class="font-bold text-lg"><i class="fa-solid fa-user-plus text-[#D4AF37] mr-2"></i>Approval Guru Pengganti</h3><p class="text-xs text-gray-500 mt-1">Setujui/tolak guru yang ingin mengisi jam kosong. Jika disetujui, menit mengajar masuk ke bisyaroh guru pengganti.</p></div><div class="flex flex-wrap gap-2"><select id="filterStatusTeachingSubstitution" onchange="loadTeachingSubstitutionAdminData()" class="px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600"><option>Menunggu</option><option>Semua</option><option>Disetujui</option><option>Ditolak</option></select><button onclick="loadTeachingSubstitutionAdminData()" class="bg-gray-800 dark:bg-gray-700 text-white px-4 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-rotate mr-1"></i>Refresh</button></div></div><div class="overflow-y-auto max-h-[360px] custom-scrollbar rounded-lg border dark:border-gray-700"><table class="w-full text-sm text-left"><thead class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0 z-10"><tr><th class="px-4 py-3">Guru Pengganti</th><th class="px-4 py-3">Guru Asli</th><th class="px-4 py-3">Jadwal</th><th class="px-4 py-3">Alasan</th><th class="px-4 py-3">Status</th><th class="px-4 py-3 text-center"><i class="fa-solid fa-gear"></i></th></tr></thead><tbody id="teachingSubstitutionBody"><tr><td colspan="6" class="text-center py-8 text-gray-400">Memuat...</td></tr></tbody></table></div>`;
+    card.insertAdjacentElement('afterend',panel);
+}
+async function loadTeachingSubstitutionAdminData(){
+    ensureTeachingSubstitutionAdminPanel();
+    const body=document.getElementById('teachingSubstitutionBody');
+    if(!body)return;
+    body.innerHTML='<tr><td colspan="6" class="text-center py-8 text-gray-400">Memuat pengajuan guru pengganti...</td></tr>';
+    const status=document.getElementById('filterStatusTeachingSubstitution')?.value||'Menunggu';
+    const res=await callAPI({action:'getTeachingSubstitutionRequestsAdmin',status:status});
+    if(!res.success||!res.data||res.data.length===0){body.innerHTML='<tr><td colspan="6" class="text-center py-8 text-gray-400">Belum ada pengajuan guru pengganti.</td></tr>';return;}
+    body.innerHTML='';
+    res.data.forEach(r=>{
+        let cls=r.status==='Disetujui'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300':(r.status==='Ditolak'?'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300':'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300');
+        let action=r.status==='Menunggu'?`<button onclick="approveTeachingSubstitution('${r.idSubstitution}')" class="text-green-600 bg-green-50 dark:bg-green-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-check"></i></button><button onclick="rejectTeachingSubstitution('${r.idSubstitution}')" class="text-red-500 bg-red-50 dark:bg-red-900/30 p-1.5 rounded-lg mx-0.5"><i class="fa-solid fa-xmark"></i></button>`:'-';
+        body.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"><td class="px-4 py-3"><p class="font-bold">${r.namaPengganti}</p><p class="text-[10px] font-mono text-gray-500">${r.niyPengganti}</p></td><td class="px-4 py-3"><p class="font-bold">${r.namaAsli}</p><p class="text-[10px] font-mono text-gray-500">${r.niyAsli}</p></td><td class="px-4 py-3"><p class="font-bold">${r.tanggal} • ${r.jamMulai}-${r.jamSelesai}</p><p class="text-xs text-gray-500">${r.kelas} • ${r.mapel} • ${r.lembaga}</p></td><td class="px-4 py-3">${r.alasan||'-'}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded text-[10px] font-bold ${cls}">${r.status}</span></td><td class="px-4 py-3 text-center whitespace-nowrap">${action}</td></tr>`;
+    });
+}
+async function approveTeachingSubstitution(idSubstitution){
+    const ok=await Swal.fire({title:'Setujui guru pengganti?',text:'Jika disetujui, guru pengganti dapat absen dan menitnya dihitung untuk bisyaroh.',icon:'question',showCancelButton:true,confirmButtonText:'Setujui',confirmButtonColor:'#16a34a'});
+    if(!ok.isConfirmed)return;
+    showLoading();
+    const res=await callAPI({action:'updateTeachingSubstitutionRequestStatus',idSubstitution:idSubstitution,status:'Disetujui',admin:currentUser?.nama||'Admin'});
+    hideLoading();
+    if(res.success){Swal.fire('Disetujui',res.message,'success');loadTeachingSubstitutionAdminData();loadTeachingRekap();}else{Swal.fire('Gagal',res.message,'error');}
+}
+async function rejectTeachingSubstitution(idSubstitution){
+    const ask=await Swal.fire({title:'Tolak guru pengganti?',input:'textarea',inputPlaceholder:'Catatan penolakan...',showCancelButton:true,confirmButtonText:'Tolak',confirmButtonColor:'#dc2626'});
+    if(!ask.isConfirmed)return;
+    showLoading();
+    const res=await callAPI({action:'updateTeachingSubstitutionRequestStatus',idSubstitution:idSubstitution,status:'Ditolak',admin:currentUser?.nama||'Admin',catatanAdmin:ask.value||''});
+    hideLoading();
+    if(res.success){Swal.fire('Ditolak',res.message,'success');loadTeachingSubstitutionAdminData();}else{Swal.fire('Gagal',res.message,'error');}
 }
 </script></body></html>
