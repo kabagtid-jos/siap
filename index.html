@@ -1378,6 +1378,27 @@ function unlockSelectIfSuper(id){
     const el=document.getElementById(id);
     if(el&&isSuperAdminUser()){el.disabled=false;el.classList.remove('opacity-70','cursor-not-allowed');}
 }
+function applyTeachingRekapVisibility(){
+    const superMode=isSuperAdminUser();
+    const rekap=document.getElementById('teachingRekapContainer');
+    const panel=rekap?rekap.closest('.glass'):null;
+    if(panel)panel.classList.toggle('hidden',!superMode);
+    ['teachingRekapContainer','teachingGridContainer'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el&&!superMode)el.classList.add('hidden');
+    });
+    ['viewBtnGuruRekap','viewBtnGuruGrid','filterLembagaMengajar','filterBulanMengajar'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el)el.classList.toggle('hidden',!superMode);
+    });
+    if(!superMode){
+        currentTeachingRekapData=[];
+        const body=document.getElementById('teachingRekapBody');
+        const grid=document.getElementById('teachingGridBody');
+        if(body)body.innerHTML='<tr><td colspan="8" class="text-center py-8 text-gray-400">Rekap guru hanya tersedia untuk Super Admin.</td></tr>';
+        if(grid)grid.innerHTML='<tr><td class="text-center py-8 text-gray-400">Rekap guru hanya tersedia untuk Super Admin.</td></tr>';
+    }
+}
 function applyAdminRoleRestrictions(){
     if(!currentUser||!isAdminUser())return;
     const superMode=isSuperAdminUser();
@@ -1390,6 +1411,7 @@ function applyAdminRoleRestrictions(){
         if(el&&!superMode)el.classList.add('hidden');
     });
     ['filterLembagaMengajar','filterLembagaMonitor','teachLembaga'].forEach(id=>superMode?unlockSelectIfSuper(id):lockSelectToAdminLembaga(id));
+    applyTeachingRekapVisibility();
     const label=document.getElementById('adminScopeLabel')||document.createElement('div');
     if(!document.getElementById('adminScopeLabel')){
         label.id='adminScopeLabel';
@@ -1424,7 +1446,8 @@ function switchAdminTab(t){
         loadTeachingAdminData();
         loadTeachingRollingAdminData();
         loadTeachingSubstitutionAdminData();
-        loadTeachingRekap();
+        if(isSuperAdminUser())loadTeachingRekap();
+        else applyTeachingRekapVisibility();
     }
 }
 function loginSuccess(u,birthdays=[]){
@@ -1502,6 +1525,22 @@ async function loadTeachingAdminData(){
     }
     applyAdminRoleRestrictions();
 }
+const loadTeachingRekapOriginalScoped=loadTeachingRekap;
+loadTeachingRekap=async function(){
+    if(!isSuperAdminUser()){
+        applyTeachingRekapVisibility();
+        return;
+    }
+    return loadTeachingRekapOriginalScoped();
+};
+const setTeachingViewOriginalScoped=setTeachingView;
+setTeachingView=function(view){
+    if(!isSuperAdminUser()){
+        applyTeachingRekapVisibility();
+        return;
+    }
+    return setTeachingViewOriginalScoped(view);
+};
 function ensureAdminRoleCheckboxes(){
     const rg=document.getElementById('roleGuru');if(!rg)return;
     const wrap=rg.closest('div')||rg.parentElement;
