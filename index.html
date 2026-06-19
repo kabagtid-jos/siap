@@ -1455,6 +1455,7 @@ function loginSuccess(u,birthdays=[]){
     else{openPimpinanMode();}
     if(birthdays&&birthdays.length>0)showBirthdayAlert(birthdays);
 }
+function sameLembagaName(a,b){return (a||'').toString().trim().toLowerCase()===(b||'').toString().trim().toLowerCase();}
 function populateTeacherSelect(){
     const sel=document.getElementById('teachNiy');if(!sel)return;
     let old=sel.value;sel.innerHTML='<option value="">-- Pilih Guru --</option>';
@@ -1463,11 +1464,14 @@ function populateTeacherSelect(){
         let roles=u.roles||((u.role||'').split(',').map(r=>r.trim().toLowerCase()));
         if(!roles.includes('guru'))return;
         const userLembaga=u.lembaga||'';
-        const hasAssignment=(u.assignments||[]).some(a=>(a.role||'').toLowerCase()==='guru'&&(!adminLembaga||a.lembaga===adminLembaga));
-        if(!isSuperAdminUser()&&adminLembaga&&userLembaga!==adminLembaga&&!hasAssignment)return;
+        const hasAssignment=(u.assignments||[]).some(a=>(a.role||'').toLowerCase()==='guru'&&sameLembagaName(a.lembaga,adminLembaga));
+        if(!isSuperAdminUser()){
+            if(!adminLembaga)return;
+            if(!sameLembagaName(userLembaga,adminLembaga)&&!hasAssignment)return;
+        }
         sel.innerHTML+=`<option value="${u.niy}">${u.nama} (${u.niy})</option>`;
     });
-    if(old)sel.value=old;
+    if(old&&[...sel.options].some(o=>o.value===old))sel.value=old;
 }
 async function loadTeachingAdminData(){
     if(Object.keys(userMap).length===0)await loadAdminData();
@@ -1475,10 +1479,15 @@ async function loadTeachingAdminData(){
     const res=await callAPI({action:'getTeachingScheduleAdmin'});
     const body=document.getElementById('teachingScheduleBody');
     if(!body)return;
-    if(res.success&&res.data&&res.data.length>0){
-        teachingScheduleAdminData=res.data;
+    let rows=(res.success&&res.data)?res.data:[];
+    if(!isSuperAdminUser()){
+        const adminLembaga=getAdminLembaga();
+        rows=adminLembaga?rows.filter(j=>sameLembagaName(j.lembaga,adminLembaga)):[];
+    }
+    if(res.success&&rows.length>0){
+        teachingScheduleAdminData=rows;
         body.innerHTML='';
-        res.data.forEach(j=>{
+        rows.forEach(j=>{
             body.innerHTML+=`<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <td class="px-4 py-3"><p class="font-bold">${j.nama}</p><p class="text-[10px] font-mono text-gray-500">${j.niy}</p></td>
                 <td class="px-4 py-3"><p class="font-bold">${j.hari}</p><p class="text-xs text-gray-500">${j.jamMulai} - ${j.jamSelesai}</p></td>
